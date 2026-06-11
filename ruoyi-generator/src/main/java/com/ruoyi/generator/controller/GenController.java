@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.alibaba.druid.sql.ast.statement.SQLCreateTableStatement;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.druid.DbType;
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlCreateTableStatement;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
@@ -128,34 +129,36 @@ public class GenController extends BaseController
     @PreAuthorize("@ss.hasRole('admin')")
     @Log(title = "创建表", businessType = BusinessType.OTHER)
     @PostMapping("/createTable")
-    public AjaxResult createTableSave(@RequestParam("sql") String sql, @RequestParam("tplWebType") String tplWebType)
+    public AjaxResult createTableSave(@RequestBody Map<String, String> body)
     {
         try
         {
+            String sql = body.get("sql");
+            String tplWebType = body.get("tplWebType");
+            genTableService.createTable(sql);
             SqlUtil.filterKeyword(sql);
-            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(sql, DbType.mysql);
+            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(sql, DbType.sqlserver);
             List<String> tableNames = new ArrayList<>();
             for (SQLStatement sqlStatement : sqlStatements)
             {
-                if (sqlStatement instanceof MySqlCreateTableStatement)
+                if (sqlStatement instanceof SQLCreateTableStatement createTableStatement)
                 {
-                    MySqlCreateTableStatement createTableStatement = (MySqlCreateTableStatement) sqlStatement;
-                    if (genTableService.createTable(createTableStatement.toString()))
-                    {
-                        String tableName = createTableStatement.getTableName().replaceAll("`", "");
-                        tableNames.add(tableName);
-                    }
+                    String tableName = createTableStatement.getTableName()
+                            .replace("[", "")
+                            .replace("]", "")
+                            .replace("'", "")
+                            .replace("\"", "")
+                            .replace("`", "");
+                    tableNames.add(tableName);
                 }
             }
             List<GenTable> tableList = genTableService.selectDbTableListByNames(tableNames.toArray(new String[tableNames.size()]));
             String operName = SecurityUtils.getUsername();
             genTableService.importGenTable(tableList, tplWebType, operName);
             return AjaxResult.success();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            return AjaxResult.error("创建表结构异常");
+            return AjaxResult.error(String.format("创建表错误: %s", e.getCause()));
         }
     }
 

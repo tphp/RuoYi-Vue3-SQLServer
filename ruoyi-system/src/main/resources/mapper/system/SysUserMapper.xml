@@ -80,7 +80,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			AND date_format(u.create_time,'%Y%m%d') &lt;= date_format(#{params.endTime},'%Y%m%d')
 		</if>
 		<if test="deptId != null and deptId != 0">
-			AND (u.dept_id = #{deptId} OR u.dept_id IN ( SELECT t.dept_id FROM sys_dept t WHERE find_in_set(#{deptId}, ancestors) ))
+			AND (u.dept_id = #{deptId} OR u.dept_id IN ( SELECT t.dept_id FROM sys_dept t where case when CHARINDEX( CAST(#{deptId} AS VARCHAR), ancestors) > 0 THEN 1 ELSE 0 END = 1 ))
 		</if>
 		<!-- 数据范围过滤 -->
 		${params.dataScope}
@@ -132,15 +132,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 	
 	<select id="checkUserNameUnique" parameterType="String" resultMap="SysUserResult">
-		select user_id, user_name from sys_user where user_name = #{userName} and del_flag = '0' limit 1
+		select top 1 user_id, user_name from sys_user where user_name = #{userName} and del_flag = '0'
 	</select>
 	
 	<select id="checkPhoneUnique" parameterType="String" resultMap="SysUserResult">
-		select user_id, phonenumber from sys_user where phonenumber = #{phonenumber} and del_flag = '0' limit 1
+		select top 1 user_id, phonenumber from sys_user where phonenumber = #{phonenumber} and del_flag = '0'
 	</select>
 	
 	<select id="checkEmailUnique" parameterType="String" resultMap="SysUserResult">
-		select user_id, email from sys_user where email = #{email} and del_flag = '0' limit 1
+		select top 1 user_id, email from sys_user where email = #{email} and del_flag = '0'
 	</select>
 	
 	<insert id="insertUser" parameterType="SysUser" useGeneratedKeys="true" keyProperty="userId">
@@ -173,7 +173,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  			<if test="pwdUpdateDate != null">#{pwdUpdateDate},</if>
  			<if test="createBy != null and createBy != ''">#{createBy},</if>
  			<if test="remark != null and remark != ''">#{remark},</if>
- 			sysdate()
+ 			getdate()
  		)
 	</insert>
 	
@@ -192,17 +192,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  			<if test="loginDate != null">login_date = #{loginDate},</if>
  			<if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
  			<if test="remark != null">remark = #{remark},</if>
- 			update_time = sysdate()
+ 			update_time = getdate()
  		</set>
  		where user_id = #{userId}
 	</update>
 	
 	<update id="updateUserStatus" parameterType="SysUser">
- 		update sys_user set status = #{status}, update_time = sysdate() where user_id = #{userId}
+ 		update sys_user set status = #{status}, update_time = getdate() where user_id = #{userId}
 	</update>
 	
 	<update id="updateUserAvatar" parameterType="SysUser">
- 		update sys_user set avatar = #{avatar}, update_time = sysdate() where user_id = #{userId}
+ 		update sys_user set avatar = #{avatar}, update_time = getdate() where user_id = #{userId}
 	</update>
 	
   	<update id="updateLoginInfo" parameterType="SysUser">
@@ -210,7 +210,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</update>
 	
 	<update id="resetUserPwd" parameterType="SysUser">
- 		update sys_user set pwd_update_date = sysdate(), password = #{password}, update_time = sysdate() where user_id = #{userId}
+ 		update sys_user set pwd_update_date = getdate(), password = #{password}, update_time = getdate() where user_id = #{userId}
 	</update>
 	
 	<delete id="deleteUserById" parameterType="Long">
