@@ -20,6 +20,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		from sys_dict_type
     </sql>
 
+	<sql id="selectDictTypeVoTop1">
+		select dict_id, dict_name, dict_type, status, create_by, create_time, remark
+		from sys_dict_type
+	</sql>
+
 	<select id="selectDictTypeList" parameterType="SysDictType" resultMap="SysDictTypeResult">
 	    <include refid="selectDictTypeVo"/>
 		<where>
@@ -56,8 +61,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 	
 	<select id="checkDictTypeUnique" parameterType="String" resultMap="SysDictTypeResult">
-		<include refid="selectDictTypeVo"/>
-		where dict_type = #{dictType} limit 1
+		<include refid="selectDictTypeVoTop1"/>
+		where dict_type = #{dictType}
 	</select>
 	
 	<delete id="deleteDictTypeById" parameterType="Long">

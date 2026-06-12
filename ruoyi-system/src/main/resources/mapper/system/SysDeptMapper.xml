@@ -26,6 +26,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select d.dept_id, d.parent_id, d.ancestors, d.dept_name, d.order_num, d.leader, d.phone, d.email, d.status, d.del_flag, d.create_by, d.create_time 
         from sys_dept d
     </sql>
+
+	<sql id="selectDeptVoTop1">
+		select top 1 d.dept_id, d.parent_id, d.ancestors, d.dept_name, d.order_num, d.leader, d.phone, d.email, d.status, d.del_flag, d.create_by, d.create_time
+		from sys_dept d
+	</sql>
     
 	<select id="selectDeptList" parameterType="SysDept" resultMap="SysDeptResult">
         <include refid="selectDeptVo"/>
@@ -83,8 +88,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 	
 	<select id="checkDeptNameUnique" resultMap="SysDeptResult">
-	    <include refid="selectDeptVo"/>
-		where dept_name=#{deptName} and parent_id = #{parentId} and del_flag = '0' limit 1
+	    <include refid="selectDeptVoTop1"/>
+		where dept_name=#{deptName} and parent_id = #{parentId} and del_flag = '0'
 	</select>
     
     <insert id="insertDept" parameterType="SysDept">
