@@ -517,7 +517,7 @@ CREATE TABLE [dbo].[sys_dept] (
     [phone] nvarchar(11) NULL,
     [email] nvarchar(50) NULL,
     [status] nchar(1) NULL,
-    [del_flag] nchar(1) NULL,
+    [del_flag] nchar(1) DEFAULT 0 NULL,
     [create_by] nvarchar(64) NULL,
     [create_time] datetime2(7)  NULL,
     [update_by] nvarchar(64) NULL,
@@ -545,16 +545,16 @@ EXEC sp_addextendedproperty 'MS_Description', N'部门表', 'SCHEMA', N'dbo', 'T
 -- 初始化-部门表数据
 -- ----------------------------
 SET IDENTITY_INSERT [dbo].[sys_dept] ON;
-INSERT INTO [dbo].[sys_dept] ([dept_id], [parent_id], [ancestors], [dept_name], [order_num], [leader], [phone], [email], [status], [del_flag], [create_by], [create_time], [update_by], [update_time]) values(100,  0,   '0',          '若依科技',   0, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', getdate(), '', null);
-INSERT INTO [dbo].[sys_dept] ([dept_id], [parent_id], [ancestors], [dept_name], [order_num], [leader], [phone], [email], [status], [del_flag], [create_by], [create_time], [update_by], [update_time]) values(101,  100, '0,100',      '深圳总公司', 1, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', getdate(), '', null);
-INSERT INTO [dbo].[sys_dept] ([dept_id], [parent_id], [ancestors], [dept_name], [order_num], [leader], [phone], [email], [status], [del_flag], [create_by], [create_time], [update_by], [update_time]) values(102,  100, '0,100',      '长沙分公司', 2, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', getdate(), '', null);
-INSERT INTO [dbo].[sys_dept] ([dept_id], [parent_id], [ancestors], [dept_name], [order_num], [leader], [phone], [email], [status], [del_flag], [create_by], [create_time], [update_by], [update_time]) values(103,  101, '0,100,101',  '研发部门',   1, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', getdate(), '', null);
-INSERT INTO [dbo].[sys_dept] ([dept_id], [parent_id], [ancestors], [dept_name], [order_num], [leader], [phone], [email], [status], [del_flag], [create_by], [create_time], [update_by], [update_time]) values(104,  101, '0,100,101',  '市场部门',   2, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', getdate(), '', null);
-INSERT INTO [dbo].[sys_dept] ([dept_id], [parent_id], [ancestors], [dept_name], [order_num], [leader], [phone], [email], [status], [del_flag], [create_by], [create_time], [update_by], [update_time]) values(105,  101, '0,100,101',  '测试部门',   3, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', getdate(), '', null);
-INSERT INTO [dbo].[sys_dept] ([dept_id], [parent_id], [ancestors], [dept_name], [order_num], [leader], [phone], [email], [status], [del_flag], [create_by], [create_time], [update_by], [update_time]) values(106,  101, '0,100,101',  '财务部门',   4, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', getdate(), '', null);
-INSERT INTO [dbo].[sys_dept] ([dept_id], [parent_id], [ancestors], [dept_name], [order_num], [leader], [phone], [email], [status], [del_flag], [create_by], [create_time], [update_by], [update_time]) values(107,  101, '0,100,101',  '运维部门',   5, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', getdate(), '', null);
-INSERT INTO [dbo].[sys_dept] ([dept_id], [parent_id], [ancestors], [dept_name], [order_num], [leader], [phone], [email], [status], [del_flag], [create_by], [create_time], [update_by], [update_time]) values(108,  102, '0,100,102',  '市场部门',   1, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', getdate(), '', null);
-INSERT INTO [dbo].[sys_dept] ([dept_id], [parent_id], [ancestors], [dept_name], [order_num], [leader], [phone], [email], [status], [del_flag], [create_by], [create_time], [update_by], [update_time]) values(109,  102, '0,100,102',  '财务部门',   2, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', getdate(), '', null);
+INSERT INTO [dbo].[sys_dept] ([dept_id], [parent_id], [ancestors], [dept_name], [order_num], [leader], [phone], [email], [status], [del_flag], [create_by], [create_time], [update_by], [update_time]) values(100,  0,   '0',          'SMC科技',   0, 'SMC', '15888888888', 'ry@qq.com', '0', '0', 'admin', getdate(), '', null);
+INSERT INTO [dbo].[sys_dept] ([dept_id], [parent_id], [ancestors], [dept_name], [order_num], [leader], [phone], [email], [status], [del_flag], [create_by], [create_time], [update_by], [update_time]) values(101,  100, '0,100',      '深圳总公司', 1, 'SMC', '15888888888', 'ry@qq.com', '0', '0', 'admin', getdate(), '', null);
+INSERT INTO [dbo].[sys_dept] ([dept_id], [parent_id], [ancestors], [dept_name], [order_num], [leader], [phone], [email], [status], [del_flag], [create_by], [create_time], [update_by], [update_time]) values(102,  100, '0,100',      '长沙分公司', 2, 'SMC', '15888888888', 'ry@qq.com', '0', '0', 'admin', getdate(), '', null);
+INSERT INTO [dbo].[sys_dept] ([dept_id], [parent_id], [ancestors], [dept_name], [order_num], [leader], [phone], [email], [status], [del_flag], [create_by], [create_time], [update_by], [update_time]) values(103,  101, '0,100,101',  '研发部门',   1, 'SMC', '15888888888', 'ry@qq.com', '0', '0', 'admin', getdate(), '', null);
+INSERT INTO [dbo].[sys_dept] ([dept_id], [parent_id], [ancestors], [dept_name], [order_num], [leader], [phone], [email], [status], [del_flag], [create_by], [create_time], [update_by], [update_time]) values(104,  101, '0,100,101',  '市场部门',   2, 'SMC', '15888888888', 'ry@qq.com', '0', '0', 'admin', getdate(), '', null);
+INSERT INTO [dbo].[sys_dept] ([dept_id], [parent_id], [ancestors], [dept_name], [order_num], [leader], [phone], [email], [status], [del_flag], [create_by], [create_time], [update_by], [update_time]) values(105,  101, '0,100,101',  '测试部门',   3, 'SMC', '15888888888', 'ry@qq.com', '0', '0', 'admin', getdate(), '', null);
+INSERT INTO [dbo].[sys_dept] ([dept_id], [parent_id], [ancestors], [dept_name], [order_num], [leader], [phone], [email], [status], [del_flag], [create_by], [create_time], [update_by], [update_time]) values(106,  101, '0,100,101',  '财务部门',   4, 'SMC', '15888888888', 'ry@qq.com', '0', '0', 'admin', getdate(), '', null);
+INSERT INTO [dbo].[sys_dept] ([dept_id], [parent_id], [ancestors], [dept_name], [order_num], [leader], [phone], [email], [status], [del_flag], [create_by], [create_time], [update_by], [update_time]) values(107,  101, '0,100,101',  '运维部门',   5, 'SMC', '15888888888', 'ry@qq.com', '0', '0', 'admin', getdate(), '', null);
+INSERT INTO [dbo].[sys_dept] ([dept_id], [parent_id], [ancestors], [dept_name], [order_num], [leader], [phone], [email], [status], [del_flag], [create_by], [create_time], [update_by], [update_time]) values(108,  102, '0,100,102',  '市场部门',   1, 'SMC', '15888888888', 'ry@qq.com', '0', '0', 'admin', getdate(), '', null);
+INSERT INTO [dbo].[sys_dept] ([dept_id], [parent_id], [ancestors], [dept_name], [order_num], [leader], [phone], [email], [status], [del_flag], [create_by], [create_time], [update_by], [update_time]) values(109,  102, '0,100,102',  '财务部门',   2, 'SMC', '15888888888', 'ry@qq.com', '0', '0', 'admin', getdate(), '', null);
 SET IDENTITY_INSERT [dbo].[sys_dept] OFF;
 
 GO
@@ -874,7 +874,7 @@ SET IDENTITY_INSERT [dbo].[sys_menu] ON;
 INSERT INTO [dbo].[sys_menu] ([menu_id], [menu_name], [parent_id], [order_num], [path], [component], [query], [route_name], [is_frame], [is_cache], [menu_type], [visible], [status], [perms], [icon], [create_by], [create_time], [update_by], [update_time], [remark]) values('1', '系统管理', '0', '1', 'system',           null, '', '', 1, 0, 'M', '0', '0', '', 'system',   'admin', getdate(), '', null, '系统管理目录');
 INSERT INTO [dbo].[sys_menu] ([menu_id], [menu_name], [parent_id], [order_num], [path], [component], [query], [route_name], [is_frame], [is_cache], [menu_type], [visible], [status], [perms], [icon], [create_by], [create_time], [update_by], [update_time], [remark]) values('2', '系统监控', '0', '2', 'monitor',          null, '', '', 1, 0, 'M', '0', '0', '', 'monitor',  'admin', getdate(), '', null, '系统监控目录');
 INSERT INTO [dbo].[sys_menu] ([menu_id], [menu_name], [parent_id], [order_num], [path], [component], [query], [route_name], [is_frame], [is_cache], [menu_type], [visible], [status], [perms], [icon], [create_by], [create_time], [update_by], [update_time], [remark]) values('3', '系统工具', '0', '3', 'tool',             null, '', '', 1, 0, 'M', '0', '0', '', 'tool',     'admin', getdate(), '', null, '系统工具目录');
-INSERT INTO [dbo].[sys_menu] ([menu_id], [menu_name], [parent_id], [order_num], [path], [component], [query], [route_name], [is_frame], [is_cache], [menu_type], [visible], [status], [perms], [icon], [create_by], [create_time], [update_by], [update_time], [remark]) values('4', '若依官网', '0', '4', 'http://ruoyi.vip', null, '', '', 0, 0, 'M', '0', '0', '', 'guide',    'admin', getdate(), '', null, '若依官网地址');
+INSERT INTO [dbo].[sys_menu] ([menu_id], [menu_name], [parent_id], [order_num], [path], [component], [query], [route_name], [is_frame], [is_cache], [menu_type], [visible], [status], [perms], [icon], [create_by], [create_time], [update_by], [update_time], [remark]) values('4', 'SMC官网', '0', '4', 'http://ruoyi.vip', null, '', '', 0, 0, 'M', '0', '0', '', 'guide',    'admin', getdate(), '', null, 'SMC官网地址');
 -- 二级菜单
 INSERT INTO [dbo].[sys_menu] ([menu_id], [menu_name], [parent_id], [order_num], [path], [component], [query], [route_name], [is_frame], [is_cache], [menu_type], [visible], [status], [perms], [icon], [create_by], [create_time], [update_by], [update_time], [remark]) values('100',  '用户管理', '1',   '1', 'user',       'system/user/index',        '', '', 1, 0, 'C', '0', '0', 'system:user:list',        'user',          'admin', getdate(), '', null, '用户管理菜单');
 INSERT INTO [dbo].[sys_menu] ([menu_id], [menu_name], [parent_id], [order_num], [path], [component], [query], [route_name], [is_frame], [is_cache], [menu_type], [visible], [status], [perms], [icon], [create_by], [create_time], [update_by], [update_time], [remark]) values('101',  '角色管理', '1',   '2', 'role',       'system/role/index',        '', '', 1, 0, 'C', '0', '0', 'system:role:list',        'peoples',       'admin', getdate(), '', null, '角色管理菜单');
@@ -1012,8 +1012,8 @@ EXEC sp_addextendedproperty 'MS_Description', N'通知公告表', 'SCHEMA', N'db
 -- Records of sys_notice
 -- ----------------------------
 SET IDENTITY_INSERT [dbo].[sys_notice] ON;
-INSERT INTO [dbo].[sys_notice] ([notice_id], [notice_title], [notice_type], [notice_content], [status], [create_by], [create_time], [update_by], [update_time], [remark]) VALUES (N'1', N'温馨提醒：2018-07-01 若依新版本发布啦', N'2', 0xE696B0E78988E69CACE58685E5AEB9, N'0', N'admin', N'2024-07-16 11:25:56.0000000', N'', NULL, N'管理员');
-INSERT INTO [dbo].[sys_notice] ([notice_id], [notice_title], [notice_type], [notice_content], [status], [create_by], [create_time], [update_by], [update_time], [remark]) VALUES (N'2', N'维护通知：2018-07-01 若依系统凌晨维护', N'1', 0xE7BBB4E68AA4E58685E5AEB9, N'0', N'admin', N'2024-07-16 11:25:56.0000000', N'', NULL, N'管理员');
+INSERT INTO [dbo].[sys_notice] ([notice_id], [notice_title], [notice_type], [notice_content], [status], [create_by], [create_time], [update_by], [update_time], [remark]) VALUES (N'1', N'温馨提醒：2018-07-01 SMC新版本发布啦', N'2', 0xE696B0E78988E69CACE58685E5AEB9, N'0', N'admin', N'2024-07-16 11:25:56.0000000', N'', NULL, N'管理员');
+INSERT INTO [dbo].[sys_notice] ([notice_id], [notice_title], [notice_type], [notice_content], [status], [create_by], [create_time], [update_by], [update_time], [remark]) VALUES (N'2', N'维护通知：2018-07-01 SMC系统凌晨维护', N'1', 0xE7BBB4E68AA4E58685E5AEB9, N'0', N'admin', N'2024-07-16 11:25:56.0000000', N'', NULL, N'管理员');
 SET IDENTITY_INSERT [dbo].[sys_notice] OFF;
 
 GO
@@ -1142,7 +1142,7 @@ CREATE TABLE [dbo].[sys_role] (
     [menu_check_strictly] tinyint  NULL,
     [dept_check_strictly] tinyint  NULL,
     [status] nchar(1) NOT NULL,
-    [del_flag] nchar(1) NULL,
+    [del_flag] nchar(1) DEFAULT 0 NULL,
     [create_by] nvarchar(64) NULL,
     [create_time] datetime2(7)  NULL,
     [update_by] nvarchar(64) NULL,
@@ -1330,7 +1330,7 @@ CREATE TABLE [dbo].[sys_user] (
     [avatar] nvarchar(100) NULL,
     [password] nvarchar(100) NULL,
     [status] nchar(1) NULL,
-    [del_flag] nchar(1) DEFAULT '0' NULL,
+    [del_flag] nchar(1) DEFAULT 0 NULL,
     [login_ip] nvarchar(128) NULL,
     [login_date] datetime2(7)  NULL,
     [pwd_update_date] datetime2(7)  NULL,
@@ -1367,8 +1367,8 @@ EXEC sp_addextendedproperty 'MS_Description', N'用户信息表', 'SCHEMA', N'db
 -- 初始化-用户信息表数据
 -- ----------------------------
 SET IDENTITY_INSERT [dbo].[sys_user] ON;
-INSERT INTO [dbo].[sys_user] ([user_id], [dept_id], [user_name], [nick_name], [user_type], [email], [phonenumber], [sex], [avatar], [password], [status], [del_flag], [login_ip], [login_date], [pwd_update_date], [create_by], [create_time], [update_by], [update_time], [remark]) values(1,  103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', getdate(), getdate(), 'admin', getdate(), '', null, '管理员');
-INSERT INTO [dbo].[sys_user] ([user_id], [dept_id], [user_name], [nick_name], [user_type], [email], [phonenumber], [sex], [avatar], [password], [status], [del_flag], [login_ip], [login_date], [pwd_update_date], [create_by], [create_time], [update_by], [update_time], [remark]) values(2,  105, 'ry',    '若依', '00', 'ry@qq.com',  '15666666666', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', getdate(), getdate(), 'admin', getdate(), '', null, '测试员');
+INSERT INTO [dbo].[sys_user] ([user_id], [dept_id], [user_name], [nick_name], [user_type], [email], [phonenumber], [sex], [avatar], [password], [status], [del_flag], [login_ip], [login_date], [pwd_update_date], [create_by], [create_time], [update_by], [update_time], [remark]) values(1,  103, 'admin', 'SMC', '00', 'ry@163.com', '15888888888', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', getdate(), getdate(), 'admin', getdate(), '', null, '管理员');
+INSERT INTO [dbo].[sys_user] ([user_id], [dept_id], [user_name], [nick_name], [user_type], [email], [phonenumber], [sex], [avatar], [password], [status], [del_flag], [login_ip], [login_date], [pwd_update_date], [create_by], [create_time], [update_by], [update_time], [remark]) values(2,  105, 'ry',    'SMC', '00', 'ry@qq.com',  '15666666666', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', getdate(), getdate(), 'admin', getdate(), '', null, '测试员');
 SET IDENTITY_INSERT [dbo].[sys_user] OFF;
 
 GO
