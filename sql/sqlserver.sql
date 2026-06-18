@@ -1205,6 +1205,28 @@ INSERT INTO [dbo].[sys_role_dept] ([role_id], [dept_id]) values ('2', '105');
 GO
 
 -- ----------------------------
+-- 用户最近信息
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID(N'[dbo].[sys_role_menu]') AND type IN ('U'))
+    DROP TABLE [dbo].[sys_user_recently];
+
+CREATE TABLE [dbo].[sys_user_recently] (
+    [user_id]   BIGINT   NOT NULL,
+    [select_id] BIGINT   NOT NULL,
+    [type]      SMALLINT NOT NULL,
+    [time]      DATETIME NULL,
+     PRIMARY KEY CLUSTERED (user_id, select_id, type)
+    );
+
+EXEC sp_addextendedproperty @name = N'MS_Description', @value = N'用户最近信息关联表', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'sys_user_recently';
+EXEC sp_addextendedproperty @name = N'MS_Description', @value = N'用户ID', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'sys_user_recently', @level2type = N'COLUMN', @level2name = N'user_id';
+EXEC sp_addextendedproperty @name = N'MS_Description', @value = N'选择ID', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'sys_user_recently', @level2type = N'COLUMN', @level2name = N'select_id';
+EXEC sp_addextendedproperty @name = N'MS_Description', @value = N'选择类型', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'sys_user_recently', @level2type = N'COLUMN', @level2name = N'type';
+EXEC sp_addextendedproperty @name = N'MS_Description', @value = N'操作时间', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'sys_user_recently', @level2type = N'COLUMN', @level2name = N'time';
+
+GO
+
+-- ----------------------------
 -- Table structure for sys_role_menu
 -- ----------------------------
 IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID(N'[dbo].[sys_role_menu]') AND type IN ('U'))

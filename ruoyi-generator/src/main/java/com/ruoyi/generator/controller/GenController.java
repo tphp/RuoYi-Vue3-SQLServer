@@ -134,10 +134,16 @@ public class GenController extends BaseController
         try
         {
             String sql = body.get("sql");
+            String sqlReplace = sql.toUpperCase()
+                    .replace("\t", " ")
+                    .replace("\r", " ")
+                    .replace("\n", " ")
+                    .replaceAll("EXECUTE .*?;", "")
+                    .replaceAll("EXE .*?;", "");
             String tplWebType = body.get("tplWebType");
             genTableService.createTable(sql);
             SqlUtil.filterKeyword(sql);
-            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(sql, DbType.sqlserver);
+            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(sqlReplace, DbType.sqlserver);
             List<String> tableNames = new ArrayList<>();
             for (SQLStatement sqlStatement : sqlStatements)
             {
