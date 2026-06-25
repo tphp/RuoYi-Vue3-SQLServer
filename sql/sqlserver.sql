@@ -1475,3 +1475,60 @@ ALTER TABLE [dbo].[voucher] SET (LOCK_ESCALATION = TABLE);
 SET IDENTITY_INSERT [dbo].[voucher] ON;
 INSERT INTO [dbo].[voucher] ([f_voucher_id], [f_date], [f_bus_date], [f_period], [f_voucher_group_no], [entry_no], [f_explanation], [f_account_id], [direction], [f_amount_for], [f_attachments], [f_detail]) VALUES (N'1', N'2023-01-05 00:00:00.0000000', N'2023-01-05 00:00:00.0000000', N'1', N'00001', N'1', N'0509-CL-202210-0107/廖伟/与垫江试验人员对接，完成配备调试、设备更换等工作', N'5101.05.01.03', N'1', N'50', N'4', N'部门--05090205--1B6A汽车电子及信息测试研究事业部');
 SET IDENTITY_INSERT [dbo].[voucher] OFF;
+
+-- ----------------------------
+-- Table structure for sys_api_key
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID(N'[dbo].[sys_api_key]') AND type IN ('U'))
+    DROP TABLE [dbo].[sys_api_key];
+
+CREATE TABLE [dbo].[sys_api_key] (
+    [id] bigint  IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    [app_name] nvarchar(100) NOT NULL,
+    [api_key] nvarchar(64) NOT NULL,
+    [api_secret] nvarchar(128) NOT NULL,
+    [status] nchar(1) DEFAULT '0' NULL,
+    [expire_time] datetime2(7)  NULL,
+    [remark] nvarchar(500) NULL,
+    [create_by] nvarchar(64) NULL,
+    [create_time] datetime2(7)  NULL,
+    [update_by] nvarchar(64) NULL,
+    [update_time] datetime2(7)  NULL
+);
+
+ALTER TABLE [dbo].[sys_api_key] SET (LOCK_ESCALATION = TABLE);
+EXEC sp_addextendedproperty 'MS_Description', N'主键ID', 'SCHEMA', N'dbo', 'TABLE', N'sys_api_key', 'COLUMN', N'id';
+EXEC sp_addextendedproperty 'MS_Description', N'应用名称', 'SCHEMA', N'dbo', 'TABLE', N'sys_api_key', 'COLUMN', N'app_name';
+EXEC sp_addextendedproperty 'MS_Description', N'API Key', 'SCHEMA', N'dbo', 'TABLE', N'sys_api_key', 'COLUMN', N'api_key';
+EXEC sp_addextendedproperty 'MS_Description', N'API Secret', 'SCHEMA', N'dbo', 'TABLE', N'sys_api_key', 'COLUMN', N'api_secret';
+EXEC sp_addextendedproperty 'MS_Description', N'状态（0正常 1停用）', 'SCHEMA', N'dbo', 'TABLE', N'sys_api_key', 'COLUMN', N'status';
+EXEC sp_addextendedproperty 'MS_Description', N'过期时间', 'SCHEMA', N'dbo', 'TABLE', N'sys_api_key', 'COLUMN', N'expire_time';
+EXEC sp_addextendedproperty 'MS_Description', N'备注', 'SCHEMA', N'dbo', 'TABLE', N'sys_api_key', 'COLUMN', N'remark';
+EXEC sp_addextendedproperty 'MS_Description', N'创建者', 'SCHEMA', N'dbo', 'TABLE', N'sys_api_key', 'COLUMN', N'create_by';
+EXEC sp_addextendedproperty 'MS_Description', N'创建时间', 'SCHEMA', N'dbo', 'TABLE', N'sys_api_key', 'COLUMN', N'create_time';
+EXEC sp_addextendedproperty 'MS_Description', N'更新者', 'SCHEMA', N'dbo', 'TABLE', N'sys_api_key', 'COLUMN', N'update_by';
+EXEC sp_addextendedproperty 'MS_Description', N'更新时间', 'SCHEMA', N'dbo', 'TABLE', N'sys_api_key', 'COLUMN', N'update_time';
+EXEC sp_addextendedproperty 'MS_Description', N'API密钥管理表', 'SCHEMA', N'dbo', 'TABLE', N'sys_api_key';
+
+CREATE UNIQUE INDEX [uk_api_key] ON [dbo].[sys_api_key] ([api_key]);
+
+-- ----------------------------
+-- Menu configuration for API Key management
+-- ----------------------------
+-- 父菜单：系统管理（假设 menu_id = 1）
+-- API密钥管理菜单
+INSERT INTO [dbo].[sys_menu] ([menu_name], [parent_id], [order_num], [path], [component], [is_frame], [is_cache], [menu_type], [visible], [status], [perms], [icon], [create_by], [create_time], [remark])
+VALUES (N'API密钥管理', 1, 10, N'apiKey', N'system/apiKey/index', 1, 0, N'C', N'0', N'0', N'system:apiKey:list', N'key', N'admin', GETDATE(), N'API密钥管理菜单');
+
+-- 获取刚插入的菜单ID（用于子菜单）
+DECLARE @menuId bigint;
+SELECT @menuId = SCOPE_IDENTITY();
+
+-- API密钥管理按钮权限
+INSERT INTO [dbo].[sys_menu] ([menu_name], [parent_id], [order_num], [path], [component], [is_frame], [is_cache], [menu_type], [visible], [status], [perms], [icon], [create_by], [create_time], [remark])
+VALUES 
+(N'API密钥查询', @menuId, 1, N'#', N'', 1, 0, N'F', N'0', N'0', N'system:apiKey:query', N'#', N'admin', GETDATE(), N''),
+(N'API密钥新增', @menuId, 2, N'#', N'', 1, 0, N'F', N'0', N'0', N'system:apiKey:add', N'#', N'admin', GETDATE(), N''),
+(N'API密钥修改', @menuId, 3, N'#', N'', 1, 0, N'F', N'0', N'0', N'system:apiKey:edit', N'#', N'admin', GETDATE(), N''),
+(N'API密钥删除', @menuId, 4, N'#', N'', 1, 0, N'F', N'0', N'0', N'system:apiKey:remove', N'#', N'admin', GETDATE(), N''),
+(N'API密钥导出', @menuId, 5, N'#', N'', 1, 0, N'F', N'0', N'0', N'system:apiKey:export', N'#', N'admin', GETDATE(), N'');
