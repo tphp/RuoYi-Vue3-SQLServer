@@ -1515,7 +1515,7 @@ CREATE UNIQUE INDEX [uk_api_key] ON [dbo].[sys_api_key] ([api_key]);
 -- ----------------------------
 -- Menu configuration for API Key management
 -- ----------------------------
--- 父菜单：系统管理（假设 menu_id = 1）
+-- 父菜单：系统管理（menu_id = 1）
 -- API密钥管理菜单
 INSERT INTO [dbo].[sys_menu] ([menu_name], [parent_id], [order_num], [path], [component], [is_frame], [is_cache], [menu_type], [visible], [status], [perms], [icon], [create_by], [create_time], [remark])
 VALUES (N'API密钥管理', 1, 10, N'apiKey', N'system/apiKey/index', 1, 0, N'C', N'0', N'0', N'system:apiKey:list', N'key', N'admin', GETDATE(), N'API密钥管理菜单');
@@ -1532,3 +1532,137 @@ VALUES
 (N'API密钥修改', @menuId, 3, N'#', N'', 1, 0, N'F', N'0', N'0', N'system:apiKey:edit', N'#', N'admin', GETDATE(), N''),
 (N'API密钥删除', @menuId, 4, N'#', N'', 1, 0, N'F', N'0', N'0', N'system:apiKey:remove', N'#', N'admin', GETDATE(), N''),
 (N'API密钥导出', @menuId, 5, N'#', N'', 1, 0, N'F', N'0', N'0', N'system:apiKey:export', N'#', N'admin', GETDATE(), N'');
+
+-- ----------------------------
+-- @author Zhang zhan
+-- @date 2026-06-26
+-- Description: 单据编号生成配置功能
+-- Tables: sys_number_rule, sys_number_rule_item, sys_number_serial
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for sys_number_rule
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID(N'[dbo].[sys_number_rule]') AND type IN ('U'))
+    DROP TABLE [dbo].[sys_number_rule];
+
+CREATE TABLE [dbo].[sys_number_rule] (
+    [rule_id] bigint  IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    [rule_name] nvarchar(100) NOT NULL,
+    [rule_code] nvarchar(64) NOT NULL,
+    [description] nvarchar(500) NULL,
+    [status] nchar(1) DEFAULT '0' NULL,
+    [remark] nvarchar(500) NULL,
+    [create_by] nvarchar(64) NULL,
+    [create_time] datetime2(7)  NULL,
+    [update_by] nvarchar(64) NULL,
+    [update_time] datetime2(7)  NULL
+);
+
+ALTER TABLE [dbo].[sys_number_rule] SET (LOCK_ESCALATION = TABLE);
+EXEC sp_addextendedproperty 'MS_Description', N'规则ID', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule', 'COLUMN', N'rule_id';
+EXEC sp_addextendedproperty 'MS_Description', N'规则名称', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule', 'COLUMN', N'rule_name';
+EXEC sp_addextendedproperty 'MS_Description', N'规则编码', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule', 'COLUMN', N'rule_code';
+EXEC sp_addextendedproperty 'MS_Description', N'规则描述', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule', 'COLUMN', N'description';
+EXEC sp_addextendedproperty 'MS_Description', N'状态（0正常 1停用）', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule', 'COLUMN', N'status';
+EXEC sp_addextendedproperty 'MS_Description', N'备注', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule', 'COLUMN', N'remark';
+EXEC sp_addextendedproperty 'MS_Description', N'创建者', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule', 'COLUMN', N'create_by';
+EXEC sp_addextendedproperty 'MS_Description', N'创建时间', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule', 'COLUMN', N'create_time';
+EXEC sp_addextendedproperty 'MS_Description', N'更新者', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule', 'COLUMN', N'update_by';
+EXEC sp_addextendedproperty 'MS_Description', N'更新时间', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule', 'COLUMN', N'update_time';
+EXEC sp_addextendedproperty 'MS_Description', N'编号规则表', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule';
+
+CREATE UNIQUE INDEX [uk_rule_code] ON [dbo].[sys_number_rule] ([rule_code]);
+CREATE INDEX [idx_rule_status] ON [dbo].[sys_number_rule] ([status]);
+
+-- ----------------------------
+-- Table structure for sys_number_rule_item
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID(N'[dbo].[sys_number_rule_item]') AND type IN ('U'))
+    DROP TABLE [dbo].[sys_number_rule_item];
+
+CREATE TABLE [dbo].[sys_number_rule_item] (
+    [item_id] bigint  IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    [rule_id] bigint NOT NULL,
+    [item_type] nchar(1) NOT NULL,
+    [item_value] nvarchar(200) NULL,
+    [date_format] nvarchar(32) NULL,
+    [cycle_type] nchar(1) NULL,
+    [serial_length] int NULL,
+    [is_pad_zero] nchar(1) DEFAULT '0' NULL,
+    [start_number] int DEFAULT 1 NULL,
+    [sort_order] int DEFAULT 0 NULL,
+    [create_by] nvarchar(64) NULL,
+    [create_time] datetime2(7)  NULL,
+    [update_by] nvarchar(64) NULL,
+    [update_time] datetime2(7)  NULL
+);
+
+ALTER TABLE [dbo].[sys_number_rule_item] SET (LOCK_ESCALATION = TABLE);
+EXEC sp_addextendedproperty 'MS_Description', N'元素ID', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule_item', 'COLUMN', N'item_id';
+EXEC sp_addextendedproperty 'MS_Description', N'规则ID', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule_item', 'COLUMN', N'rule_id';
+EXEC sp_addextendedproperty 'MS_Description', N'元素类型（1常量 2日期 3流水号）', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule_item', 'COLUMN', N'item_type';
+EXEC sp_addextendedproperty 'MS_Description', N'常量值', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule_item', 'COLUMN', N'item_value';
+EXEC sp_addextendedproperty 'MS_Description', N'日期格式', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule_item', 'COLUMN', N'date_format';
+EXEC sp_addextendedproperty 'MS_Description', N'累计周期（1不循环 2按日 3按月 4按年）', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule_item', 'COLUMN', N'cycle_type';
+EXEC sp_addextendedproperty 'MS_Description', N'流水号长度', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule_item', 'COLUMN', N'serial_length';
+EXEC sp_addextendedproperty 'MS_Description', N'是否补零（0否 1是）', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule_item', 'COLUMN', N'is_pad_zero';
+EXEC sp_addextendedproperty 'MS_Description', N'起始流水号', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule_item', 'COLUMN', N'start_number';
+EXEC sp_addextendedproperty 'MS_Description', N'排序号', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule_item', 'COLUMN', N'sort_order';
+EXEC sp_addextendedproperty 'MS_Description', N'创建者', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule_item', 'COLUMN', N'create_by';
+EXEC sp_addextendedproperty 'MS_Description', N'创建时间', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule_item', 'COLUMN', N'create_time';
+EXEC sp_addextendedproperty 'MS_Description', N'更新者', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule_item', 'COLUMN', N'update_by';
+EXEC sp_addextendedproperty 'MS_Description', N'更新时间', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule_item', 'COLUMN', N'update_time';
+EXEC sp_addextendedproperty 'MS_Description', N'编号规则元素表', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_rule_item';
+
+CREATE INDEX [idx_rule_id] ON [dbo].[sys_number_rule_item] ([rule_id]);
+CREATE INDEX [idx_sort_order] ON [dbo].[sys_number_rule_item] ([sort_order]);
+
+-- ----------------------------
+-- Table structure for sys_number_serial
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID(N'[dbo].[sys_number_serial]') AND type IN ('U'))
+    DROP TABLE [dbo].[sys_number_serial];
+
+CREATE TABLE [dbo].[sys_number_serial] (
+    [serial_id] bigint  IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    [rule_id] bigint NOT NULL,
+    [cycle_key] nvarchar(32) NOT NULL,
+    [current_value] bigint DEFAULT 0 NULL,
+    [create_time] datetime2(7)  NULL,
+    [update_time] datetime2(7)  NULL
+);
+
+ALTER TABLE [dbo].[sys_number_serial] SET (LOCK_ESCALATION = TABLE);
+EXEC sp_addextendedproperty 'MS_Description', N'流水号ID', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_serial', 'COLUMN', N'serial_id';
+EXEC sp_addextendedproperty 'MS_Description', N'规则ID', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_serial', 'COLUMN', N'rule_id';
+EXEC sp_addextendedproperty 'MS_Description', N'周期键', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_serial', 'COLUMN', N'cycle_key';
+EXEC sp_addextendedproperty 'MS_Description', N'当前流水号值', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_serial', 'COLUMN', N'current_value';
+EXEC sp_addextendedproperty 'MS_Description', N'创建时间', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_serial', 'COLUMN', N'create_time';
+EXEC sp_addextendedproperty 'MS_Description', N'更新时间', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_serial', 'COLUMN', N'update_time';
+EXEC sp_addextendedproperty 'MS_Description', N'流水号记录表', 'SCHEMA', N'dbo', 'TABLE', N'sys_number_serial';
+
+CREATE UNIQUE INDEX [uk_rule_cycle] ON [dbo].[sys_number_serial] ([rule_id], [cycle_key]);
+
+-- ----------------------------
+-- Menu configuration for Number Rule management
+-- @author Zhang zhan
+-- @date 2026-06-26
+-- ----------------------------
+-- 父菜单：系统管理（menu_id = 1）
+-- 编号规则菜单
+INSERT INTO [dbo].[sys_menu] ([menu_name], [parent_id], [order_num], [path], [component], [is_frame], [is_cache], [menu_type], [visible], [status], [perms], [icon], [create_by], [create_time], [remark])
+VALUES (N'编号规则', 1, 11, N'numberRule', N'system/numberRule/index', 1, 0, N'C', N'0', N'0', N'system:numberRule:list', N'number', N'admin', GETDATE(), N'单据编号生成规则配置');
+
+-- 获取刚插入的菜单ID（用于子菜单）
+DECLARE @numberRuleMenuId bigint;
+SELECT @numberRuleMenuId = SCOPE_IDENTITY();
+
+-- 编号规则按钮权限
+INSERT INTO [dbo].[sys_menu] ([menu_name], [parent_id], [order_num], [path], [component], [is_frame], [is_cache], [menu_type], [visible], [status], [perms], [icon], [create_by], [create_time], [remark])
+VALUES
+(N'编号规则查询', @numberRuleMenuId, 1, N'#', N'', 1, 0, N'F', N'0', N'0', N'system:numberRule:query', N'#', N'admin', GETDATE(), N''),
+(N'编号规则新增', @numberRuleMenuId, 2, N'#', N'', 1, 0, N'F', N'0', N'0', N'system:numberRule:add', N'#', N'admin', GETDATE(), N''),
+(N'编号规则修改', @numberRuleMenuId, 3, N'#', N'', 1, 0, N'F', N'0', N'0', N'system:numberRule:edit', N'#', N'admin', GETDATE(), N''),
+(N'编号规则删除', @numberRuleMenuId, 4, N'#', N'', 1, 0, N'F', N'0', N'0', N'system:numberRule:remove', N'#', N'admin', GETDATE(), N''),
+(N'编号规则导出', @numberRuleMenuId, 5, N'#', N'', 1, 0, N'F', N'0', N'0', N'system:numberRule:export', N'#', N'admin', GETDATE(), N'');
