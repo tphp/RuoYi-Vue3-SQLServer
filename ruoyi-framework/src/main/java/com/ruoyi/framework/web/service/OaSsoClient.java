@@ -83,14 +83,11 @@ public class OaSsoClient
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(ssoProperties.getOaUrl()))
                 .timeout(Duration.ofMillis(Math.max(ssoProperties.getReadTimeout(), 1000)))
-                .header("User-Agent", ssoProperties.getOaUserAgent() == null ? "" : ssoProperties.getOaUserAgent())
                 .header("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8")
-                .header("Accept", "application/json, text/plain, */*")
                 .POST(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8))
                 .build();
 
-        log.info("[SSO] 准备调用 OA url={}, ua.len={}", ssoProperties.getOaUrl(),
-                ssoProperties.getOaUserAgent() == null ? 0 : ssoProperties.getOaUserAgent().length());
+        log.info("[SSO] 准备调用 OA url={}", ssoProperties.getOaUrl());
 
         HttpResponse<String> response;
         try

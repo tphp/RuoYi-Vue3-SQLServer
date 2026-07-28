@@ -15,9 +15,6 @@ public class SsoProperties
     /** OA 校验 token 接口 */
     private String oaUrl;
 
-    /** OA 要求的 User-Agent */
-    private String oaUserAgent;
-
     /** 连接超时时间（毫秒） */
     private int connectTimeout = 5000;
 
@@ -32,16 +29,6 @@ public class SsoProperties
     public void setOaUrl(String oaUrl)
     {
         this.oaUrl = oaUrl;
-    }
-
-    public String getOaUserAgent()
-    {
-        return oaUserAgent;
-    }
-
-    public void setOaUserAgent(String oaUserAgent)
-    {
-        this.oaUserAgent = oaUserAgent;
     }
 
     public int getConnectTimeout()
