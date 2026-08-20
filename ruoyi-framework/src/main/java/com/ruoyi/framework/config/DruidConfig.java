@@ -49,6 +49,18 @@ public class DruidConfig
         return druidProperties.dataSource(dataSource);
     }
 
+    @Bean
+    @ConfigurationProperties("spring.datasource.druid.oracle")
+    @ConditionalOnProperty(prefix = "spring.datasource.druid.oracle", name = "enabled", havingValue = "true")
+    public DataSource oracleDataSource(DruidProperties druidProperties)
+    {
+        DruidDataSource dataSource = DruidDataSourceBuilder.create().build();
+        dataSource = druidProperties.dataSource(dataSource);
+        // Oracle 不支持无 FROM 子句的 SELECT 1，validationQuery 必须带 FROM DUAL（覆盖全局 SELECT 1）
+        dataSource.setValidationQuery("SELECT 1 FROM DUAL");
+        return dataSource;
+    }
+
     @Bean(name = "dynamicDataSource")
     @Primary
     public DynamicDataSource dataSource(DataSource masterDataSource)
@@ -56,6 +68,7 @@ public class DruidConfig
         Map<Object, Object> targetDataSources = new HashMap<>();
         targetDataSources.put(DataSourceType.MASTER.name(), masterDataSource);
         setDataSource(targetDataSources, DataSourceType.SLAVE.name(), "slaveDataSource");
+        setDataSource(targetDataSources, DataSourceType.ORACLE.name(), "oracleDataSource");
         return new DynamicDataSource(masterDataSource, targetDataSources);
     }
     
