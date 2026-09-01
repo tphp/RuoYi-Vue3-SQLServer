@@ -141,6 +141,20 @@ export const dynamicRoutes = [
     ]
   },
   {
+    path: '/system/datadict-detail',
+    component: Layout,
+    hidden: true,
+    permissions: ['system:datadict:query'],
+    children: [
+      {
+        path: 'index/:tableName',
+        component: () => import('@/views/system/datadict/detail'),
+        name: 'DataDictDetail',
+        meta: { title: '表结构详情', activeMenu: '/system/datadict' }
+      }
+    ]
+  },
+  {
     path: '/monitor/job-log',
     component: Layout,
     hidden: true,
