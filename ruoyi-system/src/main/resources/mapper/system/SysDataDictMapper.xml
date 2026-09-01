@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysDataDictMapper">
+
+    <resultMap type="SysDataDictTable" id="SysDataDictTableResult">
+        <result property="tableName"    column="table_name"    />
+        <result property="tableComment" column="table_comment" />
+        <result property="createTime"   column="create_time"   />
+        <result property="updateTime"   column="update_time"   />
+    </resultMap>
+
+    <resultMap type="SysDataDictColumn" id="SysDataDictColumnResult">
+        <result property="tableName"     column="table_name"     />
+        <result property="tableComment"  column="table_comment"  />
+        <result property="columnName"    column="column_name"    />
+        <result property="columnComment" column="column_comment" />
+        <result property="dataType"      column="data_type"      />
+        <result property="dataLength"    column="data_length"    />
+        <result property="dataPrecision" column="data_precision" />
+        <result property="dataScale"     column="data_scale"     />
+        <result property="isPk"          column="is_pk"          />
+        <result property="isIncrement"   column="is_increment"   />
+        <result property="isNullable"    column="is_nullable"    />
+        <result property="columnDefault" column="column_default" />
+        <result property="sort"          column="sort"           />
+    </resultMap>
+
+    <resultMap type="SysDataDictForeignKey" id="SysDataDictForeignKeyResult">
+        <result property="fkName"        column="fk_name"         />
+        <result property="tableName"     column="table_name"      />
+        <result property="columnName"    column="column_name"     />
+        <result property="refTableName"  column="ref_table_name"  />
+        <result property="refColumnName" column="ref_column_name" />
+    </resultMap>
+
+    <resultMap type="SysDataDictIndex" id="SysDataDictIndexResult">
+        <result property="indexName"    column="index_name"    />
+        <result property="indexType"    column="index_type"    />
+        <result property="isPk"         column="is_pk"         />
+        <result property="isUnique"     column="is_unique"     />
+        <result property="indexColumns" column="index_columns" />
+    </resultMap>
+
+    <sql id="selectDictTableColumns">
+        select cast(obj.name as nvarchar(128)) as table_name,
+               isnull(cast(ep.value as nvarchar(500)), '') as table_comment,
+               obj.create_date as create_time,
+               obj.modify_date as update_time
+        from sys.objects obj
+        left join sys.extended_properties ep
+            on obj.object_id = ep.major_id and ep.minor_id = 0 and ep.name = 'MS_Description'
+        where obj.type = 'U' and obj.name != 'dtproperties'
+    </sql>
+
+    <select id="selectDictTableList" parameterType="SysDataDictTable" resultMap="SysDataDictTableResult">
+        <include refid="selectDictTableColumns"/>
+        <if test="tableName != null and tableName != ''">
+            and lower(cast(obj.name as varchar(128))) like lower(concat('%', #{tableName}, '%'))
+        </if>
+        <if test="tableComment != null and tableComment != ''">
+            and lower(cast(ep.value as varchar(500))) like lower(concat('%', #{tableComment}, '%'))
+        </if>
+        order by obj.name
+    </select>
+
+    <select id="selectDictTableByName" parameterType="String" resultMap="SysDataDictTableResult">
+        <include refid="selectDictTableColumns"/>
+        and obj.name = #{tableName}
+    </select>
+
+    <select id="selectDictColumnListByTableName" parameterType="String" resultMap="SysDataDictColumnResult">
+        select cast(col.name as nvarchar(128)) as column_name,
+               isnull(cast(ep.value as nvarchar(500)), '') as column_comment,
+               cast(tp.name as nvarchar(128)) as data_type,
+               case
+                   when col.max_length = -1 then -1
+                   when tp.name in ('nvarchar', 'nchar', 'ntext') then col.max_length / 2
+                   else col.max_length
+               end as data_length,
+               col.precision as data_precision,
+               col.scale as data_scale,
+               case when col.is_nullable = 1 then 'Y' else 'N' end as is_nullable,
+               isnull(cast(dc.definition as nvarchar(500)), '') as column_default,
+               case when col.is_identity = 1 then 'Y' else 'N' end as is_increment,
+               case
+                   when exists (
+                       select 1
+                       from sys.indexes idx
+                       inner join sys.index_columns ic
+                           on ic.object_id = idx.object_id and ic.index_id = idx.index_id
+                       where idx.is_primary_key = 1
+                         and ic.object_id = col.object_id
+                         and ic.column_id = col.column_id
+                   ) then 'Y' else 'N'
+               end as is_pk,
+               col.column_id as sort
+        from sys.columns col
+        left join sys.types tp on col.user_type_id = tp.user_type_id
+        left join sys.extended_properties ep
+            on ep.major_id = col.object_id and ep.minor_id = col.column_id and ep.name = 'MS_Description'
+        left join sys.default_constraints dc
+            on dc.parent_object_id = col.object_id and dc.parent_column_id = col.column_id
+        where col.object_id = object_id(#{tableName})
+        order by col.column_id
+    </select>
+
+    <select id="selectDictForeignKeyListByTableName" parameterType="String" resultMap="SysDataDictForeignKeyResult">
+        select cast(fk.name as nvarchar(128)) as fk_name,
+               cast(pt.name as nvarchar(128)) as table_name,
+               cast(pc.name as nvarchar(128)) as column_name,
+               cast(rt.name as nvarchar(128)) as ref_table_name,
+               cast(rc.name as nvarchar(128)) as ref_column_name
+        from sys.foreign_key_columns fkc
+        inner join sys.foreign_keys fk on fkc.constraint_object_id = fk.object_id
+        inner join sys.tables pt on fkc.parent_object_id = pt.object_id
+        inner join sys.columns pc on fkc.parent_object_id = pc.object_id and fkc.parent_column_id = pc.column_id
+        inner join sys.tables rt on fkc.referenced_object_id = rt.object_id
+        inner join sys.columns rc on fkc.referenced_object_id = rc.object_id and fkc.referenced_column_id = rc.column_id
+        where pt.name = #{tableName} or rt.name = #{tableName}
+        order by fk.name, fkc.constraint_column_id
+    </select>
+
+    <select id="selectDictIndexListByTableName" parameterType="String" resultMap="SysDataDictIndexResult">
+        select cast(idx.name as nvarchar(128)) as index_name,
+               cast(idx.type_desc as nvarchar(60)) as index_type,
+               case when idx.is_primary_key = 1 then 'Y' else 'N' end as is_pk,
+               case when idx.is_unique = 1 then 'Y' else 'N' end as is_unique,
+               stuff((
+                   select ',' + cast(ic_col.name as nvarchar(128))
+                   from sys.index_columns ic
+                   inner join sys.columns ic_col
+                       on ic_col.object_id = ic.object_id and ic_col.column_id = ic.column_id
+                   where ic.object_id = idx.object_id
+                     and ic.index_id = idx.index_id
+                     and ic.is_included_column = 0
+                   order by ic.key_ordinal
+                   for xml path('')
+               ), 1, 1, '') as index_columns
+        from sys.indexes idx
+        where idx.object_id = object_id(#{tableName})
+          and idx.name is not null
+        order by idx.index_id
+    </select>
+
+    <select id="selectDictColumnExportList" parameterType="SysDataDictTable" resultMap="SysDataDictColumnResult">
+        select cast(obj.name as nvarchar(128)) as table_name,
+               isnull(cast(tep.value as nvarchar(500)), '') as table_comment,
+               cast(col.name as nvarchar(128)) as column_name,
+               isnull(cast(cep.value as nvarchar(500)), '') as column_comment,
+               cast(tp.name as nvarchar(128)) as data_type,
+               case
+                   when col.max_length = -1 then -1
+                   when tp.name in ('nvarchar', 'nchar', 'ntext') then col.max_length / 2
+                   else col.max_length
+               end as data_length,
+               col.precision as data_precision,
+               col.scale as data_scale,
+               case when col.is_nullable = 1 then 'Y' else 'N' end as is_nullable,
+               isnull(cast(dc.definition as nvarchar(500)), '') as column_default,
+               case when col.is_identity = 1 then 'Y' else 'N' end as is_increment,
+               case
+                   when exists (
+                       select 1
+                       from sys.indexes idx
+                       inner join sys.index_columns ic
+                           on ic.object_id = idx.object_id and ic.index_id = idx.index_id
+                       where idx.is_primary_key = 1
+                         and ic.object_id = col.object_id
+                         and ic.column_id = col.column_id
+                   ) then 'Y' else 'N'
+               end as is_pk,
+               col.column_id as sort
+        from sys.objects obj
+        inner join sys.columns col on obj.object_id = col.object_id
+        left join sys.types tp on col.user_type_id = tp.user_type_id
+        left join sys.extended_properties tep
+            on tep.major_id = obj.object_id and tep.minor_id = 0 and tep.name = 'MS_Description'
+        left join sys.extended_properties cep
+            on cep.major_id = col.object_id and cep.minor_id = col.column_id and cep.name = 'MS_Description'
+        left join sys.default_constraints dc
+            on dc.parent_object_id = col.object_id and dc.parent_column_id = col.column_id
+        where obj.type = 'U' and obj.name != 'dtproperties'
+        <if test="dataDictTable != null and dataDictTable.tableName != null and dataDictTable.tableName != ''">
+            and lower(cast(obj.name as varchar(128))) like lower(concat('%', #{dataDictTable.tableName}, '%'))
+        </if>
+        <if test="dataDictTable != null and dataDictTable.tableComment != null and dataDictTable.tableComment != ''">
+            and lower(cast(tep.value as varchar(500))) like lower(concat('%', #{dataDictTable.tableComment}, '%'))
+        </if>
+        <if test="tableNames != null and tableNames.size() > 0">
+            and obj.name in
+            <foreach collection="tableNames" item="tableNameItem" open="(" separator="," close=")">
+                #{tableNameItem}
+            </foreach>
+        </if>
+        order by obj.name, col.column_id
+    </select>
+
+</mapper>
