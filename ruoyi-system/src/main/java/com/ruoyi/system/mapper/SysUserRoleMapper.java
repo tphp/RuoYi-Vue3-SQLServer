@@ -59,4 +59,13 @@ public interface SysUserRoleMapper
      * @return 结果
      */
     public int deleteUserRoleInfos(@Param("roleId") Long roleId, @Param("userIds") Long[] userIds);
+
+    /**
+     * 统计某用户是否已拥有某角色（用于幂等分配默认角色）
+     *
+     * @param userId 用户ID
+     * @param roleId 角色ID
+     * @return 数量（0=未分配）
+     */
+    public int countUserRoleByUserIdAndRoleId(@Param("userId") Long userId, @Param("roleId") Long roleId);
 }
