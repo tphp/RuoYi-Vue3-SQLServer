@@ -74,6 +74,9 @@ public class SysUser extends BaseEntity
     @Excel(name = "最后登录时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss", type = Type.EXPORT)
     private Date loginDate;
 
+    /** 上级工号（直接上级的 usercode） */
+    private String fdShortNo;
+
     /** 密码最后更新时间 */
     private Date pwdUpdateDate;
 
@@ -258,6 +261,16 @@ public class SysUser extends BaseEntity
     public void setPwdUpdateDate(Date pwdUpdateDate)
     {
         this.pwdUpdateDate = pwdUpdateDate;
+    }
+
+    public String getFdShortNo()
+    {
+        return fdShortNo;
+    }
+
+    public void setFdShortNo(String fdShortNo)
+    {
+        this.fdShortNo = fdShortNo;
     }
 
     public SysDept getDept()
