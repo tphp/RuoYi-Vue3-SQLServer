@@ -332,7 +332,7 @@ public class SyncOrgTask
                 String username    = item.getString("fd_name");
                 String email       = item.getString("fd_email");
                 String mobileno    = item.getString("fd_mobile_no");
-                String detpname    = item.getString("fd_dept_name");       // 接口侧需补：所属部门名称
+                String detpname    = item.getString("fd_dept_name");       // 所属部门名称
                 String leaderNo    = item.getString("fd_short_no");       // 直接上级工号
                 String sexCn       = item.getString("fd_sex");            // "男"/"女"/空
 
