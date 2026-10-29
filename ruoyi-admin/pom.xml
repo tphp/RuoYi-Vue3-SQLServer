@@ -64,6 +64,12 @@
             <artifactId>ruoyi-generator</artifactId>
         </dependency>
 
+        <!-- 接口日志公共模块-->
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-apilog</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.apilog.mapper.SysOutboundLogMapper">
+
+    <resultMap type="SysOutboundLog" id="SysOutboundLogResult">
+        <id     property="outboundId"          column="outbound_id"           />
+        <result property="interfaceName"       column="interface_name"        />
+        <result property="interfaceUrl"        column="interface_url"         />
+        <result property="requestTime"         column="request_time"          />
+        <result property="requestParameter"    column="request_parameter"     />
+        <result property="requestStatus"       column="request_status"        />
+        <result property="responseContent"     column="response_content"      />
+        <result property="responseTime"        column="response_time"         />
+        <result property="responseCode"        column="response_code"         />
+        <result property="stacktrace"          column="stacktrace"            />
+        <result property="objectVersionNumber" column="object_version_number" />
+        <result property="requestId"           column="request_id"            />
+        <result property="programId"           column="program_id"            />
+        <result property="createdBy"           column="created_by"            />
+        <result property="creationDate"        column="creation_date"         />
+        <result property="lastUpdatedBy"       column="last_updated_by"       />
+        <result property="lastUpdateDate"      column="last_update_date"      />
+        <result property="lastUpdateLogin"     column="last_update_login"     />
+    </resultMap>
+
+    <sql id="selectOutboundLogVo">
+        select outbound_id, interface_name, interface_url, request_time, request_parameter,
+               request_status, response_content, response_time, response_code, stacktrace,
+               object_version_number, request_id, program_id, created_by, creation_date,
+               last_updated_by, last_update_date, last_update_login
+        from sys_outbound_log
+    </sql>
+
+    <select id="selectOutboundLogList" parameterType="SysOutboundLog" resultMap="SysOutboundLogResult">
+        <include refid="selectOutboundLogVo"/>
+        <where>
+            <if test="interfaceName != null and interfaceName != ''">
+                AND interface_name like '%' + #{interfaceName} + '%'
+            </if>
+            <if test="interfaceUrl != null and interfaceUrl != ''">
+                AND interface_url like '%' + #{interfaceUrl} + '%'
+            </if>
+            <if test="requestStatus != null and requestStatus != ''">
+                AND request_status = #{requestStatus}
+            </if>
+            <if test="responseCode != null and responseCode != ''">
+                AND response_code = #{responseCode}
+            </if>
+            <if test="requestId != null and requestId != ''">
+                AND request_id = #{requestId}
+            </if>
+            <if test="beginTime != null and beginTime != ''">
+                AND request_time &gt;= #{beginTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND request_time &lt;= #{endTime}
+            </if>
+        </where>
+        order by outbound_id desc
+    </select>
+
+    <select id="selectOutboundLogById" parameterType="Long" resultMap="SysOutboundLogResult">
+        <include refid="selectOutboundLogVo"/>
+        where outbound_id = #{outboundId}
+    </select>
+
+    <insert id="insertOutboundLog" parameterType="SysOutboundLog" useGeneratedKeys="true" keyProperty="outboundId">
+        insert into sys_outbound_log (
+            interface_name, interface_url, request_time, request_parameter, request_status,
+            response_content, response_time, response_code, stacktrace, object_version_number,
+            request_id, program_id, created_by, creation_date, last_updated_by, last_update_date, last_update_login
+        ) values (
+            #{interfaceName}, #{interfaceUrl}, #{requestTime}, #{requestParameter}, #{requestStatus},
+            #{responseContent}, #{responseTime}, #{responseCode}, #{stacktrace}, #{objectVersionNumber},
+            #{requestId}, #{programId}, #{createdBy}, #{creationDate}, #{lastUpdatedBy}, #{lastUpdateDate}, #{lastUpdateLogin}
+        )
+    </insert>
+
+    <delete id="deleteOutboundLogByIds" parameterType="Long">
+        delete from sys_outbound_log where outbound_id in
+        <foreach item="outboundId" collection="array" open="(" separator="," close=")">
+            #{outboundId}
+        </foreach>
+    </delete>
+
+    <delete id="cleanOutboundLog">
+        delete from sys_outbound_log
+    </delete>
+
+</mapper>

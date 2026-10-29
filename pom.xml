@@ -171,6 +171,13 @@
                 <version>${ruoyi.version}</version>
             </dependency>
 
+            <!-- 接口日志公共模块-->
+            <dependency>
+                <groupId>com.ruoyi</groupId>
+                <artifactId>ruoyi-apilog</artifactId>
+                <version>${ruoyi.version}</version>
+            </dependency>
+
             <!-- Oracle JDBC 驱动 -->
             <dependency>
                 <groupId>com.oracle.database.jdbc</groupId>
@@ -195,6 +202,7 @@
         <module>ruoyi-quartz</module>
         <module>ruoyi-generator</module>
         <module>ruoyi-common</module>
+        <module>ruoyi-apilog</module>
     </modules>
     <packaging>pom</packaging>
 

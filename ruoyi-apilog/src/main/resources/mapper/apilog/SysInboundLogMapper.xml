@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.apilog.mapper.SysInboundLogMapper">
+
+    <resultMap type="SysInboundLog" id="SysInboundLogResult">
+        <id     property="inboundId"              column="inbound_id"                />
+        <result property="interfaceName"          column="interface_name"            />
+        <result property="interfaceUrl"           column="interface_url"             />
+        <result property="requestTime"            column="request_time"              />
+        <result property="requestHeaderParameter" column="request_header_parameter"  />
+        <result property="requestBodyParameter"   column="request_body_parameter"    />
+        <result property="requestMethod"          column="request_method"            />
+        <result property="requestStatus"          column="request_status"            />
+        <result property="responseContent"        column="response_content"          />
+        <result property="responseTime"           column="response_time"             />
+        <result property="stacktrace"             column="stacktrace"                />
+        <result property="ip"                     column="ip"                        />
+        <result property="referer"                column="referer"                   />
+        <result property="userAgent"              column="user_agent"                />
+        <result property="objectVersionNumber"    column="object_version_number"     />
+        <result property="requestId"              column="request_id"                />
+        <result property="programId"              column="program_id"                />
+        <result property="createdBy"              column="created_by"                />
+        <result property="creationDate"           column="creation_date"             />
+        <result property="lastUpdatedBy"          column="last_updated_by"           />
+        <result property="lastUpdateDate"         column="last_update_date"          />
+        <result property="lastUpdateLogin"        column="last_update_login"         />
+    </resultMap>
+
+    <sql id="selectInboundLogVo">
+        select inbound_id, interface_name, interface_url, request_time, request_header_parameter,
+               request_body_parameter, request_method, request_status, response_content, response_time,
+               stacktrace, ip, referer, user_agent, object_version_number, request_id, program_id,
+               created_by, creation_date, last_updated_by, last_update_date, last_update_login
+        from sys_inbound_log
+    </sql>
+
+    <select id="selectInboundLogList" parameterType="SysInboundLog" resultMap="SysInboundLogResult">
+        <include refid="selectInboundLogVo"/>
+        <where>
+            <if test="interfaceName != null and interfaceName != ''">
+                AND interface_name like '%' + #{interfaceName} + '%'
+            </if>
+            <if test="interfaceUrl != null and interfaceUrl != ''">
+                AND interface_url like '%' + #{interfaceUrl} + '%'
+            </if>
+            <if test="requestMethod != null and requestMethod != ''">
+                AND request_method = #{requestMethod}
+            </if>
+            <if test="requestStatus != null and requestStatus != ''">
+                AND request_status = #{requestStatus}
+            </if>
+            <if test="ip != null and ip != ''">
+                AND ip = #{ip}
+            </if>
+            <if test="requestId != null and requestId != ''">
+                AND request_id = #{requestId}
+            </if>
+            <if test="beginTime != null and beginTime != ''">
+                AND request_time &gt;= #{beginTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND request_time &lt;= #{endTime}
+            </if>
+        </where>
+        order by inbound_id desc
+    </select>
+
+    <select id="selectInboundLogById" parameterType="Long" resultMap="SysInboundLogResult">
+        <include refid="selectInboundLogVo"/>
+        where inbound_id = #{inboundId}
+    </select>
+
+    <insert id="insertInboundLog" parameterType="SysInboundLog" useGeneratedKeys="true" keyProperty="inboundId">
+        insert into sys_inbound_log (
+            interface_name, interface_url, request_time, request_header_parameter, request_body_parameter,
+            request_method, request_status, response_content, response_time, stacktrace,
+            ip, referer, user_agent, object_version_number, request_id, program_id,
+            created_by, creation_date, last_updated_by, last_update_date, last_update_login
+        ) values (
+            #{interfaceName}, #{interfaceUrl}, #{requestTime}, #{requestHeaderParameter}, #{requestBodyParameter},
+            #{requestMethod}, #{requestStatus}, #{responseContent}, #{responseTime}, #{stacktrace},
+            #{ip}, #{referer}, #{userAgent}, #{objectVersionNumber}, #{requestId}, #{programId},
+            #{createdBy}, #{creationDate}, #{lastUpdatedBy}, #{lastUpdateDate}, #{lastUpdateLogin}
+        )
+    </insert>
+
+    <delete id="deleteInboundLogByIds" parameterType="Long">
+        delete from sys_inbound_log where inbound_id in
+        <foreach item="inboundId" collection="array" open="(" separator="," close=")">
+            #{inboundId}
+        </foreach>
+    </delete>
+
+    <delete id="cleanInboundLog">
+        delete from sys_inbound_log
+    </delete>
+
+</mapper>
