@@ -178,6 +178,13 @@
                 <version>${ruoyi.version}</version>
             </dependency>
 
+            <!-- 业务级权限模块-->
+            <dependency>
+                <groupId>com.ruoyi</groupId>
+                <artifactId>ruoyi-bizperm</artifactId>
+                <version>${ruoyi.version}</version>
+            </dependency>
+
             <!-- Oracle JDBC 驱动 -->
             <dependency>
                 <groupId>com.oracle.database.jdbc</groupId>
@@ -203,6 +210,7 @@
         <module>ruoyi-generator</module>
         <module>ruoyi-common</module>
         <module>ruoyi-apilog</module>
+        <module>ruoyi-bizperm</module>
     </modules>
     <packaging>pom</packaging>
 

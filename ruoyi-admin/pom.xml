@@ -70,6 +70,12 @@
             <artifactId>ruoyi-apilog</artifactId>
         </dependency>
 
+        <!-- 业务级权限模块-->
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-bizperm</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

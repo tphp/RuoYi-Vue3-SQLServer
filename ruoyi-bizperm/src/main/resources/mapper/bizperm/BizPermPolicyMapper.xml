@@ -1,0 +1,676 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.bizperm.mapper.BizPermPolicyMapper">
+
+    <resultMap type="com.ruoyi.bizperm.domain.SysBizPermPolicy" id="SysBizPermPolicyResult">
+        <id     property="id"           column="id"            />
+        <result property="policyCode"   column="policy_code"   />
+        <result property="policyName"   column="policy_name"   />
+        <result property="subjectType"  column="subject_type"  />
+        <result property="subjectValue" column="subject_value" />
+        <result property="subjectName"  column="subject_name"  />
+        <result property="includeChild" column="include_child" />
+        <result property="scopeIncludeChild" column="scope_include_child" />
+        <result property="status"       column="status"        />
+        <result property="remark"       column="remark"        />
+        <result property="createBy"     column="create_by"     />
+        <result property="createTime"   column="create_time"   />
+        <result property="updateBy"     column="update_by"     />
+        <result property="updateTime"   column="update_time"   />
+    </resultMap>
+
+    <resultMap type="com.ruoyi.bizperm.domain.SysBizPermScope" id="SysBizPermScopeResult">
+        <id     property="id"           column="id"            />
+        <result property="policyId"     column="policy_id"     />
+        <result property="scopeType"    column="scope_type"    />
+        <result property="scopeValue"   column="scope_value"   />
+        <result property="scopeName"    column="scope_name"    />
+        <result property="includeChild" column="include_child" />
+        <result property="orderNum"     column="order_num"     />
+        <result property="createBy"     column="create_by"     />
+        <result property="createTime"   column="create_time"   />
+        <result property="updateBy"     column="update_by"     />
+        <result property="updateTime"   column="update_time"   />
+    </resultMap>
+
+    <resultMap type="com.ruoyi.bizperm.domain.vo.VisibleUserVo" id="VisibleUserResult">
+        <result property="userCode" column="user_code" />
+        <result property="nickName" column="nick_name" />
+        <result property="deptId"   column="dept_id"   />
+        <result property="deptName" column="dept_name" />
+    </resultMap>
+
+    <resultMap type="com.ruoyi.bizperm.domain.vo.VisibleDeptGroupVo" id="VisibleDeptGroupResult">
+        <result property="deptId"        column="dept_id"        />
+        <result property="deptName"      column="dept_name"      />
+        <result property="includeChild"  column="include_child"  />
+        <result property="userCount"     column="user_count"     />
+        <result property="returnedCount" column="returned_count" />
+    </resultMap>
+
+    <resultMap type="com.ruoyi.bizperm.domain.vo.VisibleDeptUserVo" id="VisibleDeptUserResult">
+        <result property="groupDeptId"   column="group_dept_id"   />
+        <result property="groupDeptName" column="group_dept_name" />
+        <result property="includeChild"  column="include_child"   />
+        <result property="userCode"      column="user_code"       />
+        <result property="nickName"      column="nick_name"       />
+        <result property="deptId"        column="dept_id"         />
+        <result property="deptName"      column="dept_name"       />
+    </resultMap>
+
+    <resultMap type="com.ruoyi.bizperm.domain.vo.BizPermTreeNodeVo" id="BizPermTreeNodeResult">
+        <result property="nodeKey"      column="node_key"      />
+        <result property="nodeType"     column="node_type"     />
+        <result property="parentKey"    column="parent_key"    />
+        <result property="label"        column="label"         />
+        <result property="code"         column="code"          />
+        <result property="hasChildren"  column="has_children"  />
+        <result property="leaf"         column="leaf"          />
+        <result property="disabled"     column="disabled"      />
+    </resultMap>
+
+    <resultMap type="com.ruoyi.bizperm.domain.vo.BizPermSceneCountVo" id="BizPermSceneCountResult">
+        <result property="subjectType"  column="subject_type"  />
+        <result property="subjectValue" column="subject_value" />
+        <result property="policyCode"   column="policy_code"   />
+        <result property="userCount"    column="user_count"    />
+    </resultMap>
+
+    <sql id="selectPolicyVo">
+        select p.id, p.policy_code, p.policy_name, p.subject_type, p.subject_value, p.subject_name,
+               p.include_child, p.status, p.remark, p.create_by, p.create_time, p.update_by, p.update_time,
+               case when exists (select 1 from sys_biz_perm_scope s
+                                  where s.policy_id = p.id
+                                    and s.scope_type = 'DEPT'
+                                    and ltrim(rtrim(s.include_child)) = '1')
+                    then '1' else '0' end as scope_include_child
+        from sys_biz_perm_policy p
+    </sql>
+
+    <!-- 树查询公共过滤条件 -->
+    <sql id="policyTreeFilter">
+        <if test="policyCode != null and policyCode != ''">
+            and p.policy_code = #{policyCode}
+        </if>
+        <if test="ownerUserCode != null and ownerUserCode != ''">
+            and p.subject_type = 'USER' and p.subject_value = #{ownerUserCode}
+        </if>
+        <if test="status != null and status != ''">
+            and p.status = #{status}
+        </if>
+    </sql>
+
+    <select id="selectPolicyList" parameterType="com.ruoyi.bizperm.domain.SysBizPermPolicy" resultMap="SysBizPermPolicyResult">
+        <include refid="selectPolicyVo"/>
+        <where>
+            <if test="policyCode != null and policyCode != ''">
+                AND policy_code like '%' + #{policyCode} + '%'
+            </if>
+            <if test="policyName != null and policyName != ''">
+                AND policy_name like '%' + #{policyName} + '%'
+            </if>
+            <if test="subjectType != null and subjectType != ''">
+                AND subject_type = #{subjectType}
+            </if>
+            <if test="subjectValue != null and subjectValue != ''">
+                AND subject_value = #{subjectValue}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+        </where>
+        order by update_time desc, id desc
+    </select>
+
+    <select id="selectPolicyById" parameterType="java.lang.Long" resultMap="SysBizPermPolicyResult">
+        <include refid="selectPolicyVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectScopesByPolicyIds" resultMap="SysBizPermScopeResult">
+        select id, policy_id, scope_type, scope_value, scope_name, include_child, order_num,
+               create_by, create_time, update_by, update_time
+        from sys_biz_perm_scope
+        where policy_id in
+        <foreach collection="policyIds" item="policyId" open="(" separator="," close=")">
+            #{policyId}
+        </foreach>
+        order by policy_id, order_num, id
+    </select>
+
+    <select id="selectActivePoliciesBySubject" resultMap="SysBizPermPolicyResult">
+        <include refid="selectPolicyVo"/>
+        where subject_type = #{subjectType}
+          and subject_value = #{subjectValue}
+          and status = '0'
+        <if test="policyCode != null and policyCode != ''">
+            and policy_code = #{policyCode}
+        </if>
+        order by id
+    </select>
+
+    <!-- 可见人员范围展开：当前人命中策略 + 目标人员命中范围 -->
+    <sql id="visibleUserFromWhere">
+        from sys_user u
+        inner join sys_dept d on d.dept_id = u.dept_id
+        where u.status = '0'
+          and u.del_flag = '0'
+          and exists (
+            select 1
+            from sys_biz_perm_policy p
+            inner join sys_biz_perm_scope s on s.policy_id = p.id
+            where p.policy_code = #{policyCode}
+              and p.status = '0'
+              and (
+                (p.subject_type = 'USER' and p.subject_value = #{userCode})
+                or (p.subject_type = 'POST' and exists (
+                    select 1
+                    from sys_user_post up
+                    inner join sys_post po on po.post_id = up.post_id and po.status = '0'
+                    inner join sys_user cu on cu.user_id = up.user_id
+                    where cu.user_name = #{userCode}
+                      and cu.del_flag = '0'
+                      and up.post_id = try_cast(p.subject_value as bigint)
+                ))
+                or (p.subject_type = 'DEPT' and exists (
+                    select 1
+                    from sys_user cu
+                    inner join sys_dept cd on cd.dept_id = cu.dept_id
+                    where cu.user_name = #{userCode}
+                      and cu.del_flag = '0'
+                      and (cd.dept_id = try_cast(p.subject_value as bigint)
+                           or (ltrim(rtrim(p.include_child)) = '1'
+                               and charindex(',' + p.subject_value + ',', ',' + cd.ancestors + ',') &gt; 0))
+                ))
+              )
+              and (
+                (s.scope_type = 'USER' and s.scope_value = u.user_name)
+                or (s.scope_type = 'POST' and exists (
+                    select 1
+                    from sys_user_post up2
+                    inner join sys_post po2 on po2.post_id = up2.post_id and po2.status = '0'
+                    where up2.user_id = u.user_id
+                      and up2.post_id = try_cast(s.scope_value as bigint)
+                ))
+                or (s.scope_type = 'DEPT' and (
+                    u.dept_id = try_cast(s.scope_value as bigint)
+                    or (ltrim(rtrim(s.include_child)) = '1'
+                        and charindex(',' + s.scope_value + ',', ',' + d.ancestors + ',') &gt; 0)
+                ))
+              )
+          )
+    </sql>
+
+    <!-- 当前人作为权限归属人可命中的策略 -->
+    <sql id="ownerPoliciesCte">
+        owner_policies as (
+            select p.id
+            from sys_biz_perm_policy p
+            where p.policy_code = #{policyCode}
+              and p.status = '0'
+              and (
+                (p.subject_type = 'USER' and p.subject_value = #{userCode})
+                or (p.subject_type = 'POST' and exists (
+                    select 1
+                    from sys_user cu
+                    inner join sys_user_post up on up.user_id = cu.user_id
+                    where cu.user_name = #{userCode}
+                      and cu.del_flag = '0'
+                      and up.post_id = try_cast(p.subject_value as bigint)
+                ))
+                or (p.subject_type = 'DEPT' and exists (
+                    select 1
+                    from sys_user cu
+                    inner join sys_dept cd on cd.dept_id = cu.dept_id
+                    where cu.user_name = #{userCode}
+                      and cu.del_flag = '0'
+                      and (cd.dept_id = try_cast(p.subject_value as bigint)
+                           or (ltrim(rtrim(p.include_child)) = '1'
+                               and charindex(',' + p.subject_value + ',', ',' + cd.ancestors + ',') &gt; 0))
+                ))
+              )
+        )
+    </sql>
+
+    <select id="selectVisibleUserCodes" resultType="java.lang.String">
+        select distinct u.user_name
+        <include refid="visibleUserFromWhere"/>
+        order by u.user_name
+    </select>
+
+    <select id="countVisibleUsers" resultType="long">
+        select count(distinct u.user_name)
+        <include refid="visibleUserFromWhere"/>
+    </select>
+
+    <select id="selectVisibleUserPage" resultMap="VisibleUserResult">
+        select distinct u.user_name as user_code, u.nick_name as nick_name,
+               u.dept_id as dept_id, d.dept_name as dept_name
+        <include refid="visibleUserFromWhere"/>
+        order by u.user_name
+    </select>
+
+    <!-- 按配置部门分组统计：同一人命中多个部门时按 order_num、dept_id 优先归属 -->
+    <select id="selectVisibleDeptGroups" resultMap="VisibleDeptGroupResult">
+        with visible_users as (
+            select distinct u.user_id, u.user_name, u.dept_id, d.ancestors as dept_ancestors
+            <include refid="visibleUserFromWhere"/>
+        ),
+        <include refid="ownerPoliciesCte"/>,
+        dept_scopes as (
+            select s.scope_value as dept_id,
+                   max(s.include_child) as include_child,
+                   min(s.order_num) as order_num
+            from sys_biz_perm_scope s
+            inner join owner_policies op on op.id = s.policy_id
+            where s.scope_type = 'DEPT'
+            group by s.scope_value
+        ),
+        assigned as (
+            select vu.user_name,
+                   coalesce(ds.dept_id, cast(vu.dept_id as nvarchar(64))) as group_dept_id,
+                   coalesce(ds.include_child, '0') as include_child,
+                   coalesce(ds.order_num, 2147483647) as order_num
+            from visible_users vu
+            outer apply (
+                select top 1 x.dept_id, x.include_child, x.order_num
+                from dept_scopes x
+                where x.dept_id = cast(vu.dept_id as nvarchar(64))
+                   or (ltrim(rtrim(x.include_child)) = '1'
+                       and charindex(',' + x.dept_id + ',', ',' + vu.dept_ancestors + ',') &gt; 0)
+                order by x.order_num, x.dept_id
+            ) ds
+        )
+        select cast(a.group_dept_id as bigint) as dept_id,
+               d.dept_name as dept_name,
+               a.include_child as include_child,
+               count(distinct a.user_name) as user_count,
+               0 as returned_count
+        from assigned a
+        inner join sys_dept d on cast(d.dept_id as nvarchar(64)) = a.group_dept_id
+        group by a.group_dept_id, d.dept_name, a.include_child
+        order by min(a.order_num), a.group_dept_id
+    </select>
+
+    <!-- 分组分页人员明细：按分组顺序、工号排序后做 offset/fetch 分页 -->
+    <select id="selectVisibleDeptUserPage" resultMap="VisibleDeptUserResult">
+        with visible_users as (
+            select distinct u.user_id, u.user_name, u.nick_name, u.dept_id, d.ancestors as dept_ancestors
+            <include refid="visibleUserFromWhere"/>
+        ),
+        <include refid="ownerPoliciesCte"/>,
+        dept_scopes as (
+            select s.scope_value as dept_id,
+                   max(s.include_child) as include_child,
+                   min(s.order_num) as order_num
+            from sys_biz_perm_scope s
+            inner join owner_policies op on op.id = s.policy_id
+            where s.scope_type = 'DEPT'
+            group by s.scope_value
+        ),
+        assigned as (
+            select vu.user_id, vu.user_name, vu.nick_name, vu.dept_id as user_dept_id,
+                   coalesce(ds.dept_id, cast(vu.dept_id as nvarchar(64))) as group_dept_id,
+                   coalesce(ds.include_child, '0') as include_child,
+                   coalesce(ds.order_num, 2147483647) as order_num
+            from visible_users vu
+            outer apply (
+                select top 1 x.dept_id, x.include_child, x.order_num
+                from dept_scopes x
+                where x.dept_id = cast(vu.dept_id as nvarchar(64))
+                   or (ltrim(rtrim(x.include_child)) = '1'
+                       and charindex(',' + x.dept_id + ',', ',' + vu.dept_ancestors + ',') &gt; 0)
+                order by x.order_num, x.dept_id
+            ) ds
+        )
+        select cast(a.group_dept_id as bigint) as group_dept_id,
+               gd.dept_name as group_dept_name,
+               a.include_child as include_child,
+               a.user_name as user_code,
+               a.nick_name as nick_name,
+               a.user_dept_id as dept_id,
+               ud.dept_name as dept_name
+        from assigned a
+        inner join sys_dept gd on cast(gd.dept_id as nvarchar(64)) = a.group_dept_id
+        left join sys_dept ud on ud.dept_id = a.user_dept_id
+        order by a.order_num, a.group_dept_id, a.user_name
+        offset #{offset} rows fetch next #{pageSize} rows only
+    </select>
+
+    <!-- ===================== 权限结构树 ===================== -->
+
+    <!-- 归属人节点 -->
+    <select id="selectOwnerNodes" parameterType="com.ruoyi.bizperm.domain.bo.BizPermTreeQueryBo" resultMap="BizPermTreeNodeResult">
+        select
+            'OWNER:' + p.subject_type + ':' + p.subject_value as node_key,
+            'OWNER' as node_type,
+            cast(null as nvarchar(200)) as parent_key,
+            coalesce(max(nullif(p.subject_name, '')), max(u.nick_name), max(po.post_name),
+                     max(d.dept_name), p.subject_value) + '（' + p.subject_value + '）' as label,
+            p.subject_value as code,
+            cast(1 as bit) as has_children,
+            cast(0 as bit) as leaf,
+            cast(case when max(case when p.status = '0' then 0 else 1 end) = 1 then 1 else 0 end as bit) as disabled
+        from sys_biz_perm_policy p
+        left join sys_user u on p.subject_type = 'USER' and u.user_name = p.subject_value and u.del_flag = '0'
+        left join sys_post po on p.subject_type = 'POST' and cast(po.post_id as nvarchar(64)) = p.subject_value
+        left join sys_dept d on p.subject_type = 'DEPT' and cast(d.dept_id as nvarchar(64)) = p.subject_value
+        <where>
+            <include refid="policyTreeFilter"/>
+            <if test="keyword != null and keyword != ''">
+                and (p.subject_value like '%' + #{keyword} + '%'
+                     or p.subject_name like '%' + #{keyword} + '%'
+                     or u.nick_name like '%' + #{keyword} + '%'
+                     or p.policy_code like '%' + #{keyword} + '%'
+                     or p.policy_name like '%' + #{keyword} + '%')
+            </if>
+        </where>
+        group by p.subject_type, p.subject_value
+        order by p.subject_type, p.subject_value
+    </select>
+
+    <!-- 场景节点（批量，parentKey 指向归属人） -->
+    <select id="selectSceneNodes" parameterType="com.ruoyi.bizperm.domain.bo.BizPermTreeQueryBo" resultMap="BizPermTreeNodeResult">
+        select
+            'SCENE:' + p.subject_type + ':' + p.subject_value + ':' + p.policy_code as node_key,
+            'SCENE' as node_type,
+            'OWNER:' + p.subject_type + ':' + p.subject_value as parent_key,
+            max(p.policy_name) + '（' + p.policy_code + '）' as label,
+            p.policy_code as code,
+            cast(1 as bit) as has_children,
+            cast(0 as bit) as leaf,
+            cast(case when max(case when p.status = '0' then 0 else 1 end) = 1 then 1 else 0 end as bit) as disabled
+        from sys_biz_perm_policy p
+        <where>
+            <include refid="policyTreeFilter"/>
+            <if test="keyword != null and keyword != ''">
+                and (p.policy_code like '%' + #{keyword} + '%'
+                     or p.policy_name like '%' + #{keyword} + '%')
+            </if>
+        </where>
+        group by p.subject_type, p.subject_value, p.policy_code
+        order by p.subject_type, p.subject_value, p.policy_code
+    </select>
+
+    <!-- 部门节点（批量，parentKey 指向场景，同一场景同一部门合并） -->
+    <select id="selectDeptNodes" parameterType="com.ruoyi.bizperm.domain.bo.BizPermTreeQueryBo" resultMap="BizPermTreeNodeResult">
+        select
+            'DEPT:' + cast(min(s.policy_id) as nvarchar(20)) + ':' + s.scope_value as node_key,
+            'DEPT' as node_type,
+            'SCENE:' + p.subject_type + ':' + p.subject_value + ':' + p.policy_code as parent_key,
+            coalesce(max(d.dept_name), max(nullif(s.scope_name, '')), s.scope_value)
+                + case when ltrim(rtrim(max(s.include_child))) = '1' then '（含下级）' else '' end as label,
+            s.scope_value as code,
+            cast(1 as bit) as has_children,
+            cast(0 as bit) as leaf,
+            cast(case when max(case when p.status = '0' then 0 else 1 end) = 1 then 1 else 0 end as bit) as disabled
+        from sys_biz_perm_policy p
+        inner join sys_biz_perm_scope s on s.policy_id = p.id and s.scope_type = 'DEPT'
+        left join sys_dept d on cast(d.dept_id as nvarchar(64)) = s.scope_value
+        <where>
+            <include refid="policyTreeFilter"/>
+            <if test="keyword != null and keyword != ''">
+                and (d.dept_name like '%' + #{keyword} + '%' or s.scope_value like '%' + #{keyword} + '%')
+            </if>
+        </where>
+        group by p.subject_type, p.subject_value, p.policy_code, s.scope_value
+        order by p.subject_type, p.subject_value, p.policy_code, s.scope_value
+    </select>
+
+    <!-- 人员/岗位范围节点（批量，parentKey 指向场景） -->
+    <select id="selectScopeNodes" parameterType="com.ruoyi.bizperm.domain.bo.BizPermTreeQueryBo" resultMap="BizPermTreeNodeResult">
+        select
+            'SCOPE:' + cast(min(s.policy_id) as nvarchar(20)) + ':' + s.scope_type + ':' + s.scope_value as node_key,
+            'SCOPE' as node_type,
+            'SCENE:' + p.subject_type + ':' + p.subject_value + ':' + p.policy_code as parent_key,
+            case s.scope_type
+                when 'USER' then coalesce(max(u.nick_name), max(nullif(s.scope_name, '')), s.scope_value)
+                else coalesce(max(po.post_name), max(nullif(s.scope_name, '')), s.scope_value)
+            end + '（' + s.scope_value + '）' as label,
+            s.scope_value as code,
+            cast(1 as bit) as has_children,
+            cast(0 as bit) as leaf,
+            cast(case when max(case when p.status = '0' then 0 else 1 end) = 1 then 1 else 0 end as bit) as disabled
+        from sys_biz_perm_policy p
+        inner join sys_biz_perm_scope s on s.policy_id = p.id and s.scope_type in ('USER', 'POST')
+        left join sys_user u on s.scope_type = 'USER' and u.user_name = s.scope_value and u.del_flag = '0'
+        left join sys_post po on s.scope_type = 'POST' and cast(po.post_id as nvarchar(64)) = s.scope_value
+        <where>
+            <include refid="policyTreeFilter"/>
+            <if test="keyword != null and keyword != ''">
+                and (s.scope_value like '%' + #{keyword} + '%'
+                     or u.nick_name like '%' + #{keyword} + '%'
+                     or po.post_name like '%' + #{keyword} + '%')
+            </if>
+        </where>
+        group by p.subject_type, p.subject_value, p.policy_code, s.scope_type, s.scope_value
+        order by p.subject_type, p.subject_value, p.policy_code, s.scope_type, s.scope_value
+    </select>
+
+    <!-- 场景级可见人数（withCount=true 时一次批量统计） -->
+    <select id="selectSceneUserCounts" parameterType="com.ruoyi.bizperm.domain.bo.BizPermTreeQueryBo" resultMap="BizPermSceneCountResult">
+        select p.subject_type as subject_type,
+               p.subject_value as subject_value,
+               p.policy_code as policy_code,
+               count(distinct u.user_name) as user_count
+        from sys_biz_perm_policy p
+        inner join sys_biz_perm_scope s on s.policy_id = p.id
+        inner join sys_user u on u.status = '0' and u.del_flag = '0'
+        inner join sys_dept d on d.dept_id = u.dept_id
+        where 1 = 1
+        <include refid="policyTreeFilter"/>
+        <if test="keyword != null and keyword != ''">
+            and (p.policy_code like '%' + #{keyword} + '%' or p.policy_name like '%' + #{keyword} + '%')
+        </if>
+          and (
+            (s.scope_type = 'USER' and s.scope_value = u.user_name)
+            or (s.scope_type = 'POST' and exists (
+                select 1
+                from sys_user_post up2
+                inner join sys_post po2 on po2.post_id = up2.post_id and po2.status = '0'
+                where up2.user_id = u.user_id
+                  and up2.post_id = try_cast(s.scope_value as bigint)
+            ))
+            or (s.scope_type = 'DEPT' and (
+                u.dept_id = try_cast(s.scope_value as bigint)
+                or (ltrim(rtrim(s.include_child)) = '1'
+                    and charindex(',' + s.scope_value + ',', ',' + d.ancestors + ',') &gt; 0)
+            ))
+          )
+        group by p.subject_type, p.subject_value, p.policy_code
+    </select>
+
+    <!-- 懒加载：归属人的场景子节点 -->
+    <select id="selectSceneNodesByOwner" resultMap="BizPermTreeNodeResult">
+        select top 200
+            'SCENE:' + p.subject_type + ':' + p.subject_value + ':' + p.policy_code as node_key,
+            'SCENE' as node_type,
+            'OWNER:' + p.subject_type + ':' + p.subject_value as parent_key,
+            max(p.policy_name) + '（' + p.policy_code + '）' as label,
+            p.policy_code as code,
+            cast(1 as bit) as has_children,
+            cast(0 as bit) as leaf,
+            cast(case when max(case when p.status = '0' then 0 else 1 end) = 1 then 1 else 0 end as bit) as disabled
+        from sys_biz_perm_policy p
+        where p.subject_type = #{subjectType}
+          and p.subject_value = #{subjectValue}
+        group by p.subject_type, p.subject_value, p.policy_code
+        order by p.policy_code
+    </select>
+
+    <!-- 懒加载：场景下的部门子节点 -->
+    <select id="selectDeptNodesByOwnerScene" resultMap="BizPermTreeNodeResult">
+        select top 200
+            'DEPT:' + cast(min(s.policy_id) as nvarchar(20)) + ':' + s.scope_value as node_key,
+            'DEPT' as node_type,
+            'SCENE:' + p.subject_type + ':' + p.subject_value + ':' + p.policy_code as parent_key,
+            coalesce(max(d.dept_name), max(nullif(s.scope_name, '')), s.scope_value)
+                + case when ltrim(rtrim(max(s.include_child))) = '1' then '（含下级）' else '' end as label,
+            s.scope_value as code,
+            cast(1 as bit) as has_children,
+            cast(0 as bit) as leaf,
+            cast(case when max(case when p.status = '0' then 0 else 1 end) = 1 then 1 else 0 end as bit) as disabled
+        from sys_biz_perm_policy p
+        inner join sys_biz_perm_scope s on s.policy_id = p.id and s.scope_type = 'DEPT'
+        left join sys_dept d on cast(d.dept_id as nvarchar(64)) = s.scope_value
+        where p.subject_type = #{subjectType}
+          and p.subject_value = #{subjectValue}
+          and p.policy_code = #{policyCode}
+        group by p.subject_type, p.subject_value, p.policy_code, s.scope_value
+        order by s.scope_value
+    </select>
+
+    <!-- 懒加载：场景下的人员/岗位范围子节点 -->
+    <select id="selectScopeNodesByOwnerScene" resultMap="BizPermTreeNodeResult">
+        select top 200
+            'SCOPE:' + cast(min(s.policy_id) as nvarchar(20)) + ':' + s.scope_type + ':' + s.scope_value as node_key,
+            'SCOPE' as node_type,
+            'SCENE:' + p.subject_type + ':' + p.subject_value + ':' + p.policy_code as parent_key,
+            case s.scope_type
+                when 'USER' then coalesce(max(u.nick_name), max(nullif(s.scope_name, '')), s.scope_value)
+                else coalesce(max(po.post_name), max(nullif(s.scope_name, '')), s.scope_value)
+            end + '（' + s.scope_value + '）' as label,
+            s.scope_value as code,
+            cast(1 as bit) as has_children,
+            cast(0 as bit) as leaf,
+            cast(case when max(case when p.status = '0' then 0 else 1 end) = 1 then 1 else 0 end as bit) as disabled
+        from sys_biz_perm_policy p
+        inner join sys_biz_perm_scope s on s.policy_id = p.id and s.scope_type in ('USER', 'POST')
+        left join sys_user u on s.scope_type = 'USER' and u.user_name = s.scope_value and u.del_flag = '0'
+        left join sys_post po on s.scope_type = 'POST' and cast(po.post_id as nvarchar(64)) = s.scope_value
+        where p.subject_type = #{subjectType}
+          and p.subject_value = #{subjectValue}
+          and p.policy_code = #{policyCode}
+        group by p.subject_type, p.subject_value, p.policy_code, s.scope_type, s.scope_value
+        order by s.scope_type, s.scope_value
+    </select>
+
+    <!-- 懒加载：部门/范围下的员工（由 PageHelper 分页） -->
+    <select id="selectEmployeePage" resultMap="VisibleUserResult">
+        select distinct u.user_name as user_code,
+               u.nick_name as nick_name,
+               u.dept_id as dept_id,
+               d.dept_name as dept_name
+        from sys_user u
+        inner join sys_dept d on d.dept_id = u.dept_id
+        where u.status = '0'
+          and u.del_flag = '0'
+        <choose>
+            <when test="scopeType == 'DEPT'">
+                and exists (
+                    select 1
+                    from sys_biz_perm_scope s
+                    where s.policy_id = #{policyId}
+                      and s.scope_type = 'DEPT'
+                      and s.scope_value = #{scopeValue}
+                      and (u.dept_id = try_cast(s.scope_value as bigint)
+                           or (ltrim(rtrim(s.include_child)) = '1'
+                               and charindex(',' + s.scope_value + ',', ',' + d.ancestors + ',') &gt; 0))
+                )
+            </when>
+            <when test="scopeType == 'POST'">
+                and exists (
+                    select 1
+                    from sys_user_post up
+                    where up.user_id = u.user_id
+                      and up.post_id = try_cast(#{scopeValue} as bigint)
+                )
+            </when>
+            <otherwise>
+                and u.user_name = #{scopeValue}
+            </otherwise>
+        </choose>
+        <if test="keyword != null and keyword != ''">
+            and (u.user_name like '%' + #{keyword} + '%' or u.nick_name like '%' + #{keyword} + '%')
+        </if>
+        order by u.user_name
+    </select>
+
+    <select id="countActiveUserByCode" resultType="int">
+        select count(1) from sys_user
+        where user_name = #{userCode}
+          and status = '0'
+          and del_flag = '0'
+    </select>
+
+    <select id="countSceneDict" resultType="int">
+        select count(1) from sys_dict_data
+        where dict_type = 'biz_perm_policy'
+          and dict_value = #{policyCode}
+          and status = '0'
+    </select>
+
+    <insert id="insertPolicy" parameterType="com.ruoyi.bizperm.domain.SysBizPermPolicy" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_biz_perm_policy
+        (policy_code, policy_name, subject_type, subject_value, subject_name,
+         include_child, status, remark, create_by, create_time)
+        values
+        (#{policyCode}, #{policyName}, #{subjectType}, #{subjectValue}, #{subjectName},
+         #{includeChild}, #{status}, #{remark}, #{createBy}, getdate())
+    </insert>
+
+    <update id="updatePolicy" parameterType="com.ruoyi.bizperm.domain.SysBizPermPolicy">
+        update sys_biz_perm_policy
+        <set>
+            <if test="policyCode != null and policyCode != ''">policy_code = #{policyCode},</if>
+            <if test="policyName != null and policyName != ''">policy_name = #{policyName},</if>
+            <if test="subjectType != null and subjectType != ''">subject_type = #{subjectType},</if>
+            <if test="subjectValue != null and subjectValue != ''">subject_value = #{subjectValue},</if>
+            <if test="subjectName != null">subject_name = #{subjectName},</if>
+            <if test="includeChild != null and includeChild != ''">include_child = #{includeChild},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = getdate()
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="deletePolicyByIds">
+        delete from sys_biz_perm_policy
+        where id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteScopesByPolicyIds">
+        delete from sys_biz_perm_scope
+        where policy_id in
+        <foreach collection="policyIds" item="policyId" open="(" separator="," close=")">
+            #{policyId}
+        </foreach>
+    </delete>
+
+    <insert id="insertScopes">
+        insert into sys_biz_perm_scope
+        (policy_id, scope_type, scope_value, scope_name, include_child, order_num, create_by, create_time)
+        values
+        <foreach collection="scopes" item="scope" separator=",">
+            (#{scope.policyId}, #{scope.scopeType}, #{scope.scopeValue}, #{scope.scopeName},
+             #{scope.includeChild}, #{scope.orderNum}, #{scope.createBy}, getdate())
+        </foreach>
+    </insert>
+
+    <select id="selectPolicyCodesByIds" resultType="java.lang.String">
+        select distinct policy_code from sys_biz_perm_policy
+        where id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="countActivePolicy" parameterType="com.ruoyi.bizperm.domain.SysBizPermPolicy" resultType="int">
+        select count(1) from sys_biz_perm_policy
+        where policy_code = #{policyCode}
+          and subject_type = #{subjectType}
+          and subject_value = #{subjectValue}
+          and status = '0'
+        <if test="id != null">
+            and id != #{id}
+        </if>
+    </select>
+
+</mapper>
