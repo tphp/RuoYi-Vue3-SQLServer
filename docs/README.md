@@ -11,6 +11,19 @@
 | `03-optimization/`  | 优化改造文档 | [README](03-optimization/README.md) |
 | `04-bugfix/`        | Bug / BadCase 记录 | [README](04-bugfix/README.md) |
 
+## 在线查阅（文档中心）
+
+服务启动后，浏览器访问以下地址即可在线浏览本目录文档（含 `docs/`、`.trae/rules/`、`.trae/skills/`），无需登录：
+
+```
+http://localhost:8080/docs/index.html
+```
+
+- 左侧为文档树（项目文档 / 项目规则 / AI 技能），支持按名称搜索。
+- 右侧 iframe 内联渲染 Markdown。
+- 后端接口：`/docs/api/tree`（文档树）、`/docs/api/content?path=...`（读取内容）。
+- 若运行时探测不到项目根目录，可在 `application.yml` 配置 `ruoyi.docPath: D:/ebs-api` 覆盖。
+
 ## 已归档文档
 
 | 分类 | 文档 |

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>技术文档中心</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif; height: 100vh; overflow: hidden; }
+
+        .layout { display: flex; height: 100vh; }
+
+        /* 左侧导航 */
+        .sidebar { width: 320px; min-width: 320px; border-right: 1px solid #e0e0e0; display: flex; flex-direction: column; background: #fafafa; }
+        .sidebar-header { padding: 12px 16px; border-bottom: 1px solid #e0e0e0; }
+        .sidebar-header h1 { font-size: 16px; color: #333; margin-bottom: 10px; }
+        .search-box { position: relative; }
+        .search-box input { width: 100%; padding: 8px 12px; border: 1px solid #dcdfe6; border-radius: 4px; font-size: 13px; outline: none; }
+        .search-box input:focus { border-color: #409eff; }
+
+        .tree { flex: 1; overflow-y: auto; padding: 8px 0; }
+        .tree ul { list-style: none; }
+        .tree li { position: relative; }
+
+        .node { display: flex; align-items: center; padding: 6px 16px; cursor: pointer; font-size: 13px; color: #333; user-select: none; text-decoration: none; }
+        .node:hover { background: #f0f5ff; }
+        .node.active { background: #e6f2ff; color: #409eff; }
+        .node .arrow { width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; margin-right: 4px; transition: transform 0.2s; flex-shrink: 0; }
+        .node .arrow.open { transform: rotate(90deg); }
+        .node .icon { margin-right: 6px; flex-shrink: 0; }
+        .node .label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        .children { display: none; }
+        .children.expanded { display: block; }
+
+        .empty { padding: 20px; text-align: center; color: #999; font-size: 13px; }
+
+        /* 右侧内容 */
+        .content { flex: 1; display: flex; flex-direction: column; background: #fff; }
+        .content iframe { flex: 1; border: none; width: 100%; }
+
+        .welcome { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; color: #999; }
+        .welcome .big { font-size: 48px; margin-bottom: 12px; }
+        .welcome p { font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h1>技术文档中心</h1>
+                <div class="search-box">
+                    <input id="searchInput" type="text" placeholder="搜索文档名称..." />
+                </div>
+            </div>
+            <div class="tree" id="tree">
+                <div class="empty">加载中...</div>
+            </div>
+        </div>
+        <div class="content">
+            <div class="welcome" id="welcome">
+                <div class="big">📖</div>
+                <p>请从左侧选择文档查看</p>
+            </div>
+            <iframe id="viewer" style="display:none;"></iframe>
+        </div>
+    </div>
+
+    <script>
+        // 全局树数据缓存，用于搜索
+        var treeData = [];
+
+        // 加载文档树
+        function loadTree() {
+            fetch('/docs/api/tree')
+                .then(function(res) { return res.json(); })
+                .then(function(json) {
+                    if (json && json.code === 200) {
+                        treeData = json.data || [];
+                        renderTree(treeData);
+                    } else {
+                        renderEmpty('加载失败：' + (json && json.msg ? json.msg : '未知错误'));
+                    }
+                })
+                .catch(function(err) {
+                    renderEmpty('加载失败：' + err.message);
+                });
+        }
+
+        // 渲染树
+        function renderTree(nodes) {
+            var container = document.getElementById('tree');
+            if (!nodes || nodes.length === 0) {
+                renderEmpty('暂无文档');
+                return;
+            }
+            var ul = document.createElement('ul');
+            nodes.forEach(function(node) { ul.appendChild(buildNode(node)); });
+            container.innerHTML = '';
+            container.appendChild(ul);
+        }
+
+        // 构建节点
+        function buildNode(node) {
+            var li = document.createElement('li');
+
+            var nodeEl = document.createElement('div');
+            nodeEl.className = 'node';
+            nodeEl.setAttribute('data-path', node.path || '');
+            nodeEl.setAttribute('data-type', node.type || '');
+
+            var arrow = document.createElement('span');
+            arrow.className = 'arrow';
+            arrow.innerHTML = '▶';
+
+            var icon = document.createElement('span');
+            icon.className = 'icon';
+
+            var label = document.createElement('span');
+            label.className = 'label';
+            label.textContent = node.name || '';
+            label.setAttribute('title', node.name || '');
+
+            if (node.type === 'dir') {
+                icon.textContent = '📁';
+                nodeEl.appendChild(arrow);
+                nodeEl.appendChild(icon);
+                nodeEl.appendChild(label);
+            } else {
+                arrow.style.visibility = 'hidden';
+                icon.textContent = '📄';
+                nodeEl.appendChild(arrow);
+                nodeEl.appendChild(icon);
+                nodeEl.appendChild(label);
+            }
+
+            nodeEl.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (node.type === 'dir') {
+                    toggleChildren(nodeEl, li);
+                } else {
+                    openDoc(node.path, nodeEl);
+                }
+            });
+
+            li.appendChild(nodeEl);
+
+            if (node.children && node.children.length > 0) {
+                var childrenUl = document.createElement('ul');
+                childrenUl.className = 'children';
+                node.children.forEach(function(child) {
+                    childrenUl.appendChild(buildNode(child));
+                });
+                li.appendChild(childrenUl);
+            }
+
+            return li;
+        }
+
+        // 展开/收起目录
+        function toggleChildren(nodeEl, li) {
+            var arrow = nodeEl.querySelector('.arrow');
+            var children = li.querySelector('.children');
+            if (!children) return;
+            var isOpen = children.classList.contains('expanded');
+            if (isOpen) {
+                children.classList.remove('expanded');
+                arrow.classList.remove('open');
+            } else {
+                children.classList.add('expanded');
+                arrow.classList.add('open');
+            }
+        }
+
+        // 打开文档
+        function openDoc(path, nodeEl) {
+            // 高亮当前项
+            var actives = document.querySelectorAll('.node.active');
+            actives.forEach(function(a) { a.classList.remove('active'); });
+            if (nodeEl) nodeEl.classList.add('active');
+
+            var viewer = document.getElementById('viewer');
+            var welcome = document.getElementById('welcome');
+            viewer.src = '/docs/view.html?path=' + encodeURIComponent(path);
+            viewer.style.display = 'block';
+            welcome.style.display = 'none';
+        }
+
+        // 搜索过滤
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            var keyword = e.target.value.trim().toLowerCase();
+            if (!keyword) {
+                renderTree(treeData);
+                return;
+            }
+            // 根据关键字过滤树，保留匹配的节点及其父节点
+            var filtered = filterTree(treeData, keyword);
+            renderTree(filtered);
+            // 搜索时默认展开全部匹配结果的父级
+            expandAll();
+        });
+
+        // 递归过滤树
+        function filterTree(nodes, keyword) {
+            var result = [];
+            nodes.forEach(function(node) {
+                var nameMatch = (node.name || '').toLowerCase().indexOf(keyword) !== -1;
+                if (node.type === 'dir') {
+                    var filteredChildren = node.children ? filterTree(node.children, keyword) : [];
+                    if (nameMatch || filteredChildren.length > 0) {
+                        var clone = shallowClone(node);
+                        clone.children = nameMatch ? (node.children || []) : filteredChildren;
+                        result.push(clone);
+                    }
+                } else if (nameMatch) {
+                    result.push(shallowClone(node));
+                }
+            });
+            return result;
+        }
+
+        function shallowClone(node) {
+            return { name: node.name, path: node.path, type: node.type, children: node.children ? [] : null };
+        }
+
+        // 搜索时展开所有目录
+        function expandAll() {
+            document.querySelectorAll('.children').forEach(function(c) {
+                c.classList.add('expanded');
+            });
+            document.querySelectorAll('.arrow').forEach(function(a) {
+                a.classList.add('open');
+            });
+        }
+
+        function renderEmpty(msg) {
+            var container = document.getElementById('tree');
+            container.innerHTML = '<div class="empty">' + msg + '</div>';
+        }
+
+        // 初始化
+        loadTree();
+    </script>
+</body>
+</html>
