@@ -65,6 +65,17 @@ public class SysUserController extends BaseController
         return getDataTable(list);
     }
 
+    /**
+     * 获取当前组织架构下的用户列表
+     */
+    @GetMapping("/listTop")
+    public TableDataInfo listTop(SysUser user)
+    {
+        startPage();
+        List<SysUser> list = userService.selectUserListTop(user);
+        return getDataTable(list);
+    }
+
     @Log(title = "用户管理", businessType = BusinessType.EXPORT)
     @PreAuthorize("@ss.hasPermi('system:user:export')")
     @PostMapping("/export")
@@ -252,5 +263,14 @@ public class SysUserController extends BaseController
     public AjaxResult deptTree(SysDept dept)
     {
         return success(deptService.selectDeptTreeList(dept));
+    }
+
+    /**
+     * 获取所有部门树列表
+     */
+    @GetMapping("/deptTreeAll")
+    public AjaxResult deptTreeAll(SysDept dept)
+    {
+        return success(deptService.selectDeptTreeListAll(dept));
     }
 }

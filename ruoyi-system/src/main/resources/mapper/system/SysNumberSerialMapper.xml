@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysNumberSerialMapper">
+    
+    <resultMap type="SysNumberSerial" id="SysNumberSerialResult">
+        <id     property="serialId"      column="serial_id"     />
+        <result property="ruleId"        column="rule_id"       />
+        <result property="cycleKey"      column="cycle_key"     />
+        <result property="currentValue"  column="current_value" />
+        <result property="createTime"    column="create_time"   />
+        <result property="updateTime"    column="update_time"   />
+    </resultMap>
+    
+    <sql id="selectSerialVo">
+        select serial_id, rule_id, cycle_key, current_value, create_time, update_time
+        from sys_number_serial
+    </sql>
+    
+    <select id="selectByRuleIdAndCycleKeyWithLock" resultMap="SysNumberSerialResult">
+        select serial_id, rule_id, cycle_key, current_value, create_time, update_time
+        from sys_number_serial with (updlock, holdlock)
+        where rule_id = #{ruleId} and cycle_key = #{cycleKey}
+    </select>
+    
+    <insert id="insertSerial" parameterType="SysNumberSerial" useGeneratedKeys="true" keyProperty="serialId">
+        insert into sys_number_serial (
+            rule_id, cycle_key, current_value, create_time, update_time
+        ) values (
+            #{ruleId}, #{cycleKey}, #{currentValue}, getdate(), getdate()
+        )
+    </insert>
+    
+    <update id="updateSerial" parameterType="SysNumberSerial">
+        update sys_number_serial
+        <set>
+            current_value = #{currentValue},
+            update_time = getdate()
+        </set>
+        where serial_id = #{serialId}
+    </update>
+    
+</mapper>

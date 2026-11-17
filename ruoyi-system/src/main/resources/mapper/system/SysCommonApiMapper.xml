@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysCommonApiMapper">
+
+    <resultMap type="SysCommonApi" id="SysCommonApiResult">
+        <id     property="id"            column="id"             />
+        <result property="apiName"       column="api_name"       />
+        <result property="apiKey"        column="api_key"        />
+        <result property="apiUrl"        column="api_url"        />
+        <result property="cookie"        column="cookie"         />
+        <result property="description"   column="description"    />
+        <result property="remark"        column="remark"         />
+        <result property="createBy"      column="create_by"      />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"      column="update_by"      />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectCommonApiVo">
+        select id, api_name, api_key, api_url, cookie, description, remark, create_by, create_time, update_by, update_time
+        from sys_common_api
+    </sql>
+
+    <select id="selectCommonApiList" parameterType="SysCommonApi" resultMap="SysCommonApiResult">
+        <include refid="selectCommonApiVo"/>
+        <where>
+            <if test="apiName != null and apiName != ''">AND api_name like '%' + #{apiName} + '%'</if>
+            <if test="apiKey != null and apiKey != ''">AND (api_key like '%' + #{apiKey} + '%' or api_name like '%' + #{apiKey} + '%')</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectCommonApiById" parameterType="Long" resultMap="SysCommonApiResult">
+        <include refid="selectCommonApiVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectCommonApiByKey" parameterType="String" resultMap="SysCommonApiResult">
+        <include refid="selectCommonApiVo"/>
+        where api_key = #{apiKey}
+    </select>
+
+    <insert id="insertCommonApi" parameterType="SysCommonApi" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_common_api (
+            <if test="apiName != null and apiName != ''">api_name,</if>
+            <if test="apiKey != null and apiKey != ''">api_key,</if>
+            <if test="apiUrl != null and apiUrl != ''">api_url,</if>
+            <if test="cookie != null and cookie != ''">cookie,</if>
+            <if test="description != null and description != ''">description,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            <if test="remark != null and remark != ''">remark,</if>
+            create_time
+        ) values (
+            <if test="apiName != null and apiName != ''">#{apiName},</if>
+            <if test="apiKey != null and apiKey != ''">#{apiKey},</if>
+            <if test="apiUrl != null and apiUrl != ''">#{apiUrl},</if>
+            <if test="cookie != null and cookie != ''">#{cookie},</if>
+            <if test="description != null and description != ''">#{description},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            <if test="remark != null and remark != ''">#{remark},</if>
+            getdate()
+        )
+    </insert>
+
+    <update id="updateCommonApi" parameterType="SysCommonApi">
+        update sys_common_api
+        <set>
+            <if test="apiName != null and apiName != ''">api_name = #{apiName},</if>
+            <if test="apiKey != null and apiKey != ''">api_key = #{apiKey},</if>
+            <if test="apiUrl != null and apiUrl != ''">api_url = #{apiUrl},</if>
+            <if test="cookie != null">cookie = #{cookie},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = getdate()
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteCommonApiById" parameterType="Long">
+        delete from sys_common_api where id = #{id}
+    </delete>
+
+    <delete id="deleteCommonApiByIds" parameterType="Long">
+        delete from sys_common_api where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

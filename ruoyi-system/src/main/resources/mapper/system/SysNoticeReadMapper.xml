@@ -13,8 +13,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <!-- 新增已读记录 -->
     <insert id="insertNoticeRead" parameterType="SysNoticeRead">
-        insert ignore into sys_notice_read (notice_id, user_id, read_time)
-        values (#{noticeId}, #{userId}, sysdate())
+        insert into sys_notice_read (notice_id, user_id, read_time)
+        values (#{noticeId}, #{userId}, getdate())
     </insert>
 
     <!-- 查询未读数量：正常状态公告 减去 当前用户已读数 -->
@@ -37,21 +37,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             n.status,
             n.create_by    as createBy,
             n.create_time  as createTime,
-            case when r.notice_id is not null then true else false end as isRead
+            case when r.notice_id is not null then 1 else 0 end as isRead
         from sys_notice n
         left join sys_notice_read r
             on r.notice_id = n.notice_id and r.user_id = #{userId}
         where n.status = '0'
         order by n.notice_id desc
-        limit #{limit}
+        OFFSET 0 ROWS FETCH NEXT #{limit} ROWS ONLY
     </select>
 
     <!-- 批量标记已读 -->
     <insert id="insertNoticeReadBatch">
-        insert ignore into sys_notice_read (notice_id, user_id, read_time)
+        insert into sys_notice_read (notice_id, user_id, read_time)
         values
         <foreach collection="noticeIds" item="noticeId" separator=",">
-            (#{noticeId}, #{userId}, sysdate())
+            (#{noticeId}, #{userId}, getdate())
         </foreach>
     </insert>
 

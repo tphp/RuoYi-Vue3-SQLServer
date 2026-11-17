@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysUserRecentlyMapper">
+    
+    <resultMap type="SysUserRecently" id="SysUserRecentlyResult">
+        <result property="userId"    column="user_id"    />
+        <result property="selectId"    column="select_id"    />
+        <result property="type"    column="type"    />
+        <result property="time"    column="time"    />
+    </resultMap>
+
+    <select id="selectSysUserRecentlyList" parameterType="SysUserRecently" resultMap="SysUserRecentlyResult">
+        select user_id, select_id, type, time from sys_user_recently
+        <where>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="type != null "> and type = #{type}</if>
+        </where>
+        order by time desc
+    </select>
+
+    <insert id="updateSysUserRecently" parameterType="ArrayList">
+        DELETE FROM sys_user_recently
+        WHERE user_id = #{userId} AND select_id in
+        <foreach item="selectId" collection="userIds" open="(" separator="," close=")">
+            #{selectId}
+        </foreach>
+        AND type = #{type};
+        insert into sys_user_recently (user_id, select_id, type, time)
+        values
+        <foreach collection="userIds" item="selectId" separator=",">
+            (#{userId}, #{selectId}, #{type}, getdate())
+        </foreach>
+    </insert>
+
+    <delete id="clearSysUserRecently" parameterType="String">
+        delete from sys_user_recently
+        <where>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="type != null "> and type = #{type}</if>
+        </where>
+    </delete>
+</mapper>

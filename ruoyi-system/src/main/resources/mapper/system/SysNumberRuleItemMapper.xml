@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysNumberRuleItemMapper">
+    
+    <resultMap type="SysNumberRuleItem" id="SysNumberRuleItemResult">
+        <id     property="itemId"        column="item_id"       />
+        <result property="ruleId"        column="rule_id"       />
+        <result property="itemType"      column="item_type"     />
+        <result property="itemValue"     column="item_value"    />
+        <result property="dateFormat"    column="date_format"   />
+        <result property="cycleType"     column="cycle_type"    />
+        <result property="serialLength"  column="serial_length" />
+        <result property="isPadZero"     column="is_pad_zero"   />
+        <result property="startNumber"   column="start_number"  />
+        <result property="sortOrder"     column="sort_order"    />
+        <result property="createBy"      column="create_by"     />
+        <result property="createTime"    column="create_time"   />
+        <result property="updateBy"      column="update_by"     />
+        <result property="updateTime"    column="update_time"   />
+    </resultMap>
+    
+    <sql id="selectRuleItemVo">
+        select item_id, rule_id, item_type, item_value, date_format, cycle_type, serial_length, is_pad_zero, start_number, sort_order, create_by, create_time, update_by, update_time
+        from sys_number_rule_item
+    </sql>
+    
+    <select id="selectRuleItemsByRuleId" parameterType="Long" resultMap="SysNumberRuleItemResult">
+        <include refid="selectRuleItemVo"/>
+        where rule_id = #{ruleId}
+        order by sort_order asc
+    </select>
+    
+    <insert id="insertRuleItem" parameterType="SysNumberRuleItem" useGeneratedKeys="true" keyProperty="itemId">
+        insert into sys_number_rule_item (
+            <if test="ruleId != null">rule_id,</if>
+            <if test="itemType != null and itemType != ''">item_type,</if>
+            <if test="itemValue != null">item_value,</if>
+            <if test="dateFormat != null">date_format,</if>
+            <if test="cycleType != null and cycleType != ''">cycle_type,</if>
+            <if test="serialLength != null">serial_length,</if>
+            <if test="isPadZero != null and isPadZero != ''">is_pad_zero,</if>
+            <if test="startNumber != null">start_number,</if>
+            <if test="sortOrder != null">sort_order,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            create_time
+        ) values (
+            <if test="ruleId != null">#{ruleId},</if>
+            <if test="itemType != null and itemType != ''">#{itemType},</if>
+            <if test="itemValue != null">#{itemValue},</if>
+            <if test="dateFormat != null">#{dateFormat},</if>
+            <if test="cycleType != null and cycleType != ''">#{cycleType},</if>
+            <if test="serialLength != null">#{serialLength},</if>
+            <if test="isPadZero != null and isPadZero != ''">#{isPadZero},</if>
+            <if test="startNumber != null">#{startNumber},</if>
+            <if test="sortOrder != null">#{sortOrder},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            getdate()
+        )
+    </insert>
+    
+    <insert id="batchInsertRuleItems" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="itemId">
+        insert into sys_number_rule_item (
+            rule_id, item_type, item_value, date_format, cycle_type, serial_length, is_pad_zero, start_number, sort_order, create_by, create_time
+        ) values 
+        <foreach collection="list" item="item" separator=",">
+            (
+                #{item.ruleId}, #{item.itemType}, #{item.itemValue}, #{item.dateFormat}, #{item.cycleType},
+                #{item.serialLength}, #{item.isPadZero}, #{item.startNumber}, #{item.sortOrder},
+                #{item.createBy}, getdate()
+            )
+        </foreach>
+    </insert>
+    
+    <delete id="deleteRuleItemsByRuleId" parameterType="Long">
+        delete from sys_number_rule_item where rule_id = #{ruleId}
+    </delete>
+    
+    <delete id="deleteRuleItemsByRuleIds" parameterType="Long">
+        delete from sys_number_rule_item where rule_id in 
+        <foreach item="ruleId" collection="array" open="(" separator="," close=")">
+            #{ruleId}
+        </foreach>
+    </delete>
+    
+</mapper>

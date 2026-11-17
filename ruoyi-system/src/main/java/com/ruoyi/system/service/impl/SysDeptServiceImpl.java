@@ -49,6 +49,19 @@ public class SysDeptServiceImpl implements ISysDeptService
     }
 
     /**
+     * 查询所有部门管理数据
+     *
+     * @param dept 部门信息
+     * @return 部门信息集合
+     */
+    @Override
+    @DataScope(deptAlias = "d")
+    public List<SysDept> selectDeptListAll(SysDept dept)
+    {
+        return deptMapper.selectDeptListAll(dept);
+    }
+
+    /**
      * 查询部门树结构信息
      * 
      * @param dept 部门信息
@@ -58,6 +71,19 @@ public class SysDeptServiceImpl implements ISysDeptService
     public List<TreeSelect> selectDeptTreeList(SysDept dept)
     {
         List<SysDept> depts = SpringUtils.getAopProxy(this).selectDeptList(dept);
+        return buildDeptTreeSelect(depts);
+    }
+
+    /**
+     * 查询所有部门树结构信息
+     *
+     * @param dept 部门信息
+     * @return 部门树信息集合
+     */
+    @Override
+    public List<TreeSelect> selectDeptTreeListAll(SysDept dept)
+    {
+        List<SysDept> depts = SpringUtils.getAopProxy(this).selectDeptListAll(dept);
         return buildDeptTreeSelect(depts);
     }
 

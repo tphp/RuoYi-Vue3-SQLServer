@@ -26,6 +26,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select d.dept_id, d.parent_id, d.ancestors, d.dept_name, d.order_num, d.leader, d.phone, d.email, d.status, d.del_flag, d.create_by, d.create_time 
         from sys_dept d
     </sql>
+
+	<sql id="selectDeptVoTop1">
+		select top 1 d.dept_id, d.parent_id, d.ancestors, d.dept_name, d.order_num, d.leader, d.phone, d.email, d.status, d.del_flag, d.create_by, d.create_time
+		from sys_dept d
+	</sql>
     
 	<select id="selectDeptList" parameterType="SysDept" resultMap="SysDeptResult">
         <include refid="selectDeptVo"/>
@@ -46,6 +51,24 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		${params.dataScope}
 		order by d.parent_id, d.order_num
     </select>
+
+	<select id="selectDeptListAll" parameterType="SysDept" resultMap="SysDeptResult">
+		<include refid="selectDeptVo"/>
+		where d.del_flag = '0'
+		<if test="deptId != null and deptId != 0">
+			AND dept_id = #{deptId}
+		</if>
+		<if test="parentId != null and parentId != 0">
+			AND parent_id = #{parentId}
+		</if>
+		<if test="deptName != null and deptName != ''">
+			AND dept_name like concat('%', #{deptName}, '%')
+		</if>
+		<if test="status != null and status != ''">
+			AND status = #{status}
+		</if>
+		order by d.parent_id, d.order_num
+	</select>
     
     <select id="selectDeptListByRoleId" resultType="Long">
 		select d.dept_id
@@ -70,21 +93,26 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 	
 	<select id="hasChildByDeptId" parameterType="Long" resultType="int">
-		select count(1) from sys_dept
-		where del_flag = '0' and parent_id = #{deptId} limit 1
+		select top 1 count(1)from sys_dept
+		where del_flag = '0' and parent_id = #{deptId}
 	</select>
 	
 	<select id="selectChildrenDeptById" parameterType="Long" resultMap="SysDeptResult">
-		select * from sys_dept where find_in_set(#{deptId}, ancestors)
+		select * from sys_dept
+		where
+			CHARINDEX(',' + CAST(#{deptId} AS VARCHAR(50)) + ',', ',' + ancestors + ',') > 0
 	</select>
 	
 	<select id="selectNormalChildrenDeptById" parameterType="Long" resultType="int">
-		select count(*) from sys_dept where status = 0 and del_flag = '0' and find_in_set(#{deptId}, ancestors)
+		select count(*) from sys_dept
+		where
+			status = 0 and del_flag = '0' and
+			CHARINDEX(',' + CAST(#{deptId} AS VARCHAR(50)) + ',', ',' + ancestors + ',') > 0
 	</select>
 	
 	<select id="checkDeptNameUnique" resultMap="SysDeptResult">
-	    <include refid="selectDeptVo"/>
-		where dept_name=#{deptName} and parent_id = #{parentId} and del_flag = '0' limit 1
+	    <include refid="selectDeptVoTop1"/>
+		where dept_name=#{deptName} and parent_id = #{parentId} and del_flag = '0'
 	</select>
     
     <insert id="insertDept" parameterType="SysDept">
@@ -111,7 +139,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  			<if test="email != null and email != ''">#{email},</if>
  			<if test="status != null">#{status},</if>
  			<if test="createBy != null and createBy != ''">#{createBy},</if>
- 			sysdate()
+ 			getdate()
  		)
 	</insert>
 	
@@ -127,7 +155,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  			<if test="email != null">email = #{email},</if>
  			<if test="status != null and status != ''">status = #{status},</if>
  			<if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
- 			update_time = sysdate()
+ 			update_time = getdate()
  		</set>
  		where dept_id = #{deptId}
 	</update>
@@ -155,7 +183,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<update id="updateDeptSort" parameterType="SysDept">
 		update sys_dept set order_num = #{orderNum} where dept_id = #{deptId}
 	</update>
-	
+
 	<delete id="deleteDeptById" parameterType="Long">
 		update sys_dept set del_flag = '2' where dept_id = #{deptId}
 	</delete>

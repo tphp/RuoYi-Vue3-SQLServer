@@ -20,6 +20,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select config_id, config_name, config_key, config_value, config_type, create_by, create_time, update_by, update_time, remark 
 		from sys_config
     </sql>
+
+    <sql id="selectConfigVoTop1">
+        select top 1 config_id, config_name, config_key, config_value, config_type, create_by, create_time, update_by, update_time, remark
+        from sys_config
+    </sql>
     
     <!-- 查询条件 -->
 	<sql id="sqlwhereSearch">
@@ -65,8 +70,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 	
     <select id="checkConfigKeyUnique" parameterType="String" resultMap="SysConfigResult">
-        <include refid="selectConfigVo"/>
-        where config_key = #{configKey} limit 1
+        <include refid="selectConfigVoTop1"/>
+        where config_key = #{configKey}
     </select>
     
     <insert id="insertConfig" parameterType="SysConfig">
@@ -85,7 +90,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="configType != null and configType != ''">#{configType},</if>
 			<if test="createBy != null and createBy != ''">#{createBy},</if>
 			<if test="remark != null and remark != ''">#{remark},</if>
- 			sysdate()
+ 			getdate()
 		)
     </insert>
 	 
@@ -98,7 +103,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="configType != null and configType != ''">config_type = #{configType},</if>
             <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
             <if test="remark != null">remark = #{remark},</if>
- 			update_time = sysdate()
+ 			update_time = getdate()
         </set>
         where config_id = #{configId}
     </update>

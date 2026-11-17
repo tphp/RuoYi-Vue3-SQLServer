@@ -1,9 +1,10 @@
 package com.ruoyi.common.xss;
 
 import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.common.utils.html.EscapeUtil;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 自定义xss校验注解实现
@@ -12,6 +13,8 @@ import jakarta.validation.ConstraintValidatorContext;
  */
 public class XssValidator implements ConstraintValidator<Xss, String>
 {
+    private static final String HTML_PATTERN = "<(\\S*?)[^>]*>.*?|<.*? />";
+
     @Override
     public boolean isValid(String value, ConstraintValidatorContext constraintValidatorContext)
     {
@@ -24,8 +27,13 @@ public class XssValidator implements ConstraintValidator<Xss, String>
 
     public static boolean containsHtml(String value)
     {
-        // 如果清洗后和原文不一致，说明包含危险内容
-        String cleaned = EscapeUtil.clean(value);
-        return !cleaned.equals(value);
+        StringBuilder sHtml = new StringBuilder();
+        Pattern pattern = Pattern.compile(HTML_PATTERN);
+        Matcher matcher = pattern.matcher(value);
+        while (matcher.find())
+        {
+            sHtml.append(matcher.group());
+        }
+        return pattern.matcher(sHtml).matches();
     }
 }

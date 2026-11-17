@@ -127,13 +127,13 @@ public class LoginUser implements UserDetails
     @Override
     public String getPassword()
     {
-        return user.getPassword();
+        return user == null ? null : user.getPassword();
     }
 
     @Override
     public String getUsername()
     {
-        return user.getUserName();
+        return user == null ? null : user.getUserName();
     }
 
     /**
