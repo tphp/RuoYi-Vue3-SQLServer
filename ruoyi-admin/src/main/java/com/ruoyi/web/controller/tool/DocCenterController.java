@@ -1,5 +1,6 @@
 package com.ruoyi.web.controller.tool;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,7 +11,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -24,7 +27,7 @@ import com.ruoyi.common.annotation.Anonymous;
 import com.ruoyi.common.core.domain.R;
 
 /**
- * 技术文档中心 Controller
+ * 文档中心 Controller
  * <p>
  * 服务启动后访问 {@code http://localhost:8080/docs/index.html} 即可在线查阅项目文档，
  * 覆盖 docs/（四类文档）、.trae/rules/（项目规则）、.trae/skills/（AI 技能）。
@@ -58,6 +61,23 @@ public class DocCenterController
             new DocRoot(".trae/rules", "项目规则"),
             new DocRoot(".trae/skills", "AI 技能")
     );
+
+    /**
+     * 分类目录显示名映射：目录名 → 导航展示名（如 01-requirements 显示为「01-需求」）
+     */
+    private static final Map<String, String> DIR_DISPLAY_NAMES = new HashMap<>();
+    static
+    {
+        DIR_DISPLAY_NAMES.put("01-requirements", "01-需求");
+        DIR_DISPLAY_NAMES.put("02-development", "02-开发");
+        DIR_DISPLAY_NAMES.put("03-optimization", "03-优化");
+        DIR_DISPLAY_NAMES.put("04-bugfix", "04-bug修复");
+    }
+
+    /**
+     * 「中文名称」元信息行前缀（文档首部引用块中标注的中文名）
+     */
+    private static final String CN_NAME_PREFIX = "中文名称：";
 
     /**
      * 返回文档中心首页（导航树 + 搜索）
@@ -201,7 +221,9 @@ public class DocCenterController
                 String childPath = relativePath + "/" + f.getName();
                 if (f.isDirectory())
                 {
-                    DocNode child = buildNode(f, childPath, f.getName());
+                    // 分类目录按映射显示中文名（如 01-requirements → 01-需求），未映射的保持原名
+                    String dirName = DIR_DISPLAY_NAMES.getOrDefault(f.getName(), f.getName());
+                    DocNode child = buildNode(f, childPath, dirName);
                     if (child != null)
                     {
                         children.add(child);
@@ -210,7 +232,8 @@ public class DocCenterController
                 else if (isMarkdown(f))
                 {
                     DocNode child = new DocNode();
-                    child.setName(stripExtension(f.getName()));
+                    // 文档项优先显示首部「中文名称」元信息，未标注时回退文件名（不含扩展名）
+                    child.setName(resolveDisplayName(f, stripExtension(f.getName())));
                     child.setPath(childPath);
                     child.setType("file");
                     children.add(child);
@@ -219,6 +242,42 @@ public class DocCenterController
         }
         node.setChildren(children);
         return node;
+    }
+
+    /**
+     * 提取 Markdown 文档首部的「中文名称：xxx」元信息行，作为导航显示名
+     *
+     * @param file         Markdown 文件对象
+     * @param fallbackName 未找到中文名称时的回退显示名
+     * @return 中文名称；未标注或读取失败时返回 fallbackName
+     */
+    private String resolveDisplayName(File file, String fallbackName)
+    {
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8))
+        {
+            String line;
+            int readLines = 0;
+            // 中文名称位于文档首部（H1 标题下方），仅扫描前 10 行，避免大文件全量读取
+            while ((line = reader.readLine()) != null && readLines < 10)
+            {
+                readLines++;
+                String trimmed = line.trim();
+                int idx = trimmed.indexOf(CN_NAME_PREFIX);
+                if (idx >= 0)
+                {
+                    String cnName = trimmed.substring(idx + CN_NAME_PREFIX.length()).trim();
+                    if (!cnName.isEmpty())
+                    {
+                        return cnName;
+                    }
+                }
+            }
+        }
+        catch (IOException e)
+        {
+            // 读取失败时静默回退到文件名，不影响文档树返回
+        }
+        return fallbackName;
     }
 
     /**

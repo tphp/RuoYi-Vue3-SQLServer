@@ -3,32 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>技术文档中心</title>
+    <title>文档中心</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif; height: 100vh; overflow: hidden; }
 
         .layout { display: flex; height: 100vh; }
 
-        /* 左侧导航 */
-        .sidebar { width: 320px; min-width: 320px; border-right: 1px solid #e0e0e0; display: flex; flex-direction: column; background: #fafafa; }
-        .sidebar-header { padding: 12px 16px; border-bottom: 1px solid #e0e0e0; }
-        .sidebar-header h1 { font-size: 16px; color: #333; margin-bottom: 10px; }
-        .search-box { position: relative; }
-        .search-box input { width: 100%; padding: 8px 12px; border: 1px solid #dcdfe6; border-radius: 4px; font-size: 13px; outline: none; }
-        .search-box input:focus { border-color: #409eff; }
+        /* 左侧导航（参考 doc/index.jsp 样式） */
+        .sidebar { width: 300px; min-width: 300px; border-right: 1px solid #e0e0e0; display: flex; flex-direction: column; background: #fff; }
+        .sidebar-header { padding: 14px 16px; border-bottom: 2px solid #1890ff; }
+        .sidebar-header h1 { font-size: 18px; color: #1890ff; }
+        .search-box { padding: 12px 12px 4px; position: relative; }
+        .search-box input { width: 100%; padding: 8px 12px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; outline: none; transition: border-color 0.2s; }
+        .search-box input:focus { border-color: #1890ff; }
 
-        .tree { flex: 1; overflow-y: auto; padding: 8px 0; }
+        .tree { flex: 1; overflow-y: auto; padding: 8px; }
         .tree ul { list-style: none; }
         .tree li { position: relative; }
 
-        .node { display: flex; align-items: center; padding: 6px 16px; cursor: pointer; font-size: 13px; color: #333; user-select: none; text-decoration: none; }
-        .node:hover { background: #f0f5ff; }
-        .node.active { background: #e6f2ff; color: #409eff; }
-        .node .arrow { width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; margin-right: 4px; transition: transform 0.2s; flex-shrink: 0; }
+        .node { display: flex; align-items: center; padding: 7px 10px; cursor: pointer; font-size: 13px; color: #333; user-select: none; text-decoration: none; border-left: 3px solid transparent; transition: background 0.2s, color 0.2s; }
+        .node .arrow { width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; margin-right: 2px; transition: transform 0.25s; flex-shrink: 0; }
         .node .arrow.open { transform: rotate(90deg); }
-        .node .icon { margin-right: 6px; flex-shrink: 0; }
+        .node .icon { margin-right: 8px; flex-shrink: 0; font-size: 15px; }
         .node .label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* 根分组：圆角卡片，展开时浅蓝高亮 */
+        .node-root { margin: 5px 0; padding: 11px 12px; background: #f6f8fa; border-radius: 6px; font-size: 14px; font-weight: 500; }
+        .node-root:hover { background: #e6f7ff; }
+        .node-root.opened { background: #e6f7ff; color: #1890ff; }
+
+        /* 子级目录/文档：缩进纯文本，悬停与选中蓝色反馈 */
+        .node-sub:hover { background: #f0f9ff; color: #1890ff; border-left-color: #1890ff; }
+        .node-sub.active { background: #e6f7ff; color: #1890ff; border-left-color: #1890ff; font-weight: 500; }
 
         .children { display: none; }
         .children.expanded { display: block; }
@@ -48,10 +55,10 @@
     <div class="layout">
         <div class="sidebar">
             <div class="sidebar-header">
-                <h1>技术文档中心</h1>
-                <div class="search-box">
-                    <input id="searchInput" type="text" placeholder="搜索文档名称..." />
-                </div>
+                <h1>📚 文档中心</h1>
+            </div>
+            <div class="search-box">
+                <input id="searchInput" type="text" placeholder="搜索文档..." />
             </div>
             <div class="tree" id="tree">
                 <div class="empty">加载中...</div>
@@ -70,6 +77,9 @@
         // 全局树数据缓存，用于搜索
         var treeData = [];
 
+        // 根分组图标映射（键为后端 DocRoot 显示名）
+        var ROOT_ICONS = { '项目文档': '📚', '项目规则': '📋', 'AI 技能': '🤖' };
+
         // 加载文档树
         function loadTree() {
             fetch('/docs/api/tree')
@@ -77,6 +87,10 @@
                 .then(function(json) {
                     if (json && json.code === 200) {
                         treeData = json.data || [];
+                        // 项目文档分组排序到最下方（项目规则、AI 技能置前）
+                        treeData.sort(function(a, b) {
+                            return (a.name === '项目文档' ? 1 : 0) - (b.name === '项目文档' ? 1 : 0);
+                        });
                         renderTree(treeData);
                     } else {
                         renderEmpty('加载失败：' + (json && json.msg ? json.msg : '未知错误'));
@@ -95,26 +109,24 @@
                 return;
             }
             var ul = document.createElement('ul');
-            nodes.forEach(function(node) { ul.appendChild(buildNode(node)); });
+            nodes.forEach(function(node) { ul.appendChild(buildNode(node, 0)); });
             container.innerHTML = '';
             container.appendChild(ul);
         }
 
-        // 构建节点
-        function buildNode(node) {
+        // 构建节点（depth=0 根分组为卡片式并带图标，其余为缩进子级）
+        function buildNode(node, depth) {
+            depth = depth || 0;
             var li = document.createElement('li');
 
             var nodeEl = document.createElement('div');
-            nodeEl.className = 'node';
+            nodeEl.className = depth === 0 ? 'node node-root' : 'node node-sub';
             nodeEl.setAttribute('data-path', node.path || '');
             nodeEl.setAttribute('data-type', node.type || '');
-
-            var arrow = document.createElement('span');
-            arrow.className = 'arrow';
-            arrow.innerHTML = '▶';
-
-            var icon = document.createElement('span');
-            icon.className = 'icon';
+            if (depth > 0) {
+                // 子级按层级递增缩进
+                nodeEl.style.paddingLeft = (10 + depth * 18) + 'px';
+            }
 
             var label = document.createElement('span');
             label.className = 'label';
@@ -122,15 +134,20 @@
             label.setAttribute('title', node.name || '');
 
             if (node.type === 'dir') {
-                icon.textContent = '📁';
+                var arrow = document.createElement('span');
+                arrow.className = 'arrow';
+                arrow.innerHTML = '▶';
                 nodeEl.appendChild(arrow);
-                nodeEl.appendChild(icon);
+                if (depth === 0) {
+                    // 根分组显示映射图标
+                    var icon = document.createElement('span');
+                    icon.className = 'icon';
+                    icon.textContent = ROOT_ICONS[node.name] || '📁';
+                    nodeEl.appendChild(icon);
+                }
                 nodeEl.appendChild(label);
             } else {
-                arrow.style.visibility = 'hidden';
-                icon.textContent = '📄';
-                nodeEl.appendChild(arrow);
-                nodeEl.appendChild(icon);
+                // 文档项：纯文本，无图标
                 nodeEl.appendChild(label);
             }
 
@@ -149,7 +166,7 @@
                 var childrenUl = document.createElement('ul');
                 childrenUl.className = 'children';
                 node.children.forEach(function(child) {
-                    childrenUl.appendChild(buildNode(child));
+                    childrenUl.appendChild(buildNode(child, depth + 1));
                 });
                 li.appendChild(childrenUl);
             }
@@ -157,19 +174,38 @@
             return li;
         }
 
-        // 展开/收起目录
+        // 展开/收起目录（根分组展开时收起其他根分组，保持单项展开）
         function toggleChildren(nodeEl, li) {
             var arrow = nodeEl.querySelector('.arrow');
-            var children = li.querySelector('.children');
+            var children = li.querySelector(':scope > .children');
             if (!children) return;
             var isOpen = children.classList.contains('expanded');
             if (isOpen) {
                 children.classList.remove('expanded');
                 arrow.classList.remove('open');
+                nodeEl.classList.remove('opened');
             } else {
+                // 展开根分组前先收起其他根分组
+                if (nodeEl.classList.contains('node-root')) {
+                    closeOtherRoots(li);
+                }
                 children.classList.add('expanded');
                 arrow.classList.add('open');
+                nodeEl.classList.add('opened');
             }
+        }
+
+        // 收起当前根分组以外的全部展开状态
+        function closeOtherRoots(currentLi) {
+            document.querySelectorAll('.children.expanded').forEach(function(c) {
+                if (!currentLi.contains(c)) c.classList.remove('expanded');
+            });
+            document.querySelectorAll('.arrow.open').forEach(function(a) {
+                if (!currentLi.contains(a)) a.classList.remove('open');
+            });
+            document.querySelectorAll('.node-root.opened').forEach(function(n) {
+                if (!currentLi.contains(n)) n.classList.remove('opened');
+            });
         }
 
         // 打开文档
@@ -204,7 +240,9 @@
         function filterTree(nodes, keyword) {
             var result = [];
             nodes.forEach(function(node) {
-                var nameMatch = (node.name || '').toLowerCase().indexOf(keyword) !== -1;
+                // 显示名为中文名称，同时匹配路径（含英文文件名/目录名），保证中英文均可搜索
+                var nameMatch = (node.name || '').toLowerCase().indexOf(keyword) !== -1
+                    || (node.path || '').toLowerCase().indexOf(keyword) !== -1;
                 if (node.type === 'dir') {
                     var filteredChildren = node.children ? filterTree(node.children, keyword) : [];
                     if (nameMatch || filteredChildren.length > 0) {
@@ -227,6 +265,9 @@
         function expandAll() {
             document.querySelectorAll('.children').forEach(function(c) {
                 c.classList.add('expanded');
+                // 根分组下的子列表展开时，同步根卡片高亮
+                var root = c.parentNode ? c.parentNode.querySelector('.node-root') : null;
+                if (root) root.classList.add('opened');
             });
             document.querySelectorAll('.arrow').forEach(function(a) {
                 a.classList.add('open');

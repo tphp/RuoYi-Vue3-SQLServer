@@ -3,6 +3,8 @@ name: "sqlserver-compat-check"
 description: "检测 Mapper XML、Java 内嵌 SQL 中 MySQL 专属语法，统一适配 SQL Server 语法规范。【强制自动触发】只要涉及 mapper、xml、SQL、数据库相关代码生成/修改/审查，必须先调用本技能校验通过后再输出最终代码。"
 ---
 
+> 中文名称：SQL Server 兼容性检查
+
 # SQL Server 兼容性检查
 
 ## ⚠️ 最高强制规则（必须遵守）

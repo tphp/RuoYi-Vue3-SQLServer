@@ -1,5 +1,7 @@
 # 实施计划：为项目添加 Oracle 数据源
 
+> 中文名称：Oracle数据源接入实施计划
+
 ## Context（背景）
 
 当前项目 `smc-api`（基于若依 RuoYi 4.0.6 / Spring Boot 4 / MyBatis / Druid / MSSQL）已经内置动态数据源机制（master/slave 切换），但只有一个主库（MSSQL）。为支持后续业务接入外部 Oracle 系统（读 + 写），需要新增 Oracle 数据源，并让业务代码能通过 `@DataSource` 注解自由切换。

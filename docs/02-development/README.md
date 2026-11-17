@@ -11,13 +11,13 @@
 ├── README.md                 # 本文件：规范 + 索引
 ├── _template-dev.md          # 开发文档通用模板（勿删）
 └── <模块名>/                 # 每个业务模块 / 技术领域一个子目录
-    └── <功能>-开发文档.md
+    └── <英文短横线名>.md      # 首行保留中文标题，并写明「中文名称：xxx」
 ```
 
 ### 命名规范
 
 - 模块目录：英文小写、短横线分隔，与后端模块名 / 功能领域对齐（如 `bizperm`、`number-rule`、`external-api`、`datasource`）
-- 开发文档：`<模块>-<功能>-开发.md`，或用描述性中文标题（如 `业务级权限体系开发任务清单.md`）
+- 开发文档：文件名统一用**英文小写、短横线分隔**描述文档性质（如 `api-log-dev.md`、`external-integration-plan.md`、`oracle-datasource-plan.md`、`policy-crud-checklist.md`）；文档首行保留中文标题，并在标题下写明「中文名称：接口日志功能开发文档」等中文名，便于对应查找
 - 模板：`_template-dev.md`
 
 ### 新增开发文档步骤
@@ -32,8 +32,10 @@
 
 | 模块 | 目录 | 文档 |
 |------|------|------|
-| 业务级权限体系 | `bizperm/` | [业务级权限体系开发任务清单](bizperm/业务级权限体系开发任务清单.md) |
-| 业务级权限体系 | `bizperm/` | [业务级权限策略CRUD落地清单](bizperm/业务级权限策略CRUD落地清单.md) |
-| 单据编号生成 | `number-rule/` | [单据编号生成配置功能方案](number-rule/单据编号生成配置功能方案.md) |
-| 外部系统接口对接 | `external-api/` | [外部系统接口对接方案](external-api/外部系统接口对接方案.md) |
-| 数据源接入 | `datasource/` | [add-oracle-datasource（Oracle 数据源接入实施计划）](datasource/add-oracle-datasource.md) |
+| 业务级权限体系 | `bizperm/` | [业务级权限体系开发任务清单](bizperm/permission-system-tasklist.md) |
+| 业务级权限体系 | `bizperm/` | [业务级权限策略CRUD落地清单](bizperm/policy-crud-checklist.md) |
+| 单据编号生成 | `number-rule/` | [单据编号生成配置功能方案](number-rule/number-generation-config-plan.md) |
+| 外部系统接口对接 | `external-api/` | [外部系统接口对接方案](external-api/external-integration-plan.md) |
+| 数据源接入 | `datasource/` | [Oracle数据源接入实施计划](datasource/oracle-datasource-plan.md) |
+| 接口日志 | `apilog/` | [接口日志功能开发文档](apilog/api-log-dev.md)（回溯补录） |
+| 全项目结构 | `structure/` | [全项目结构说明](structure/project-structure.md) |

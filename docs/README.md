@@ -28,11 +28,17 @@ http://localhost:8080/docs/index.html
 
 | 分类 | 文档 |
 |------|------|
-| `01-requirements/bizperm/` | [业务级权限体系需求开发方案](01-requirements/bizperm/业务级权限体系需求开发方案.md) |
-| `02-development/bizperm/` | [业务级权限体系开发任务清单](02-development/bizperm/业务级权限体系开发任务清单.md) |
-| `02-development/bizperm/` | [业务级权限策略CRUD落地清单](02-development/bizperm/业务级权限策略CRUD落地清单.md) |
-| `02-development/number-rule/` | [单据编号生成配置功能方案](02-development/number-rule/单据编号生成配置功能方案.md) |
-| `02-development/external-api/` | [外部系统接口对接方案](02-development/external-api/外部系统接口对接方案.md) |
-| `02-development/datasource/` | [add-oracle-datasource（Oracle 数据源接入实施计划）](02-development/datasource/add-oracle-datasource.md) |
+| `01-requirements/bizperm/` | [业务级权限体系需求开发方案](01-requirements/bizperm/permission-system-prd.md) |
+| `01-requirements/apilog/` | [接口日志功能需求文档](01-requirements/apilog/api-log-prd.md)（回溯补录） |
+| `01-requirements/number-rule/` | [单据编号生成功能需求文档](01-requirements/number-rule/number-generation-prd.md)（回溯补录） |
+| `01-requirements/external-api/` | [外部系统接口对接需求文档](01-requirements/external-api/external-integration-prd.md)（回溯补录） |
+| `01-requirements/datasource/` | [Oracle副数据源接入需求文档](01-requirements/datasource/oracle-datasource-prd.md)（回溯补录） |
+| `02-development/bizperm/` | [业务级权限体系开发任务清单](02-development/bizperm/permission-system-tasklist.md) |
+| `02-development/bizperm/` | [业务级权限策略CRUD落地清单](02-development/bizperm/policy-crud-checklist.md) |
+| `02-development/apilog/` | [接口日志功能开发文档](02-development/apilog/api-log-dev.md)（回溯补录） |
+| `02-development/number-rule/` | [单据编号生成配置功能方案](02-development/number-rule/number-generation-config-plan.md) |
+| `02-development/external-api/` | [外部系统接口对接方案](02-development/external-api/external-integration-plan.md) |
+| `02-development/datasource/` | [Oracle数据源接入实施计划](02-development/datasource/oracle-datasource-plan.md) |
+| `02-development/structure/` | [全项目结构说明](02-development/structure/project-structure.md) |
 
 > 原 `.trae/docs/`、`.trae/documents/` 下的文档已完成迁移归档。

@@ -1,9 +1,11 @@
 # 业务级权限 · 策略 CRUD 落地清单
 
+> 中文名称：业务级权限策略CRUD落地清单
+
 > 版本：v1.0（2026-11-03）
 > 对应模块：`ruoyi-bizperm`
 > 适用数据库：SQL Server
-> 关联文档：`业务级权限体系需求开发方案.md`、`业务级权限体系开发任务清单.md`
+> 关联文档：`permission-system-prd.md`（业务级权限体系需求开发方案）、`permission-system-tasklist.md`（业务级权限体系开发任务清单）
 
 ---
 

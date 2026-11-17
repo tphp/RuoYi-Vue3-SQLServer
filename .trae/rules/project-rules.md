@@ -1,1059 +1,530 @@
-# 若依CRM项目规则
+# 若依（RuoYi）二次开发项目规则（通用版）
 
-> **项目根目录**: `<workspace>/ruoyi-crm`
-> **规则位置**: `crm-api/.trae/rules/` (前后端规则统一放在后端目录下)
-> **规则版本**: v1.0
+> 中文名称：若依二次开发项目规则
 
----
-
-## 0. 规则体系定位（MUST AI强制遵守）
-
-> 本文档为项目【全局固定 Rules 基线】
-
-1. 本文档永久固定、团队统一、无业务属性、AI 最高优先级约束
-2. 所有业务 Prompt 必须继承本规则，禁止重复定义技术规范
-3. 所有自动化 Skill 流程必须全程遵守本规则
-4. 优先级：**人工明确指令 > 本 Rules 基线 > 业务 Prompt > AI 自主优化**
-5. **AI 禁止突破本规则任何约束**
+> **项目根目录**: 当前仓库根目录
+> **规则位置**: `.trae/rules/`（`rules.md` 为全局文档规则，本文件为技术基线）
+> **规则版本**: v2.0（2026-11-17 按实际代码库校正）
+> **废弃声明**: v1.0 中出现的 `ruoyi-crm`、`crm-api/`、`crm-web/`、「ruoyi-ui 已作废」等描述均与当前仓库不符，**已作废，不得再作为路径依据**。
 
 ---
 
-## 项目概述
+## 0. 规则体系定位
 
-本项目是基于**若依(RuoYi)框架**的企业级CRM管理系统，采用前后端分离架构。
-
-| 端 | 相对路径 | 技术栈 | 状态 |
-|---|----------|--------|------|
-| **后端** | `crm-api/` | Spring Boot + MyBatis + MSSQL | ✅ 使用中 |
-| **前端** | `crm-web/` | Vue 3 + TypeScript + Vite + Element Plus | ✅ 使用中 |
-| ~~前端~~ | ~~`crm-api/ruoyi-ui/`~~ | ~~Vue 2~~ | ❌ **已作废** |
-
-> **⚠️ 警告**: `crm-api/ruoyi-ui` 目录已作废，前端开发请在 `crm-web` 目录下进行！
+1. 本文件是项目【技术基线 Rules】，所有业务 Prompt、Skill 流程必须继承，禁止重复定义技术规范。
+2. 优先级：**人工明确指令 > `.trae/rules.md`（全局文档规则） > 本技术基线 > `docs/` 既有文档约定 > 业务 Prompt > AI 自主优化**。
+3. AI 不得突破本文件约束；确需突破时，必须先停止操作并向用户报告，获得明确指令后再执行。
+4. 版本、模块、目录均以仓库实际情况为准；本文件与代码不一致时，**以代码为准并同步修正本文件**。
 
 ---
 
-## 第一部分：框架刚性规则（MUST）
+## 1. 项目概述
 
-### 1. 技术栈约束
+基于 **RuoYi-Vue 3.9.2** 的企业级管理系统，前后端分离。
 
-#### 1.1 后端技术栈
+| 模块 | 职责 | AI 改动边界 |
+|------|------|-------------|
+| `ruoyi-admin` | Web 入口、系统/监控/工具控制器（含 `DocCenterController`）、`sales` 下 Oracle 测试控制器 | 🟡 新增业务控制器需确认，`controller/system`、`controller/monitor` 禁止改 |
+| `ruoyi-framework` | 框架配置、安全、AOP、多数据源装配（`DruidConfig`） | 🔴 禁止修改 |
+| `ruoyi-system` | 系统管理（用户/角色/菜单/字典等） | 🔴 禁止修改 |
+| `ruoyi-common` | 公共工具、注解、枚举、核心基类 | 🔴 禁止修改 |
+| `ruoyi-quartz` | 定时任务 | 🔴 禁止修改 |
+| `ruoyi-generator` | 代码生成器 | 🔴 禁止修改 |
+| `ruoyi-apilog` | 接口日志：入站日志过滤器、出站接口客户端、日志落库、日志查询 | 🟢 可自由修改 |
+| `ruoyi-bizperm` | 业务级权限体系（策略、范围、权限树、可见人员） | 🟢 可自由修改 |
+| `ruoyi-ui` | **唯一有效前端**（Vue 2 + Element UI） | 🟢 `src/views/<模块>`、`src/api/<模块>` 可改；其余目录见第 4 节 |
 
-| 层级 | 技术 | 版本 | 说明 |
-|------|------|------|------|
-| 后端框架 | Spring Boot | 4.0.6 | 禁止修改核心依赖版本 |
-| Java版本 | Java | 17 | 语言级别固定 |
-| ORM框架 | MyBatis | 4.0.1 | 必须使用 MyBatis，禁止 JPA |
-| 分页插件 | PageHelper | 4.1.0 | 统一分页方式 |
-| JSON处理 | FastJSON | 2.0.62 | 禁止混用 Jackson/Gson |
-| 权限认证 | Spring Security + JWT | - | 安全框架不可替换 |
-| 数据库 | MSSQL | - | 使用 `SELECT TOP` 分页语法 |
-| 连接池 | Druid | 1.2.28 | 阿里数据库连接池 |
-
-#### 1.2 前端技术栈
-
-| 层级 | 技术 | 版本 | 说明 |
-|------|------|------|------|
-| 前端框架 | Vue | 3.5.26 | 必须使用 Composition API |
-| 前端语言 | TypeScript | 5.6.3 | 禁止纯 JavaScript |
-| UI组件库 | Element Plus | 2.13.1 | 禁止引入其他 UI 库 |
-| 状态管理 | Pinia | 3.0.4 | 禁止 Vuex |
-| 构建工具 | Vite | 6.4.1 | - |
-| HTTP请求 | Axios | 1.13.2 | - |
+> ⚠️ 前端只有 `ruoyi-ui` 一个工程，**不存在 `crm-web`**。禁止引用或新建 `crm-web`。
 
 ---
 
-### 2. 后端架构约束
+## 2. 技术栈（以 `pom.xml` / `package.json` 为准）
 
-#### 2.1 模块结构约束（强制）
+### 2.1 后端
+
+| 层级 | 技术 | 版本 |
+|------|------|------|
+| 基础框架 | RuoYi-Vue | 3.9.2 |
+| 后端框架 | Spring Boot | 4.0.6 |
+| Java | JDK | 17 |
+| ORM | MyBatis | 4.0.1（禁用 JPA） |
+| 分页 | PageHelper | 4.1.0（`helperDialect: sqlserver`） |
+| JSON | FastJSON2 | 2.0.62（禁混用 Jackson/Gson） |
+| 权限 | Spring Security + JWT | - |
+| 连接池 | Druid | 1.2.28 |
+| 主数据库 | SQL Server | 主库（库名见 `application-druid.yml`） |
+| 副数据库 | Oracle | 副库 / 外部系统数据源（按需启用） |
+
+### 2.2 前端
+
+| 层级 | 技术 | 版本 |
+|------|------|------|
+| 框架 | Vue | 2.6.12（Options API） |
+| UI 库 | Element UI | 2.15.14（禁止引入其他 UI 库） |
+| 状态管理 | Vuex | 3.6.0（禁用 Pinia） |
+| 路由 | vue-router | 3.4.9 |
+| 构建 | vue-cli（webpack） | 4.4.6（禁用 Vite） |
+| HTTP | axios | 0.30.3 |
+| 样式 | Sass | 1.32.13 |
+
+> 前端是 **Vue 2 + JavaScript**，禁止使用 Vue 3 语法、Composition API、TypeScript、Element Plus、Pinia、Vite。
+
+---
+
+## 3. 后端开发规范
+
+### 3.1 业务模块包结构（强制）
+
+新增业务代码统一放入**自建业务模块**（`ruoyi-bizperm`、`ruoyi-apilog` 或新建 `ruoyi-xxx`），**禁止放入 `ruoyi-admin`、`ruoyi-system` 等框架模块**。
+
+> 📌 **存量豁免**：历史上已落在 `ruoyi-system` 等框架模块内的二开表与功能（如单据编号 `SysNumberRule*`、`SysApiKey`、`SysDataDict`、`SysNoticeRead`、`SysUserRecently` 等），按现状维护、不强制迁移（红区仍禁改，仅允许 Bug 修复级变更）；但**新增功能一律不得复制该模式**，必须进自建业务模块。
 
 ```
-crm-api/
-├── ruoyi-admin/              # Web服务入口（仅系统Controller，禁止修改）
-│   └── src/main/java/com/ruoyi/web/controller/system/   # 系统控制器（禁止修改）
-├── ruoyi-framework/          # 框架核心配置（禁止修改）
-│   ├── config/               # 配置类
-│   ├── security/             # 安全配置
-│   └── aspectj/              # AOP切面
-├── ruoyi-system/             # 系统管理模块（禁止修改）
-│   ├── domain/               # 实体类
-│   ├── mapper/               # Mapper接口
-│   └── service/              # 服务层
-├── ruoyi-common/             # 公共模块（禁止修改）
-│   ├── core/                 # 核心类
-│   ├── utils/                # 工具类
-│   └── annotation/           # 注解
-├── ruoyi-generator/          # 代码生成器（禁止修改）
-├── ruoyi-quartz/             # 定时任务（禁止修改）
-└── ruoyi-crm/                # CRM业务模块（✅ 业务代码存放位置）
-    ├── src/main/java/com/ruoyi/crm/
-    │   ├── controller/       # ✅ 业务Controller
-    │   ├── domain/           # ✅ 业务实体类
-    │   ├── mapper/           # ✅ 业务Mapper接口
-    │   └── service/          # ✅ 业务服务层
-    │       └── impl/         # ✅ 业务服务实现
-    └── src/main/resources/
-    │   ├── mapper/crm/       # ✅ Mapper XML文件
-    │   └── sql/crm/          # ✅ 建表SQL文件
-    └── pom.xml
+ruoyi-bizperm/
+├── src/main/java/com/ruoyi/bizperm/
+│   ├── controller/          # 控制器
+│   ├── domain/              # 实体
+│   │   ├── bo/              # 入参对象
+│   │   ├── vo/              # 出参对象
+│   │   └── enums/           # 枚举
+│   ├── mapper/              # Mapper 接口
+│   ├── service/             # 服务接口
+│   │   └── impl/            # 服务实现
+│   └── utils/               # 模块工具类（按需）
+└── src/main/resources/
+    ├── mapper/bizperm/      # Mapper XML
+    └── sql/bizperm/         # 模块建表/初始化 SQL
 ```
 
-> **⚠️ 重要说明**：
-> - `ruoyi-admin`、`ruoyi-framework`、`ruoyi-system`、`ruoyi-common`、`ruoyi-generator`、`ruoyi-quartz` 都是框架核心，**禁止修改**
-> - 所有 CRM 业务代码（Controller、Domain、Mapper、Service）必须放在 `ruoyi-crm` 模块
-> - Controller 放在 `ruoyi-crm/src/main/java/com/ruoyi/crm/controller/` 目录下
+`ruoyi-apilog` 同理（`resources/mapper/apilog/`），额外包含 `utils/`（接口客户端、日志工具）与 `web/`（过滤器）。
 
-#### 2.2 包结构约束（强制）
+### 3.2 类与方法命名（强制）
 
-**系统模块包结构（禁止修改）：**
-```
-com.ruoyi.system/             # 系统模块（禁止修改）
-├── domain/                   # 实体类
-├── mapper/                   # Mapper接口
-└── service/                  # 服务层
-    └── impl/                 # 服务实现
-```
+| 类型 | 规则 | 示例 |
+|------|------|------|
+| Controller | `XxxController` | `BizPermPolicyController` |
+| Service 接口 | `IXxxService` | `IBizPermPolicyService` |
+| Service 实现 | `XxxServiceImpl` | `BizPermPolicyServiceImpl` |
+| Mapper | `XxxMapper` | `BizPermPolicyMapper` |
+| Entity / BO / VO | `Xxx` / `XxxBo` / `XxxVo` | `SysBizPermPolicy` / `BizPermTreeQueryBo` / `BizPermTreeNodeVo` |
 
-**CRM业务模块包结构（业务代码）：**
-```
-com.ruoyi.crm/                # CRM业务模块（✅ 业务代码）
-├── controller/               # ✅ 业务Controller
-├── domain/                   # ✅ 实体类
-│   ├── bo/                   # 业务对象（参数接收）
-│   └── vo/                   # 视图对象（响应返回）
-├── mapper/                   # ✅ Mapper接口
-├── service/                  # ✅ 业务接口
-│   └── impl/                 # ✅ 业务实现
-└── utils/                    # 模块工具类
-```
+方法命名：`selectXxxList` / `selectXxxById` / `insertXxx` / `updateXxx` / `deleteXxxByIds` / `checkXxxUnique`；禁用 `getXxxList`、`save`、`remove`、`Dao`、`DTO`。
 
-**禁止行为：**
-- ❌ 包名不使用 `com.ruoyi` 前缀
-- ❌ 在 domain 包外定义实体类
-- ❌ Service 实现不放在 `impl` 子包
-- ❌ Controller 放在 `ruoyi-admin` 模块（系统模块禁止修改）
-- ❌ 修改 `ruoyi-system`、`ruoyi-framework`、`ruoyi-common` 等框架核心模块
-
-#### 2.3 类命名约束（强制）
-
-| 类型 | 命名规则 | 示例 |
-|------|----------|------|
-| Controller | `XxxController` | `SysUserController` |
-| Service接口 | `IXxxService` | `ISysUserService` |
-| Service实现 | `XxxServiceImpl` | `SysUserServiceImpl` |
-| Mapper | `XxxMapper` | `SysUserMapper` |
-| Entity | `Xxx` | `SysUser` |
-| BO | `XxxBo` | `SysUserBo` |
-| VO | `XxxVo` | `SysUserVo` |
-
-**禁止行为：**
-- ❌ Service 接口不以 `I` 开头
-- ❌ 使用 `Dao` 代替 `Mapper`
-- ❌ 使用 `DTO` 代替 `Bo/Vo`
-
-#### 2.4 方法命名约束（强制）
-
-| 操作类型 | 方法名 | 返回值 |
-|------|------|--------|
-| 查询列表 | `selectXxxList` | `List<Xxx>` |
-| 分页查询 | `selectXxxList` | `List<Xxx>`（配合 `startPage()`） |
-| 根据ID查询 | `selectXxxById` | `Xxx` |
-| 新增 | `insertXxx` | `int`（影响行数） |
-| 修改 | `updateXxx` | `int`（影响行数） |
-| 删除 | `deleteXxxById` | `int`（影响行数） |
-| 批量删除 | `deleteXxxByIds` | `int`（影响行数） |
-| 校验唯一性 | `checkXxxUnique` | `boolean` / `String` |
-
-**禁止行为：**
-- ❌ 使用 `getXxxList` 代替 `selectXxxList`
-- ❌ 使用 `save` 代替 `insert/update`
-- ❌ 使用 `remove` 代替 `delete`
-
-#### 2.5 Controller 规范（强制）
+### 3.3 Controller 规范（强制）
 
 ```java
 /**
- * @author ${USER_NAME}
- * @date ${CURRENT_DATE}
+ * 业务权限策略Controller
+ *
+ * @author 张三
+ * @date 2026-11-17
  */
 @RestController
-@RequestMapping("/system/user")
-public class SysUserController extends BaseController {
-
+@RequestMapping("/bizperm/policy")
+public class BizPermPolicyController extends BaseController
+{
     @Autowired
-    private ISysUserService userService;
+    private IBizPermPolicyService bizPermPolicyService;
 
-    // 列表查询必须调用 startPage()
-    @PreAuthorize("@ss.hasPermi('system:user:list')")
+    @PreAuthorize("@ss.hasPermi('bizperm:policy:list')")
     @GetMapping("/list")
-    public TableDataInfo list(SysUser user) {
-        startPage();  // MUST: 分页查询必须调用
-        List<SysUser> list = userService.selectUserList(user);
-        return getDataTable(list);  // MUST: 返回 TableDataInfo
-    }
-
-    // 单条查询返回 AjaxResult
-    @PreAuthorize("@ss.hasPermi('system:user:query')")
-    @GetMapping(value = "/{userId}")
-    public AjaxResult getInfo(@PathVariable Long userId) {
-        return success(userService.selectUserById(userId));
-    }
-
-    // 新增必须加 @Log 和 @PreAuthorize
-    @PreAuthorize("@ss.hasPermi('system:user:add')")
-    @Log(title = "用户管理", businessType = BusinessType.INSERT)
-    @PostMapping
-    public AjaxResult add(@RequestBody SysUser user) {
-        return toAjax(userService.insertUser(user));
-    }
-
-    // 修改
-    @PreAuthorize("@ss.hasPermi('system:user:edit')")
-    @Log(title = "用户管理", businessType = BusinessType.UPDATE)
-    @PutMapping
-    public AjaxResult edit(@RequestBody SysUser user) {
-        return toAjax(userService.updateUser(user));
-    }
-
-    // 删除
-    @PreAuthorize("@ss.hasPermi('system:user:remove')")
-    @Log(title = "用户管理", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{userIds}")
-    public AjaxResult remove(@PathVariable Long[] userIds) {
-        return toAjax(userService.deleteUserByIds(userIds));
+    public TableDataInfo list(SysBizPermPolicy query)
+    {
+        startPage();
+        return getDataTable(bizPermPolicyService.selectPolicyList(query));
     }
 }
 ```
 
-**必须遵守：**
-- ✅ 继承 `BaseController`
-- ✅ 使用 `@RestController`，不用 `@Controller`
-- ✅ 路径使用小写，单词间用连字符 `/system/user`
-- ✅ 列表查询调用 `startPage()` + `getDataTable()`
-- ✅ 增删改返回 `AjaxResult`，使用 `toAjax()` 包装
-- ✅ 敏感操作加 `@PreAuthorize` 权限控制
-- ✅ 敏感操作加 `@Log` 操作日志
+必须遵守：
+- ✅ 继承 `BaseController`，`@RestController`
+- ✅ 列表：`startPage()` + `getDataTable()`；单条/复杂结果：`success(...)` + `AjaxResult`
+- ✅ 增删改：`toAjax(...)`，并按需加 `@Log`、`@PreAuthorize`、`@RepeatSubmit`
+- ✅ 业务逻辑全部委托 Service，Controller 只做参数校验与结果包装
+- ✅ 类/方法左大括号换行（与现有代码风格一致）
 
-**禁止行为：**
-- ❌ 直接返回 `List` 或 `Entity`（必须用 `AjaxResult` / `TableDataInfo` 包装）
-- ❌ 在 Controller 写业务逻辑（必须委托给 Service）
-- ❌ 手动处理分页（必须用 `startPage()`）
+禁止：
+- ❌ 直接返回 `List` / 实体
+- ❌ 手写分页 SQL 或手动 `PageInfo`
+- ❌ 在 Controller 里写数据库访问
 
-**⚠️ 重要坑点：AjaxResult.success() 重载问题**
+**⚠️ `AjaxResult.success()` 重载坑点**
 
-若依的 `AjaxResult` 有两个容易混淆的重载：
-- `success(String msg)` —— 字符串参数会被当成 **消息文本**
-- `success(Object data)` —— 对象参数会被当成 **数据对象**
+| 写法 | 结果 |
+|------|------|
+| `success(token)`（String） | 被当作 `msg`，`data` 为空 |
+| `success((Object) token)` | 正确放入 `data` |
 
-由于 Java 重载优先级，当传入 `String` 类型时，会优先匹配 `success(String msg)`，导致字符串被放到 `msg` 字段而不是 `data` 字段。
+返回字符串且需要放 `data` 时，必须强转 `Object`。
 
-**正确写法：** 如果返回值是 String 类型但要放到 data 里，必须强转 Object：
-```java
-// ❌ 错误：字符串被当成 msg
-return success(token);
-return success(number);
+### 3.4 Entity 规范
 
-// ✅ 正确：强转 Object，放到 data 字段
-return success((Object) token);
-return success((Object) number);
-```
+- 继承 `BaseEntity`（获得 `createBy/createTime/updateBy/updateTime/remark`）
+- 字段驼峰命名，自动映射下划线；需要导出的字段加 `@Excel`
+- 密码、盐值等敏感字段禁止导出
+- 非数据库字段需在注释中标明
 
-#### 2.6 Entity 规范（强制）
+### 3.5 Mapper / XML / SQL 规范（强制）
 
-```java
-/**
- * @author ${USER_NAME}
- * @date ${CURRENT_DATE}
- */
-public class SysUser extends BaseEntity {
-    
-    @Excel(name = "用户序号", cellType = Excel.ColumnType.NUMERIC)
-    private Long userId;
-    
-    @Excel(name = "用户名称")
-    private String userName;
-    
-    @Excel(name = "用户性别", readConverterExp = "0=男,1=女,2=未知")
-    private String sex;
-    
-    // 敏感字段不导出
-    private String password;
-    
-    // 非数据库字段
-    @Excel(name = "部门名称", sort = 10)
-    private String deptName;
-    
-    // getter / setter
-}
-```
+- XML 放在模块 `src/main/resources/mapper/<module>/`，`namespace` 必须等于接口全限定名
+- 参数绑定用 `#{}`；`${}` 仅限数据权限等受控场景
+- 分页统一交给 PageHelper，禁止手写分页 SQL
+- **SQL Server 语法**：
+  - 取前 N 条用 `top N`，禁止 `limit`
+  - 当前时间用 `getdate()`，禁止 `now()` / `sysdate()`
+  - 字符串拼接优先用 `+`，慎用 `concat`（低版本不兼容）
+  - 行级锁用 `with (updlock, holdlock)`；引用含 `from` 的 `<sql>` 片段时注意不要出现重复 `from`
+- **Oracle 语法**（副库）：校验语句必须带 `FROM DUAL`（如 `select 1 from dual`）
 
-**必须遵守：**
-- ✅ 继承 `BaseEntity`（自动获得 createBy, createTime, updateBy, updateTime, remark）
-- ✅ 数据库字段使用驼峰命名（自动映射下划线）
-- ✅ 需要导出的字段加 `@Excel` 注解
-- ✅ 文件顶部添加 `@author` 和 `@date` 注释
+> ⛔ **强制**：任何 Mapper XML、Java 内嵌 SQL、建表脚本的新增/修改，必须先执行 `.trae/skills/sqlserver-compat-check/SKILL.md` 校验清单，修复通过后再输出代码。
 
-#### 2.7 Mapper 规范（强制）
+### 3.6 Service 规范
+
+- 实现类加 `@Service`；增删改加 `@Transactional`，查询不加事务
+- **事务豁免**：单条 INSERT/DELETE 且无关联写操作、无跨表一致性要求的方法，可不加 `@Transactional`（单条语句自动提交），如日志类 `record()` 落库方法；除此之外的写方法一律加事务
+- 复杂业务、跨表组装、事务边界放 Service，不放 Controller/Mapper
+- 数据权限需要时在 Service 或 Mapper 方法上加 `@DataScope`
+
+### 3.7 注解使用
+
+| 注解 | 位置 | 必须性 |
+|------|------|--------|
+| `@PreAuthorize` | Controller 方法 | MUST（豁免见下方） |
+| `@Log` | Controller 敏感操作 | MUST |
+| `@Transactional` | Service 增删改 | MUST |
+| `@DataScope` | 需要数据权限的查询 | 按需 |
+| `@DataSource(DataSourceType.ORACLE)` | 访问 Oracle 的方法（Mapper/Service，现有示例在 Controller） | 按需 |
+| `@Excel` | Entity 字段 | 需要导出时 |
+| `@RepeatSubmit` | 提交类接口 | 按需 |
+
+**`@PreAuthorize` 豁免条款**（同时适用于 §3.3、§7 审查清单）：
+
+1. **自助型接口可豁免**：仅操作**当前登录人自身数据**、且通过 `SecurityUtils` 强制绑定登录人工号/用户名（参数不可被外部指定）的接口，可不加 `@PreAuthorize`，登录态即为门槛。示例：`/bizperm/my/tree`、`/bizperm/my/visible-users`（对应 `BizPermMyController`）。
+   - 判定标准（必须全部满足）：① 从登录上下文取身份，不信任入参；② 只读或只改当前用户自己的数据；③ 无批量查询他人数据的能力。
+2. **匿名放行接口**：标注 `@Anonymous` 的公开接口（如验证码、登录、文档中心）天然豁免，但其内部不得泄露敏感数据。
+3. **以下场景不豁免（仍必须加）**：
+   - 接受**任意用户 ID/工号等入参**查询或操作他人数据的接口——即使需要登录也不豁免，必须配专用权限串（如 `bizperm:api:query`），或改用独立鉴权（签名/服务 Token）并在此处登记豁免；
+   - 增删改等写操作接口一律不豁免。
+
+> ⚠️ 待办：`ApiBizPermController`（`/api/bizperm/visible-users`，接受任意 userCode）**不符合豁免条件**，属于第 3 条范围，需补 `@PreAuthorize` 或独立鉴权后再更新本条。
+
+### 3.8 双数据源使用约束
+
+- **主库（SQL Server）**：系统表、业务表、日志表，所有写操作只能走主库
+- **副库（Oracle）**：用于外部系统数据查询，通过 `@DataSource(DataSourceType.ORACLE)` 切换（见 `OracleTestController`）
+- 禁止假设跨库分布式事务；跨库写操作必须拆分为"主库事务 + 幂等补偿"，并在方案文档中说明
+- 数据库账号口令不得出现在代码、文档、日志、提交信息中
+
+### 3.9 文件注释（强制）
+
+所有 Java 类、接口、Mapper 顶部必须包含：
 
 ```java
 /**
- * @author ${USER_NAME}
- * @date ${CURRENT_DATE}
+ * 功能说明
+ *
+ * @author 开发者姓名
+ * @date yyyy-MM-dd
  */
-public interface SysUserMapper {
-    
-    // 列表查询必须加 @DataScope（如果需要数据权限）
-    @DataScope(deptAlias = "d", userAlias = "u")
-    List<SysUser> selectUserList(SysUser user);
-    
-    SysUser selectUserById(Long userId);
-    
-    int insertUser(SysUser user);
-    
-    int updateUser(SysUser user);
-    
-    int deleteUserById(Long userId);
-    
-    int deleteUserByIds(Long[] userIds);
-    
-    SysUser checkUserNameUnique(String userName);
-}
 ```
-
-**XML 约束：**
-
-```xml
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper
-        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ruoyi.system.mapper.SysUserMapper">
-    
-    <resultMap type="com.ruoyi.system.domain.SysUser" id="SysUserResult">
-        <id property="userId" column="user_id"/>
-        <result property="deptId" column="dept_id"/>
-        <result property="userName" column="user_name"/>
-    </resultMap>
-    
-    <sql id="selectUserVo">
-        select u.user_id, u.dept_id, u.user_name, u.nick_name
-        from sys_user u
-        left join sys_dept d on u.dept_id = d.dept_id
-    </sql>
-    
-    <select id="selectUserList" parameterType="com.ruoyi.system.domain.SysUser" resultMap="SysUserResult">
-        <include refid="selectUserVo"/>
-        where u.del_flag = '0'
-        ${params.dataScope}
-        <if test="userName != null and userName != ''">
-            AND u.user_name like concat('%', #{userName}, '%')
-        </if>
-    </select>
-    
-</mapper>
-```
-
-**必须遵守：**
-- ✅ Mapper 接口不写 `@Repository`（MyBatis 自动扫描）
-- ✅ 需要数据权限的方法加 `@DataScope`
-- ✅ XML 文件放在 `resources/mapper/xxx/` 目录
-- ✅ XML namespace 必须等于接口全限定名
-- ✅ MSSQL 使用 `SELECT TOP n` 语法
-
-**禁止行为：**
-- ❌ 使用 `${}` 拼接参数（必须用 `#{}`，除非数据权限）
-- ❌ 在 XML 写复杂业务逻辑（只能用 SQL）
-- ❌ 手写分页 SQL（用 PageHelper）
-
-#### 2.8 Service 规范（强制）
-
-```java
-/**
- * @author ${USER_NAME}
- * @date ${CURRENT_DATE}
- */
-public interface ISysUserService {
-    List<SysUser> selectUserList(SysUser user);
-    SysUser selectUserById(Long userId);
-    int insertUser(SysUser user);
-    int updateUser(SysUser user);
-    int deleteUserByIds(Long[] userIds);
-}
-
-/**
- * @author ${USER_NAME}
- * @date ${CURRENT_DATE}
- */
-@Service
-public class SysUserServiceImpl implements ISysUserService {
-    
-    @Autowired
-    private SysUserMapper userMapper;
-
-    // 查询不加事务
-    @Override
-    @DataScope(deptAlias = "d", userAlias = "u")
-    public List<SysUser> selectUserList(SysUser user) {
-        return userMapper.selectUserList(user);
-    }
-    
-    // 增删改必须加事务
-    @Override
-    @Transactional
-    public int insertUser(SysUser user) {
-        int rows = userMapper.insertUser(user);
-        // 关联操作
-        insertUserPost(user);
-        insertUserRole(user);
-        return rows;
-    }
-    
-    @Override
-    @Transactional
-    public int updateUser(SysUser user) {
-        return userMapper.updateUser(user);
-    }
-    
-    @Override
-    @Transactional
-    public int deleteUserByIds(Long[] userIds) {
-        return userMapper.deleteUserByIds(userIds);
-    }
-}
-```
-
-**必须遵守：**
-- ✅ Service 实现加 `@Service`
-- ✅ 增删改方法加 `@Transactional`
-- ✅ 查询方法不加事务
-- ✅ 复杂业务在 Service 层处理，不在 Mapper/Controller
-- ✅ 文件顶部添加 `@author` 和 `@date` 注释
-
-#### 2.9 注解使用规范（强制）
-
-| 注解 | 使用位置 | 作用 | 必须性 |
-|------|----------|------|--------|
-| `@PreAuthorize` | Controller 方法 | 权限控制 | MUST |
-| `@Log` | Controller 方法 | 操作日志 | MUST（敏感操作） |
-| `@DataScope` | Mapper/Service 方法 | 数据权限 | MUST（需要时） |
-| `@Transactional` | Service 增删改方法 | 事务管理 | MUST |
-| `@Excel` | Entity 字段 | Excel 导出 | SHOULD（需要导出时） |
-| `@RepeatSubmit` | Controller 方法 | 防重复提交 | SHOULD |
 
 ---
 
-### 3. 前端架构约束
+## 4. 前端开发规范（`ruoyi-ui`，Vue 2）
 
-#### 3.1 目录结构约束（强制）
+### 4.1 目录与边界
 
 ```
-crm-web/src/
-├── api/                    # API 接口
-│   ├── system/             # 系统管理接口
-│   ├── monitor/            # 监控接口
-│   └── xxx/                # 业务模块接口
-├── assets/                 # 静态资源
-│   ├── icons/svg/          # SVG 图标
-│   ├── images/             # 图片
-│   └── styles/             # 样式
-├── components/             # 公共组件
-├── directive/              # 自定义指令
-├── layout/                 # 布局组件
-├── plugins/                # 插件
-├── router/                 # 路由配置
-├── store/                  # Pinia 状态管理
-│   └── modules/            # store 模块
-├── types/                  # TypeScript 类型
-│   └── api/                # API 类型定义
-├── utils/                  # 工具函数
-└── views/                  # 页面视图
-    ├── system/             # 系统管理页面
-    ├── monitor/            # 监控页面
-    └── xxx/                # 业务页面
+ruoyi-ui/src/
+├── api/            # ⚠️ 框架目录：system/、monitor/、tool/ 禁止改；业务接口放 api/<module>/
+├── assets/         # 🔴 styles/icons/images 禁止随意改
+├── components/     # 🔴 公共组件（PascalCase 目录，如 FileUpload/index.vue）
+├── directive/      # 🔴 v-hasPermi / v-hasRole 等指令
+├── layout/         # 🔴 布局
+├── plugins/        # 🔴 全局插件（$modal / $tab / $auth / $dict）
+├── router/         # 🔴 路由（菜单驱动的动态路由）
+├── store/          # 🔴 Vuex 模块
+├── utils/          # 🔴 request.js / auth.js / dict.js / ruoyi.js
+└── views/          # 🟢 业务页面放 views/<module>/
 ```
 
-**禁止行为：**
-- ❌ 在 `views` 外写页面组件
-- ❌ 在 `api` 外定义接口
-- ❌ 在 `components` 写页面级组件
+- 业务页面：`src/views/<module>/index.vue`（子页面如 `detail.vue`）
+- 业务接口：`src/api/<module>/<entity>.js`
+- 当前 `views/` 下只有 `dashboard/error/monitor/system/tool`；`bizperm`、`apilog` 页面按需新增，不得改动框架页面
 
-#### 3.2 文件命名约束（强制）
-
-| 类型 | 命名规则 | 示例 |
-|------|----------|------|
-| Vue 组件 | 小写，连字符分隔 | `user-list.vue`, `user-form.vue` |
-| API 文件 | 小驼峰 | `user.ts` |
-| 类型定义 | 小驼峰 | `user.ts` |
-| Store 模块 | 小驼峰 | `user.ts` |
-
-**禁止行为：**
-- ❌ Vue 文件使用大驼峰（`UserList.vue`）
-- ❌ 使用下划线分隔（`user_list.vue`）
-
-#### 3.3 Vue 组件规范（强制）
+### 4.2 页面规范（Options API）
 
 ```vue
 <template>
   <div class="app-container">
-    <!-- 搜索表单 -->
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch">
-      <el-form-item label="用户名称" prop="userName">
-        <el-input v-model="queryParams.userName" placeholder="请输入用户名称" clearable />
+    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch">
+      <el-form-item label="关键字" prop="keyword">
+        <el-input v-model="queryParams.keyword" placeholder="请输入关键字" clearable
+                  @keyup.enter.native="handleQuery" />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-        <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
-    
-    <!-- 操作按钮 -->
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button type="primary" plain icon="Plus" @click="handleAdd" v-hasPermi="['system:user:add']">新增</el-button>
-      </el-col>
-    </el-row>
-    
-    <!-- 数据表格 -->
-    <el-table v-loading="loading" :data="userList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="用户编号" align="center" prop="userId" />
-      <el-table-column label="操作" align="center" width="150">
-        <template #default="scope">
-          <el-button type="primary" link icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['system:user:edit']">修改</el-button>
-          <el-button type="primary" link icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['system:user:remove']">删除</el-button>
-        </template>
-      </el-table-column>
+
+    <el-table v-loading="loading" :data="list">
+      <el-table-column label="名称" prop="name" />
     </el-table>
-    
-    <!-- 分页 -->
-    <pagination v-show="total > 0" :total="total" v-model:page="queryParams.pageNum" v-model:limit="queryParams.pageSize" @pagination="getList" />
-    
-    <!-- 添加/修改对话框 -->
-    <el-dialog :title="title" v-model="open" width="600px" append-to-body>
-      <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="用户名称" prop="userName">
-          <el-input v-model="form.userName" placeholder="请输入用户名称" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
-      </template>
-    </el-dialog>
+
+    <pagination v-show="total > 0" :total="total"
+                :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
+                @pagination="getList" />
   </div>
 </template>
 
-<script setup lang="ts">
-import { listUser, getUser, addUser, updateUser, delUser } from '@/api/system/user'
-import type { UserQuery, UserForm, UserVO } from '@/types'
+<script>
+import { listXxx } from "@/api/bizperm/xxx"
 
-const { proxy } = getCurrentInstance()!
-
-const loading = ref(false)
-const showSearch = ref(true)
-const userList = ref<UserVO[]>([])
-const total = ref(0)
-const open = ref(false)
-const title = ref('')
-const queryParams = reactive<UserQuery>({ pageNum: 1, pageSize: 10 })
-const form = reactive<UserForm>({})
-const rules = {
-  userName: [{ required: true, message: '用户名称不能为空', trigger: 'blur' }]
-}
-
-const getList = async () => {
-  loading.value = true
-  const res = await listUser(queryParams)
-  userList.value = res.rows
-  total.value = res.total
-  loading.value = false
-}
-
-const handleQuery = () => {
-  queryParams.pageNum = 1
-  getList()
-}
-
-const resetQuery = () => {
-  proxy!.$refs.queryRef?.resetFields()
-  handleQuery()
-}
-
-const handleAdd = () => {
-  form.value = {}
-  open.value = true
-  title.value = '添加用户'
-}
-
-const handleUpdate = async (row: UserVO) => {
-  const res = await getUser(row.userId)
-  form.value = res.data
-  open.value = true
-  title.value = '修改用户'
-}
-
-const submitForm = async () => {
-  await proxy!.$refs.formRef.validate()
-  if (form.value.userId) {
-    await updateUser(form.value)
-    proxy!.$modal.msgSuccess('修改成功')
-  } else {
-    await addUser(form.value)
-    proxy!.$modal.msgSuccess('新增成功')
+export default {
+  name: "BizPermXxx",
+  data() {
+    return {
+      loading: false,
+      showSearch: true,
+      list: [],
+      total: 0,
+      queryParams: { pageNum: 1, pageSize: 10 }
+    }
+  },
+  created() {
+    this.getList()
+  },
+  methods: {
+    /** 查询列表 */
+    getList() {
+      this.loading = true
+      listXxx(this.queryParams).then(res => {
+        this.list = res.rows
+        this.total = res.total
+        this.loading = false
+      })
+    },
+    /** 搜索按钮 */
+    handleQuery() {
+      this.queryParams.pageNum = 1
+      this.getList()
+    }
   }
-  open.value = false
-  getList()
 }
-
-const handleDelete = async (row: UserVO) => {
-  await proxy!.$modal.confirm('是否确认删除用户编号为"' + row.userId + '"的数据项？')
-  await delUser(row.userId)
-  getList()
-  proxy!.$modal.msgSuccess('删除成功')
-}
-
-onMounted(() => {
-  getList()
-})
 </script>
 ```
 
-**必须遵守：**
-- ✅ 使用 `<script setup lang="ts">` 语法
-- ✅ 根元素使用 `class="app-container"`
-- ✅ 表格必须加 `v-loading`
-- ✅ 分页使用 `<pagination>` 组件
-- ✅ 按钮权限使用 `v-hasPermi`
-- ✅ 消息提示使用 `proxy!.$modal` 或 `proxy!.$message`
+必须遵守：
+- ✅ `<script>` 内使用 Options API：`data()`、`created()`、`methods`
+- ✅ 根元素 `class="app-container"`；表格 `v-loading`；分页用 `<pagination>` 组件
+- ✅ 按钮权限 `v-hasPermi="['bizperm:policy:add']"`
+- ✅ 消息与弹窗用 `this.$modal.msgSuccess()` / `this.$modal.confirm()` / `this.$message`
+- ✅ 字典用 `dicts: ['sys_yes_no']` + `dict.type.sys_yes_no`
+- ❌ 禁止 `<script setup>`、`ref/reactive`、`Element Plus` 组件名、`import type`
 
-#### 3.4 API 接口规范（强制）
+### 4.3 API 文件规范（JS）
 
-```typescript
-// api/system/user.ts
+```javascript
 import request from '@/utils/request'
-import type { UserQuery, UserForm, UserVO, TableDataInfo, AjaxResult } from '@/types'
 
-export function listUser(query: UserQuery): Promise<TableDataInfo<UserVO[]>> {
-  return request({
-    url: '/system/user/list',
-    method: 'get',
-    params: query
-  })
+/** 查询列表 */
+export function listXxx(query) {
+  return request({ url: '/bizperm/xxx/list', method: 'get', params: query })
 }
 
-export function getUser(userId: number): Promise<AjaxResult<UserVO>> {
-  return request({
-    url: '/system/user/' + userId,
-    method: 'get'
-  })
-}
-
-export function addUser(data: UserForm): Promise<AjaxResult> {
-  return request({
-    url: '/system/user',
-    method: 'post',
-    data: data
-  })
-}
-
-export function updateUser(data: UserForm): Promise<AjaxResult> {
-  return request({
-    url: '/system/user',
-    method: 'put',
-    data: data
-  })
-}
-
-export function delUser(userId: number | number[]): Promise<AjaxResult> {
-  return request({
-    url: '/system/user/' + userId,
-    method: 'delete'
-  })
+/** 新增 */
+export function addXxx(data) {
+  return request({ url: '/bizperm/xxx', method: 'post', data: data })
 }
 ```
 
-**必须遵守：**
-- ✅ 使用 `request` 封装函数
-- ✅ 定义完整的 TypeScript 类型
-- ✅ GET 请求用 `params`，POST/PUT 用 `data`
-
-#### 3.5 类型定义规范（强制）
-
-```typescript
-// types/system/user.ts
-
-export interface UserQuery {
-  pageNum?: number
-  pageSize?: number
-  userName?: string
-  status?: string
-  [key: string]: any
-}
-
-export interface UserForm {
-  userId?: number
-  userName?: string
-  nickName?: string
-  email?: string
-  status?: string
-  remark?: string
-}
-
-export interface UserVO {
-  userId: number
-  userName: string
-  nickName: string
-  email: string
-  status: string
-  createTime: string
-}
-```
-
-**必须遵守：**
-- ✅ 查询参数、表单、视图对象分开定义
-- ✅ 可选字段用 `?` 标记
-- ✅ 后端返回的字段用 `VO` 后缀
+- GET 用 `params`，POST/PUT 用 `data`
+- 函数必须写中文注释（功能说明）
+- 前端无 TypeScript，禁止 `.ts` 文件与类型声明文件
 
 ---
 
-## 第二部分：AI 开发边界控制（MUST）
+## 5. 数据库规范
 
-### 1. 区域划分
+**表命名**
+- 统一 `sys_` 前缀：系统表 `sys_user`，业务表 `sys_<模块>_<实体>`（如 `sys_biz_perm_policy`、`sys_interface_log`）
+- 小写 + 下划线，禁止驼峰
 
-#### 🔴 红色区域 - 框架核心（禁止修改）
+**字段命名**
+- 主键 `id` 或 `<表名>_id`
+- 逻辑删除 `del_flag`：`0` 正常、`2` 删除（与若依一致）
+- 状态 `status`：`0` 正常、`1` 停用
+- 时间 `create_time` / `update_time`；操作人 `create_by` / `update_by`
 
-**范围：**
+**索引**
+- 主键、外键、高频查询字段必须建索引
+- 索引名 `idx_<表名>_<字段名>`
 
-```
-后端：
-- ruoyi-framework/              # 框架核心模块
-- ruoyi-common/                 # 公共工具模块
-- ruoyi-system/                 # 系统管理模块
-- ruoyi-quartz/                 # 定时任务模块
-- ruoyi-generator/              # 代码生成器模块
-- ruoyi-admin/src/main/java/com/ruoyi/web/controller/system/  # 系统控制器
+**SQL 文件位置**
+- 框架初始化/系统表脚本：仓库根 `sql/`（如 `sqlserver.sql`、`quartz_sqlserver.sql`、`datadict_menu.sql`）
+- 模块业务脚本：模块内 `src/main/resources/sql/<module>/`（如 `ruoyi-bizperm/.../sql/bizperm/`、`ruoyi-apilog/.../sql/apilog/`）
 
-前端：
-- src/components/               # 公共组件
-- src/directive/                # 自定义指令
-- src/layout/                   # 布局组件
-- src/plugins/                  # 插件
-- src/router/                   # 路由配置
-- src/store/modules/            # 状态管理模块
-- src/utils/                    # 工具函数
-```
-
-**约束：**
-- ❌ **绝对禁止** AI 自动修改
-- ⚠️ 如果业务需求确实需要修改，AI 必须**停止操作**并**向用户报告**
-- ✅ 用户明确指令后，方可修改
-
-#### 🟡 黄色区域 - 公共工具（提醒确认）
-
-**范围：**
-
-```
-后端：
-- ruoyi-admin/src/main/java/com/ruoyi/web/controller/common/  # 通用控制器
-- ruoyi-admin/src/main/java/com/ruoyi/web/core/config/       # 配置类
-- 各模块的 utils/ 包                                        # 模块工具类
-
-前端：
-- src/assets/styles/            # 全局样式
-- src/types/                    # 全局类型定义（非业务）
-- .env.*                        # 环境配置文件
-```
-
-**约束：**
-- ⚠️ AI 可以修改，但**必须先提醒用户确认**
-- ✅ 用户确认后，方可执行修改
-
-#### 🟢 绿色区域 - 业务模块（自由修改）
-
-**范围：**
-
-```
-后端：
-- ruoyi-crm/                    # CRM 业务模块（自定义）
-- ruoyi-xxx/                    # 其他自定义业务模块
-
-前端：
-- src/views/crm/                # CRM 页面
-- src/views/xxx/                # 其他业务页面
-- src/api/crm/                  # CRM API
-- src/types/crm/                # CRM 类型定义
-```
-
-**约束：**
-- ✅ AI 可以自由修改
-- ✅ 必须遵守 Rules 中的技术规范
+**SQL 脚本命名（按脚本类别，替代旧「文件名使用表名」单条表述）**
+- **建表脚本（一表一名）**：文件名 = 表名，小写下划线，如 `sys_biz_perm_policy.sql`、`sys_interface_log.sql`
+- **初始化脚本（多表/全量）**：`<范围>_init[_方言]`，如 `bizperm_init_all.sql`；**存量豁免**：根目录 `sqlserver.sql`、`quartz_sqlserver.sql` 沿用现名（已被 docs/规则引用，不改名）
+- **数据脚本（菜单/字典等基础数据）**：`<功能>_menu.sql` / `<功能>_dict.sql`，如 `datadict_menu.sql`、`sys_interface_log_menu.sql`；**存量豁免**：`sys_menu_bizperm.sql`、`sys_dict_bizperm.sql` 沿用现名（docs 已引用），**新增一律用 `<功能>_menu` 风格**
+- 通用：小写 + 下划线、后缀 `.sql`；禁止在 Java 代码中硬编码建表语句
 
 ---
 
-## 第三部分：项目自定义规则（SHOULD）
+## 6. 文档规范
 
-### 1. 代码审查清单
-
-#### 1.1 后端审查项
-
-- [ ] 新增接口是否添加了 `@PreAuthorize` 权限控制
-- [ ] 敏感操作是否添加了 `@Log` 操作日志
-- [ ] 需要数据权限的查询是否添加了 `@DataScope`
-- [ ] 增删改操作是否添加了 `@Transactional`
-- [ ] Controller 是否继承了 `BaseController`
-- [ ] 列表查询是否调用了 `startPage()`
-- [ ] 返回结果是否使用了 `AjaxResult` / `TableDataInfo`
-- [ ] SQL 是否使用了 `#{}` 参数绑定（非 `${}`）
-- [ ] 是否避免了 N+1 查询问题
-- [ ] 是否处理了空指针和边界情况
-
-#### 1.2 前端审查项
-
-- [ ] 是否使用了 TypeScript 类型定义
-- [ ] API 接口是否定义了完整的返回类型
-- [ ] 表格是否添加了 `v-loading`
-- [ ] 分页是否使用了 `<pagination>` 组件
-- [ ] 按钮权限是否使用了 `v-hasPermi`
-- [ ] 字典数据是否使用了 `useDict`
-- [ ] 表单是否添加了验证规则
-- [ ] 是否处理了接口错误情况
-
-### 2. 安全红线
-
-**绝对禁止：**
-
-- ❌ 在代码中硬编码密码、密钥、Token
-- ❌ 在生产环境开启 SQL 日志打印参数
-- ❌ 返回敏感字段给前端（如 password、salt）
-- ❌ 使用 `${}` 拼接用户输入的参数
-- ❌ 在日志中打印敏感信息
-
-### 3. 性能约束
-
-**必须遵守：**
-
-- ✅ 列表查询必须分页，禁止查询全表数据
-- ✅ 循环中禁止查询数据库（先查询再循环处理）
-- ✅ 避免 N+1 查询（使用 JOIN 或批量查询）
-- ✅ 大数据量导出使用异步任务
-- ✅ 前端表格大数据量使用虚拟滚动
-
-### 4. Git 提交规范
-
-**Commit Message 格式：**
-
-```
-<type>(<scope>): <subject>
-
-<body>
-
-<footer>
-```
-
-**Type 类型：**
-
-- `feat`: 新功能
-- `fix`: 修复
-- `docs`: 文档
-- `style`: 格式（不影响代码运行的变动）
-- `refactor`: 重构
-- `perf`: 性能优化
-- `test`: 测试
-- `chore`: 构建过程或辅助工具的变动
-
-**示例：**
-
-```
-feat(user): 新增用户批量导入功能
-
-- 支持 Excel 模板下载
-- 支持批量校验和导入
-- 导入结果异步通知
-
-Closes #123
-```
-
-### 5. 数据库规范
-
-**表命名：**
-
-- 使用小写字母，下划线分隔
-- 业务表以模块前缀开头，如 `crm_customer`
-- 系统表以 `sys_` 开头
-
-**字段命名：**
-
-- 使用小写字母，下划线分隔
-- 主键统一为 `id` 或 `表名_id`
-- 逻辑删除字段统一为 `del_flag`（0-正常，1-删除）
-- 状态字段统一为 `status`（0-正常，1-停用）
-- 时间字段：`create_time`, `update_time`
-- 操作人字段：`create_by`, `update_by`
-
-**索引规范：**
-
-- 主键必须建索引
-- 外键必须建索引
-- 查询频繁的字段必须建索引
-- 索引名：`idx_表名_字段名`
+- 文档统一放 `docs/`，按四类归档：`01-requirements/`、`02-development/`、`03-optimization/`、`04-bugfix/`
+- 每类下按模块建子目录（英文小写、短横线分隔，如 `bizperm`、`number-rule`、`datasource`）
+- 新建文档使用 `_template-*.md` 模板，并同步更新所属分类目录 README 索引表与 `docs/README.md` 索引
+- 6A 工作流产物同样归入上述分类目录：需求/对齐 → `01-requirements/<module>/`，设计/任务/验收/总结 → `02-development/<module>/`，缺陷 → `04-bugfix/<module>/`；**禁止在 `docs/` 根下新建 `任务名/` 平铺目录**
+- 文档在线查阅：`http://localhost:8080/docs/index.html`（`DocCenterController`，匿名放行）
 
 ---
 
-## 第四部分：开发流程与规范
+## 7. 代码审查清单
 
-### Java文件注释规范
+**后端**
+- [ ] 业务代码是否放入自建业务模块（未改框架模块）
+- [ ] 新增接口是否加 `@PreAuthorize`（豁免范围见 3.7 豁免条款），敏感操作是否加 `@Log`
+- [ ] 增删改是否加 `@Transactional`（单条无关联写入豁免见 3.6）
+- [ ] 列表是否 `startPage()` + `getDataTable()`
+- [ ] SQL 是否兼容 SQL Server（top / getdate / 无 limit），Oracle 语句是否带 `FROM DUAL`
+- [ ] 是否已过 `sqlserver-compat-check` 校验
+- [ ] 是否使用 `#{}` 绑定，是否有 N+1 查询
+- [ ] Java 文件顶部是否有 `@author` / `@date`
 
-**所有Java类、接口、Mapper文件顶部必须添加注释：**
-
-```java
-/**
- * @author ${USER_NAME}
- * @date ${CURRENT_DATE}
- */
-```
-
-> **说明**: 
-> - `${USER_NAME}` - 填写开发者姓名
-> - `${CURRENT_DATE}` - 填写当前日期，格式 `yyyy-MM-dd`
->
-> **示例**:
-> ```java
-> /**
->  * @author Zhang san
->  * @date 2026-06-16
->  */
-> ```
-
-### 新增功能模块步骤
-
-1. **数据库**: 创建表结构 (MSSQL)
-2. **后端开发** (crm-api):
-   - Domain实体类 (`ruoyi-system/.../domain/`)
-   - Mapper接口 + XML (`ruoyi-system/.../mapper/`)
-   - Service接口 + 实现 (`ruoyi-system/.../service/`)
-   - Controller控制器 (`ruoyi-admin/.../controller/`)
-3. **前端开发** (crm-web):
-   - 类型定义 (`src/types/模块/`)
-   - API接口 (`src/api/模块/`)
-   - 页面组件 (`src/views/模块/`)
+**前端**
+- [ ] 是否 Vue 2 Options API（无 Vue3/TS/Element Plus 写法）
+- [ ] 表格 `v-loading`、分页 `<pagination>`、按钮 `v-hasPermi`
+- [ ] 接口方法是否集中在 `src/api/<module>/`
+- [ ] 字典是否用 `dicts`，消息是否用 `this.$modal`
+- [ ] 是否改动 `router/store/utils/layout/plugins` 等框架目录（应避免）
 
 ---
 
-## 第五部分：常用命令与工具
+## 8. 安全红线与性能
 
-### 常用命令
+**安全红线**
+- ❌ 代码、文档、日志、提交信息中出现数据库口令、密钥、Token
+- ❌ 返回 `password`、`salt` 等敏感字段
+- ❌ 使用 `${}` 拼接用户输入
+- ❌ 生产环境打印 SQL 参数与敏感日志
 
-#### 后端 (crm-api)
+**性能**
+- ✅ 列表必须分页，禁止全表查询
+- ✅ 禁止循环内查库，改用批量/JOIN
+- ✅ 大数据导出使用异步任务
+- ✅ 前端大表格使用分页或虚拟滚动
+
+---
+
+## 9. Git 规范
+
+- 提交信息：`<type>(<scope>): <subject>`，type ∈ `feat|fix|docs|style|refactor|perf|test|chore`
+- 远程仓库：
+  - `origin`：**唯一提交/推送目标**（主远程仓库）
+  - 其他历史远程（如 `crm-api`）：**禁止 push / merge / pull**，如需查阅先与负责人确认
+- 提交前确认当前分支（`master`）与变更范围，禁止提交 `target/`、`.idea/`、含口令的配置文件
+
+---
+
+## 10. 常用命令
+
+**后端（仓库根目录）**
+
 ```bash
-# 进入目录
-cd crm-api
-
-# 打包
-mvn clean package
-
-# 运行
-mvn spring-boot:run
-
-# 跳过测试打包
-mvn clean package -DskipTests
-
-# 跳过测试安装到本地仓库
-mvn clean install -DskipTests
+mvn clean package -DskipTests        # 打包
+mvn clean install -DskipTests        # 安装到本地仓库
 ```
 
-#### 前端 (crm-web)
-```bash
-# 进入目录
-cd crm-web
+- 启动：IDEA 运行 `ruoyi-admin` 的 `RuoYiApplication`（Windows 也可用根目录 `ry.bat`）
+- 端口：`8080`；配置：`ruoyi-admin/src/main/resources/application.yml`、`application-druid.yml`
 
-# 安装依赖
+**前端（`ruoyi-ui`）**
+
+```bash
 npm install
-
-# 开发运行
-npm run dev
-
-# 生产构建
-npm run build:prod
-
-# 预览构建结果
-npm run preview
+npm run dev          # 开发，端口 80，/dev-api 代理到 8080
+npm run build:prod   # 生产构建
 ```
 
-### 附录：常用工具类
+---
 
-#### 后端工具类
+## 11. 常用工具类
 
-| 类名 | 路径 | 用途 |
-|------|------|------|
-| StringUtils | `com.ruoyi.common.utils.StringUtils` | 字符串处理 |
-| DateUtils | `com.ruoyi.common.utils.DateUtils` | 日期处理 |
-| SecurityUtils | `com.ruoyi.common.utils.SecurityUtils` | 获取当前用户 |
-| ServletUtils | `com.ruoyi.common.utils.ServletUtils` | Servlet 工具 |
-| ExcelUtil | `com.ruoyi.common.utils.poi.ExcelUtil` | Excel 导入导出 |
-| RedisCache | `com.ruoyi.common.core.redis.RedisCache` | Redis 操作 |
+**后端**
 
-#### 前端工具类
+| 类 | 路径 |
+|---|---|
+| StringUtils | `com.ruoyi.common.utils.StringUtils` |
+| DateUtils | `com.ruoyi.common.utils.DateUtils` |
+| SecurityUtils | `com.ruoyi.common.utils.SecurityUtils` |
+| ServletUtils | `com.ruoyi.common.utils.ServletUtils` |
+| ExcelUtil | `com.ruoyi.common.utils.poi.ExcelUtil` |
+| RedisCache | `com.ruoyi.common.core.redis.RedisCache` |
+
+**前端**
 
 | 文件 | 路径 | 用途 |
-|------|------|------|
-| request.ts | `src/utils/request.ts` | HTTP 请求封装 |
-| auth.ts | `src/utils/auth.ts` | Token 管理 |
-| dict.ts | `src/utils/dict.ts` | 字典工具 |
-| ruoyi.ts | `src/utils/ruoyi.ts` | 若依通用工具 |
+|---|---|---|
+| request.js | `src/utils/request.js` | HTTP 封装 |
+| auth.js | `src/utils/auth.js` | Token 管理 |
+| dict.js | `src/utils/dict.js` | 字典 |
+| ruoyi.js | `src/utils/ruoyi.js` | 通用工具（`parseTime`、`parseStrEmpty` 等） |
 
 ---
 
-## 注意事项
+## 12. 注意事项
 
-1. **数据库**: 使用MSSQL，注意SQL语法差异
-   - 分页使用 `SELECT TOP n` 而非 `LIMIT`
-   - 字符串拼接使用 `concat()` 函数
+1. **数据库**：主库 SQL Server（`SELECT TOP`、`getdate()`），副库 Oracle（`FROM DUAL`）；分页统一 PageHelper
+2. **作者信息**：新文件顶部写 `@author` 与 `@date`，使用开发者本人姓名
+3. **代码生成**：可用 `ruoyi-generator` 生成基础代码，但生成后须按本规则校正包名/模块位置
+4. **权限**：后端 `@PreAuthorize`，前端 `v-hasPermi` / `v-hasRole`
+5. **端口/代理**：后端 `8080`，前端 dev `80`，接口前缀 `/dev-api`
+6. **前端唯一目录**：`ruoyi-ui`；`crm-web`、`ruoyi-crm` 不存在，禁止引用
+7. **文档中心**：`http://localhost:8080/docs/index.html`；探测不到项目根目录时配置 `ruoyi.docPath`
+8. **规则维护**：发现本文件与代码不一致，先按代码执行，并同步修订本文件（改规则需用户确认）
 
-2. **作者信息**: 新文件顶部添加注释，使用开发者自己的姓名
+---
 
-3. **代码生成**: 可使用 ruoyi-generator 模块生成基础代码
+## 13. 纯 AI 新增项目/模块开发步骤（强制流程）
 
-4. **权限控制**: 
-   - 后端: Spring Security + JWT + `@PreAuthorize`
-   - 前端: 指令 `v-hasPermi` / `v-hasRole`
+> 由 AI 独立完成的**新增功能/新增模块**，必须按以下顺序执行；任一步骤存疑先中断询问，禁止跳步直接写代码。
 
-5. **路径映射**:
-   - 后端端口: `8080`
-   - 前端代理: `/dev-api` 转发到后端
+### 步骤1：需求对齐（文档先行）
+- 先检索记忆与现有代码，确认无重复实现；产出 `docs/01-requirements/<module>/<名称>-prd.md`（复制 `_template-prd.md`），写清范围、验收标准、待确认问题
+- 关键决策点（表结构、权限模型、外部接口范围）中断询问用户，共识后写入 PRD
 
-6. **文件位置**:
-   - 规则文档: `crm-api/.trae/rules/project-rules.md`
-   - 其他文档: `crm-api/.trae/docs/`
+### 步骤2：方案设计
+- 产出 `docs/02-development/<module>/<名称>-plan.md` 或 `-dev.md`：分层架构、接口契约、数据模型、异常处理
+- 涉及 SQL 的，方案中先过 `.trae/skills/sqlserver-compat-check/SKILL.md` 校验清单
 
-7. **作废目录警告**:
-   - `crm-api/ruoyi-ui/` **已作废**，请勿在此目录下编写任何前端代码
-   - 前端开发请统一在 `crm-web/` 目录下进行
+### 步骤3：任务拆分与确认
+- 按可独立编译验证的粒度拆子任务，明确依赖顺序与验收标准（6A 工作流的 TASK 文档可复用），复杂任务先请用户确认
 
-8. **SQL 文件存放规范**:
-   - 所有初始化、建表 SQL 文件统一放在 `src/main/resources/sql/` 目录下
-   - 按模块分类存放，目录结构如下：
-     ```
-     src/main/resources/sql/
-     ├── system/                 # 系统模块 SQL
-     │   ├── sys_user.sql        # 用户表
-     │   ├── sys_role.sql        # 角色表
-     │   └── sys_menu.sql        # 菜单表
-     ├── crm/                    # CRM 业务模块 SQL
-     │   ├── customer/           # 客户管理
-     │   │   ├── crm_customer_report.sql      # 客户报备表
-     │   │   ├── crm_customer_archive.sql     # 客户档案表
-     │   │   └── crm_customer_contact.sql     # 客户联系人表
-     │   ├── opportunity/        # 商机管理
-     │   │   └── crm_opportunity.sql          # 商机表
-     │   ├── brand/              # 品牌管理
-     │   │   └── crm_brand.sql                # 品牌表
-     │   ├── material/           # 物料管理
-     │   │   └── crm_material.sql             # 物料表
-     │   └── quotation/          # 报价单管理
-     │   │   ├── crm_quotation.sql            # 报价单主表
-     │   │   └── crm_quotation_detail.sql     # 报价单明细表
-     └── init/                   # 初始化 SQL
-         └── init_data.sql       # 初始化数据
-     ```
-   - SQL 文件命名规范：`表名.sql`（如 `crm_customer_archive.sql`）
-   - 每个 SQL 文件包含：建表语句、索引、初始数据（如有）
-   - **禁止**在代码中硬编码建表 SQL，必须使用独立 SQL 文件
+### 步骤4：工程骨架
+- 代码落位：新建 `ruoyi-xxx` 自建模块，或复用 `ruoyi-bizperm` / `ruoyi-apilog`，包结构按 §3.1；**禁止进框架红区**（§1 模块表）
+- SQL 脚本落位：建表 `<表名>.sql`、菜单 `<功能>_menu.sql`、字典 `<功能>_dict.sql`，统一放 `src/main/resources/sql/<module>/`
+
+### 步骤5：后端实现
+- 按 §3.2~§3.9 编写 Controller/Service/Mapper：命名、`@PreAuthorize`（豁免见 §3.7）、`@Transactional`（豁免见 §3.6）、`startPage()+getDataTable()`、文件头 `@author/@date`、函数中文注释
+- 所有 SQL 先过 sqlserver-compat-check 再输出
+
+### 步骤6：前端实现
+- 按 §4 编写 `ruoyi-ui/src/views/<module>/index.vue` 与 `src/api/<module>/*.js`：Vue 2 Options API、`<pagination>`、`v-hasPermi`、`this.$modal`
+- 菜单 SQL 中的组件路径必须与实际页面文件一一对应，避免点击白屏
+
+### 步骤7：编译与自测
+- 后端：`mvn -pl ruoyi-admin -am compile -DskipTests`（本机需 `JAVA_HOME` 指向 JDK17；命令行默认 java 为 1.8 会报「无效的目标发行版 17」，可用 IDEA 自带 JBR：`D:\Idea 2024\JetBrains\IntelliJ IDEA 2024.3.7\jbr`）
+- 前端：`npm run dev`；逐条对照 PRD 验收标准自测，失败项修复后重测
+
+### 步骤8：文档与索引同步
+- 更新 `docs/01-requirements|02-development/<module>/README.md` 索引与 `docs/README.md`；新文档首行保留中文标题并写明「中文名称：xxx」（文档中心按此显示）
+- 缺陷记入 `docs/04-bugfix/<module>/`
+
+### 步骤9：交付确认
+- 输出变更清单（新增/修改文件、SQL 脚本执行方式、菜单/字典初始化步骤、启动与验证方式）
+- 需要执行的 SQL（建表/菜单）明确告知用户手工执行；涉及本规则修订的，先取得用户确认再改
+- 提交按 §9 规范，禁止提交 `target/`、`.idea/`、含口令配置

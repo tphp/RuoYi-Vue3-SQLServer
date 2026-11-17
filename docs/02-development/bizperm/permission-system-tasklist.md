@@ -1,5 +1,7 @@
 # 业务级权限体系开发任务清单
 
+> 中文名称：业务级权限体系开发任务清单
+
 > 依据：《业务级权限体系需求开发方案》v1.2
 > 范围：核心 2 张表 + 权限结构树相关接口（`tree`、`tree/children`、`my/tree`、`visible-users`）
 > 技术栈：Spring Boot 4 + Java 17 + MyBatis + SQL Server + RuoYi `ruoyi-ui`（Vue2 + Element UI）
