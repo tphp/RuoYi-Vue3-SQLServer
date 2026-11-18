@@ -41,5 +41,7 @@
 | 数据源接入 | `common/datasource/` | [Oracle数据源接入实施计划](common/datasource/oracle-datasource-plan.md) |
 | 接口日志 | `common/apilog/` | [接口日志功能开发文档](common/apilog/api-log-dev.md)（回溯补录） |
 | 消息队列 | `common/mq/` | [RabbitMQ 接入方案（外部接口失败重试）](common/mq/rabbitmq-plan.md) |
+| 系统国际化 | `common/i18n/` | [系统国际化开发文档](common/i18n/i18n-dev.md)（回溯补录） |
+| 系统国际化 | `common/i18n/` | [系统国际化使用指南](common/i18n/i18n-usage.md)（回溯补录） |
 | 全项目结构 | `common/structure/` | [全项目结构说明](common/structure/project-structure.md) |
 | AI 开发协作 | `ai-dev/` | [AI开发协作指南](ai-dev/ai-workflow.md) |

@@ -39,3 +39,4 @@
 | 外部系统接口对接 | `common/external-api/` | [外部系统接口对接需求文档](common/external-api/external-integration-prd.md)（回溯补录） |
 | 数据源接入 | `common/datasource/` | [Oracle副数据源接入需求文档](common/datasource/oracle-datasource-prd.md)（回溯补录） |
 | 消息队列 | `common/mq/` | [RabbitMQ 外部接口失败重试需求文档](common/mq/rabbitmq-prd.md) |
+| 系统国际化 | `common/i18n/` | [系统国际化功能需求文档](common/i18n/i18n-prd.md)（回溯补录） |
