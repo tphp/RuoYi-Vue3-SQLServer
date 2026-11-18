@@ -4,7 +4,7 @@
 
 > 依据：《业务级权限体系需求开发方案》v1.2
 > 范围：核心 2 张表 + 权限结构树相关接口（`tree`、`tree/children`、`my/tree`、`visible-users`）
-> 技术栈：Spring Boot 4 + Java 17 + MyBatis + SQL Server + RuoYi `ruoyi-ui`（Vue2 + Element UI）
+> 技术栈：Spring Boot 4 + Java 17 + MyBatis + SQL Server + 主前端 `xxx-web`（Vue 3.5 + TypeScript + Element Plus，独立仓库、与本仓库平级）
 > 说明：本清单以方案第 4 章的 MVP 模型为准；第 13 章的 DENY、场景注册表、SQL 下推等 P0/P1 项不纳入本次开发。
 
 ---
@@ -701,35 +701,28 @@ TreePageResult<BizPermTreeNodeVo> listChildren(BizPermTreeChildrenQueryBo query)
 
 ### FE-01 API 封装
 
-文件：`ruoyi-ui/src/api/bizperm/policy.js`
+文件：`xxx-web/src/api/bizperm/policy.ts`（类型定义位于 `xxx-web/src/types/api/bizperm.ts`，经 `types/api/index.ts` 聚合导出）
 
-```javascript
+```typescript
 import request from '@/utils/request'
+import type { AjaxResult, TreePageResult, BizPermTreeNode, BizPermTreeQuery, BizPermTreeChildrenQuery } from '@/types'
 
-// 查询权限结构树首屏
-export function getPermTree(query) {
+/** 查询权限结构树首屏 */
+export function getPermTree(query?: BizPermTreeQuery): Promise<AjaxResult<TreePageResult<BizPermTreeNode>>> {
   return request({ url: '/bizperm/policy/tree', method: 'get', params: query })
 }
 
-// 懒加载树节点子级
-export function getPermTreeChildren(query) {
+/** 懒加载树节点子级 */
+export function getPermTreeChildren(query: BizPermTreeChildrenQuery): Promise<AjaxResult<TreePageResult<BizPermTreeNode>>> {
   return request({ url: '/bizperm/policy/tree/children', method: 'get', params: query })
 }
 
-// 查询我的权限树
-export function getMyPermTree(query) {
-  return request({ url: '/bizperm/my/tree', method: 'get', params: query })
-}
-
-// 查询我的可见员工
-export function getMyVisibleUsers(query) {
-  return request({ url: '/bizperm/my/visible-users', method: 'get', params: query })
-}
+// 查询我的权限树、我的可见员工等方法同文件追加，签名同样标注 TS 返回类型
 ```
 
 ### FE-02 树形页面与我的权限
 
-文件：`ruoyi-ui/src/views/bizperm/policy/index.vue`
+文件：`xxx-web/src/views/bizperm/policy/index.vue`（`<script setup lang="ts">` + Element Plus）
 
 - [ ] 顶部 Tab：`权限结构` / `策略列表` / `我的权限`。
 - [ ] 权限结构：`el-tree` 懒加载，`:props="{ label: 'label', isLeaf: 'leaf', disabled: 'disabled' }"`。
@@ -739,7 +732,7 @@ export function getMyVisibleUsers(query) {
 - [ ] 停用节点置灰并显示状态标签。
 - [ ] 我的权限：复用树组件，根节点固定当前用户，隐藏编辑按钮。
 - [ ] 策略列表：场景编码、场景名称、权限归属人、含下级、状态、更新时间、操作。
-- [ ] 新增/编辑抽屉：场景下拉（字典 `biz_perm_policy`）、归属人选择（人员/岗位/部门）、多部门选择（`treeselect` 多选）、含下级开关。
+- [ ] 新增/编辑抽屉：场景下拉（字典 `biz_perm_policy`）、归属人选择（人员/岗位/部门）、多部门选择（部门树多选）、含下级开关。
 - [ ] 按钮权限：`bizperm:policy:query/add/edit/remove`。
 
 **完成标准**

@@ -159,7 +159,7 @@ public class SomeServiceImpl implements ISomeService {
 
 ### 1. 编译验证
 ```bash
-cd d:\smc-api
+cd <项目根目录>
 mvn clean compile -DskipTests
 ```
 预期：BUILD SUCCESS，无编译错误。
@@ -167,7 +167,7 @@ mvn clean compile -DskipTests
 ### 2. 配置验证（不启用 Oracle）
 保持 `oracle.enabled: false`，启动应用：
 ```bash
-cd d:\smc-api\ruoyi-admin
+cd <项目根目录>\ruoyi-admin
 mvn spring-boot:run
 ```
 预期：应用正常启动，`@ConditionalOnProperty` 让 oracleDataSource Bean 不创建，无副作用。

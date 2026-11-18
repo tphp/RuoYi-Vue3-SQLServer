@@ -77,5 +77,5 @@
 
 ## 8. 关联文档
 
-- [外部系统接口对接方案（02-development/external-api）](../../02-development/external-api/external-integration-plan.md)
-- [接口日志功能需求文档（01-requirements/apilog）](../apilog/api-log-prd.md)
+- [外部系统接口对接方案（02-development/common/external-api）](../../../02-development/common/external-api/external-integration-plan.md)
+- [接口日志功能需求文档（01-requirements/common/apilog）](../apilog/api-log-prd.md)

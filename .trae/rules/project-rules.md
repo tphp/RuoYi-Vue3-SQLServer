@@ -4,7 +4,7 @@
 
 > **项目根目录**: 当前仓库根目录
 > **规则位置**: `.trae/rules/`（`rules.md` 为全局文档规则，本文件为技术基线）
-> **规则版本**: v2.0（2026-11-17 按实际代码库校正）
+> **规则版本**: v2.1（2026-11-18 双前端修订：新增主前端 `D:\ebs-web`（Vue3+TS），`ruoyi-ui` 改为并行维护，修订 §1/§2/§4；v2.0 为 2026-11-17 按实际代码库校正）
 > **废弃声明**: v1.0 中出现的 `ruoyi-crm`、`crm-api/`、`crm-web/`、「ruoyi-ui 已作废」等描述均与当前仓库不符，**已作废，不得再作为路径依据**。
 
 ---
@@ -32,9 +32,10 @@
 | `ruoyi-generator` | 代码生成器 | 🔴 禁止修改 |
 | `ruoyi-apilog` | 接口日志：入站日志过滤器、出站接口客户端、日志落库、日志查询 | 🟢 可自由修改 |
 | `ruoyi-bizperm` | 业务级权限体系（策略、范围、权限树、可见人员） | 🟢 可自由修改 |
-| `ruoyi-ui` | **唯一有效前端**（Vue 2 + Element UI） | 🟢 `src/views/<模块>`、`src/api/<模块>` 可改；其余目录见第 4 节 |
+| `ebs-web`（`D:\ebs-web`，独立仓库） | **主前端**（Vue 3 + TypeScript + Vite + Element Plus），含全部业务页面（bizperm/apilog/apiKey/numberRule/datadict 等），代理指向本后端 8080 | 🟢 `src/views/<模块>`、`src/api/<模块>`、`src/types/api/<模块>` 可改；其余目录见 §4 |
+| `ruoyi-ui` | **旧前端（并行维护）**（Vue 2 + Element UI），仅框架页面，业务页面落后于主前端 | 🟢 `src/views/<模块>`、`src/api/<模块>` 可改；其余目录见 §4 |
 
-> ⚠️ 前端只有 `ruoyi-ui` 一个工程，**不存在 `crm-web`**。禁止引用或新建 `crm-web`。
+> ⚠️ **双前端并行维护**：主前端 `D:\ebs-web`（Vue3+TS），旧前端 `ruoyi-ui`（Vue2），**同一业务功能两端均需实现**（分工与规范见 §4）。**不存在 `crm-web`**，禁止引用或新建 `crm-web`。
 
 ---
 
@@ -55,7 +56,25 @@
 | 主数据库 | SQL Server | 主库（库名见 `application-druid.yml`） |
 | 副数据库 | Oracle | 副库 / 外部系统数据源（按需启用） |
 
-### 2.2 前端
+### 2.2 前端（双前端并行，规范分列）
+
+**主前端 `D:\ebs-web`（Vue 3 + TypeScript，新业务默认落此端）**
+
+| 层级 | 技术 | 版本 |
+|------|------|------|
+| 框架 | Vue | 3.5.26（`<script setup>` + Composition API） |
+| 语言 | TypeScript | 5.6.3（业务代码必须带类型定义，`src/types/api/`） |
+| UI 库 | Element Plus | 2.13.1（禁止引入其他 UI 库） |
+| 状态管理 | Pinia | 3.0.4（禁用 Vuex） |
+| 路由 | vue-router | 4.6.4 |
+| 构建 | Vite | 6.4.1（禁用 vue-cli） |
+| HTTP | axios | 1.13.2 |
+| 样式 | Sass（sass-embedded） | 1.97.2 |
+
+- 开发端口 5173，`/dev-api` 代理至后端 8080（`vite.config.ts` + `.env*`）
+- **在 ebs-web 中禁止**回退 Vue2/Options API 主写法、Element UI、Vuex
+
+**旧前端 `ruoyi-ui`（Vue 2，位于本仓库内，并行维护）**
 
 | 层级 | 技术 | 版本 |
 |------|------|------|
@@ -67,7 +86,7 @@
 | HTTP | axios | 0.30.3 |
 | 样式 | Sass | 1.32.13 |
 
-> 前端是 **Vue 2 + JavaScript**，禁止使用 Vue 3 语法、Composition API、TypeScript、Element Plus、Pinia、Vite。
+> ⚠️ 技术栈**按目录严格隔离**：`ruoyi-ui` 内是 **Vue 2 + JavaScript**，禁止 Vue 3 语法、Composition API、TypeScript、Element Plus、Pinia、Vite；`D:\ebs-web` 内反向禁止 Vue2/Element UI 写法。写代码前先确认目标前端目录，禁止串栈。
 
 ---
 
@@ -230,7 +249,20 @@ public class BizPermPolicyController extends BaseController
 
 ---
 
-## 4. 前端开发规范（`ruoyi-ui`，Vue 2）
+## 4. 前端开发规范（双前端并行：主前端 `D:\ebs-web` / 旧前端 `ruoyi-ui`）
+
+### 4.0 适用范围与分工（必读）
+
+| 项 | 主前端 `D:\ebs-web` | 旧前端 `ruoyi-ui`（本仓库） |
+|----|--------------------|---------------------------|
+| 技术栈 | Vue 3.5 + TypeScript + Vite + Element Plus + Pinia（§2.2 上表） | Vue 2.6 + JavaScript + vue-cli + Element UI + Vuex（§2.2 下表） |
+| 地位 | 含全部业务页面，联调代理指向本后端 8080 | 并行维护，业务页面落后，需补齐 |
+| 业务代码边界 | `src/views/<模块>`、`src/api/<模块>`、`src/types/api/<模块>` | `src/views/<模块>`、`src/api/<模块>` |
+| 规范章节 | §4.1（目录）、§4.4、§4.5 | §4.1（目录）、§4.2、§4.3 |
+
+- **同一业务功能两端均需实现**（并行维护约定）：新增/改造业务时，先确认两端清单，后端接口共用，前端分别按各自技术栈落地
+- **写代码前先判定目标目录**，严格按 §2.2 技术栈隔离，禁止串栈（在 ebs-web 写 Options API/Element UI、在 ruoyi-ui 写 `<script setup>`/TS 均属违规）
+- 不确定落在哪端时，**中断询问用户**
 
 ### 4.1 目录与边界
 
@@ -252,7 +284,22 @@ ruoyi-ui/src/
 - 业务接口：`src/api/<module>/<entity>.js`
 - 当前 `views/` 下只有 `dashboard/error/monitor/system/tool`；`bizperm`、`apilog` 页面按需新增，不得改动框架页面
 
-### 4.2 页面规范（Options API）
+**主前端 `D:\ebs-web` 目录与边界**
+
+```
+ebs-web/src/
+├── api/            # ⚠️ 框架接口：system/、monitor/、tool/ 等存量框架目录禁止改；业务接口放 api/<module>/
+├── types/api/      # 🟢 业务接口类型定义（与 api/<module> 对应）
+├── views/          # 🟢 业务页面放 views/<module>/
+├── assets/  components/  layout/  directive/  # 🔴 框架目录，禁止改
+├── plugins/  router/  store/  utils/           # 🔴 框架目录（request.ts/auth.ts/dict.ts 等禁改）
+└── vite/  vite.config.ts  tsconfig.json        # 🔴 构建配置，改动需用户确认
+```
+
+- 业务页面：`src/views/<module>/index.vue`（已有 `bizperm/policy`、`apilog/*`、`system/apiKey|numberRule|datadict|commonApi`、`sale/order` 等可参考）
+- 业务接口：`src/api/<module>/<entity>.ts` + 类型 `src/types/api/<module>/*.ts`
+
+### 4.2 `ruoyi-ui` 页面规范（Vue 2 Options API）
 
 ```vue
 <template>
@@ -323,7 +370,7 @@ export default {
 - ✅ 字典用 `dicts: ['sys_yes_no']` + `dict.type.sys_yes_no`
 - ❌ 禁止 `<script setup>`、`ref/reactive`、`Element Plus` 组件名、`import type`
 
-### 4.3 API 文件规范（JS）
+### 4.3 `ruoyi-ui` API 文件规范（JS）
 
 ```javascript
 import request from '@/utils/request'
@@ -342,6 +389,70 @@ export function addXxx(data) {
 - GET 用 `params`，POST/PUT 用 `data`
 - 函数必须写中文注释（功能说明）
 - 前端无 TypeScript，禁止 `.ts` 文件与类型声明文件
+
+### 4.4 `ebs-web` 页面与 API 规范（Vue 3 + TypeScript）
+
+```vue
+<template>
+  <div class="app-container">
+    <el-form :model="queryParams" ref="queryFormRef" size="small" :inline="true" v-show="showSearch">
+      <el-form-item label="关键字" prop="keyword">
+        <el-input v-model="queryParams.keyword" placeholder="请输入关键字" clearable
+                  @keyup.enter="handleQuery" />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" icon="el-icon-search" size="small" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh" size="small" @click="resetQuery">重置</el-button>
+      </el-form-item>
+    </el-form>
+
+    <el-table v-loading="loading" :data="list">
+      <el-table-column label="名称" prop="name" />
+    </el-table>
+
+    <pagination v-show="total > 0" :total="total"
+                v-model:page="queryParams.pageNum" v-model:limit="queryParams.pageSize"
+                @pagination="getList" />
+  </div>
+</template>
+
+<script setup name="BizPermXxx">
+import { listXxx } from "@/api/bizperm/xxx"
+import type { Xxx } from "@/types/api/bizperm"
+
+// 查询参数
+const queryParams = ref<Xxx.Query>({ pageNum: 1, pageSize: 10 })
+// 列表与加载
+const list = ref<Xxx.Row[]>([])
+const total = ref(0)
+const loading = ref(false)
+
+/** 查询列表 */
+const getList = async () => {
+  loading.value = true
+  const res = await listXxx(queryParams.value)
+  list.value = res.rows
+  total.value = res.total
+  loading.value = false
+}
+</script>
+```
+
+必须遵守：
+- ✅ `<script setup name="Xxx">` + Composition API（`ref`/`reactive`/`computed`，auto-import 已配置）
+- ✅ 接口类型定义放 `src/types/api/<模块>`，API 函数返回值与入参必须有类型
+- ✅ 根元素 `class="app-container"`；表格 `v-loading`；分页用 `<pagination>`（Element Plus 4.x 写法 `v-model:page`）
+- ✅ 按钮权限 `v-hasPermi="['bizperm:policy:add']"`；消息与弹窗用 `useMessage`/`$modal`（以 `plugins/modal.ts` 为准）
+- ✅ 字典用 `useDict('sys_yes_no')`（以 `utils/dict.ts` 实际导出为准）
+- ✅ 状态跨页面共享用 Pinia（`store/modules/`，框架目录禁改，业务 store 新增需确认）
+- ❌ 禁止 Vue2/Options API 主写法、Element UI 组件名、Vuex、`.js` 业务接口文件（一律 `.ts`）
+
+### 4.5 双端一致性要求（并行维护）
+
+- **同一业务两端并行交付**：改动清单中必须同时列出 `ebs-web/src/views|api|types/<模块>` 与 `ruoyi-ui/src/views|api/<模块>`（若该功能已在 ruoyi-ui 存在）
+- **接口契约共用**：两端调用同一后端路径与参数；后端接口变更须同步两端 API 文件
+- **菜单/组件路径**：菜单 SQL 中的组件路径必须与**两端各自**实际页面文件一一对应，避免点击白屏
+- **文案与交互对齐**：两端同一功能的字段、按钮、提示文案保持一致（按各自 UI 库习惯实现，不强制像素级相同）
 
 ---
 
@@ -376,9 +487,9 @@ export function addXxx(data) {
 ## 6. 文档规范
 
 - 文档统一放 `docs/`，按四类归档：`01-requirements/`、`02-development/`、`03-optimization/`、`04-bugfix/`
-- 每类下按模块建子目录（英文小写、短横线分隔，如 `bizperm`、`number-rule`、`datasource`）
+- 每类下按模块建子目录（英文小写、短横线分隔，如 `bizperm`、`number-rule`、`datasource`）；通用能力文档统一放 `common/<module>/`（需求/开发两侧结构一致）
 - 新建文档使用 `_template-*.md` 模板，并同步更新所属分类目录 README 索引表与 `docs/README.md` 索引
-- 6A 工作流产物同样归入上述分类目录：需求/对齐 → `01-requirements/<module>/`，设计/任务/验收/总结 → `02-development/<module>/`，缺陷 → `04-bugfix/<module>/`；**禁止在 `docs/` 根下新建 `任务名/` 平铺目录**
+- 6A 工作流产物同样归入上述分类目录：需求/对齐 → `01-requirements/common/<module>/`，设计/任务/验收/总结 → `02-development/common/<module>/`，缺陷 → `04-bugfix/<module>/`；**禁止在 `docs/` 根下新建 `任务名/` 平铺目录**
 - 文档在线查阅：`http://localhost:8080/docs/index.html`（`DocCenterController`，匿名放行）
 
 ---
@@ -396,11 +507,12 @@ export function addXxx(data) {
 - [ ] Java 文件顶部是否有 `@author` / `@date`
 
 **前端**
-- [ ] 是否 Vue 2 Options API（无 Vue3/TS/Element Plus 写法）
+- [ ] 是否与目标目录技术栈一致：`ruoyi-ui` 用 Vue 2 Options API、`ebs-web` 用 Vue3 `<script setup>`+TS（禁止串栈，§4.0）
 - [ ] 表格 `v-loading`、分页 `<pagination>`、按钮 `v-hasPermi`
-- [ ] 接口方法是否集中在 `src/api/<module>/`
-- [ ] 字典是否用 `dicts`，消息是否用 `this.$modal`
+- [ ] 接口方法是否集中在 `src/api/<module>/`（ebs-web 另需 `src/types/api/<module>/` 类型）
+- [ ] 字典与消息是否按各自端规范（ruoyi-ui：`dicts` + `this.$modal`；ebs-web：`useDict` + `$modal`/`useMessage`）
 - [ ] 是否改动 `router/store/utils/layout/plugins` 等框架目录（应避免）
+- [ ] 并行功能是否两端同步实现与联调（§4.5）
 
 ---
 
@@ -442,12 +554,17 @@ mvn clean install -DskipTests        # 安装到本地仓库
 - 启动：IDEA 运行 `ruoyi-admin` 的 `RuoYiApplication`（Windows 也可用根目录 `ry.bat`）
 - 端口：`8080`；配置：`ruoyi-admin/src/main/resources/application.yml`、`application-druid.yml`
 
-**前端（`ruoyi-ui`）**
+**前端（按目标目录分栈，§4.0）**
 
 ```bash
+# 主前端 D:\ebs-web（Vue3+TS，端口 5173）
 npm install
-npm run dev          # 开发，端口 80，/dev-api 代理到 8080
-npm run build:prod   # 生产构建
+npm run dev            # 开发，端口 5173，/dev-api 代理到 8080
+npm run build:prod     # 生产构建（Vite）
+
+# 旧前端 d:\ebs-api\ruoyi-ui（Vue2，端口 80）
+npm run dev            # 开发，端口 80，/dev-api 代理到 8080
+npm run build:prod     # 生产构建
 ```
 
 ---
@@ -469,10 +586,12 @@ npm run build:prod   # 生产构建
 
 | 文件 | 路径 | 用途 |
 |---|---|---|
-| request.js | `src/utils/request.js` | HTTP 封装 |
-| auth.js | `src/utils/auth.js` | Token 管理 |
-| dict.js | `src/utils/dict.js` | 字典 |
-| ruoyi.js | `src/utils/ruoyi.js` | 通用工具（`parseTime`、`parseStrEmpty` 等） |
+| request.js | `src/utils/request.js` | HTTP 封装（ruoyi-ui） |
+| auth.js | `src/utils/auth.js` | Token 管理（ruoyi-ui） |
+| dict.js | `src/utils/dict.js` | 字典（ruoyi-ui） |
+| ruoyi.js | `src/utils/ruoyi.js` | 通用工具（`parseTime`、`parseStrEmpty` 等，ruoyi-ui） |
+| request.ts | `ebs-web/src/utils/request.ts` | HTTP 封装（主前端） |
+| modal.ts | `ebs-web/src/plugins/modal.ts` | 消息与弹窗（主前端，`$modal`） |
 
 ---
 
@@ -482,8 +601,8 @@ npm run build:prod   # 生产构建
 2. **作者信息**：新文件顶部写 `@author` 与 `@date`，使用开发者本人姓名
 3. **代码生成**：可用 `ruoyi-generator` 生成基础代码，但生成后须按本规则校正包名/模块位置
 4. **权限**：后端 `@PreAuthorize`，前端 `v-hasPermi` / `v-hasRole`
-5. **端口/代理**：后端 `8080`，前端 dev `80`，接口前缀 `/dev-api`
-6. **前端唯一目录**：`ruoyi-ui`；`crm-web`、`ruoyi-crm` 不存在，禁止引用
+5. **端口/代理**：后端 `8080`，主前端 ebs-web dev `5173`，旧前端 ruoyi-ui dev `80`，接口前缀均为 `/dev-api`
+6. **前端双工程**：主前端 `D:\ebs-web`（Vue3+TS）+ 旧前端 `ruoyi-ui`（Vue2）并行维护，规范按 §4 分栈执行；`crm-web`、`ruoyi-crm` 不存在，禁止引用
 7. **文档中心**：`http://localhost:8080/docs/index.html`；探测不到项目根目录时配置 `ruoyi.docPath`
 8. **规则维护**：发现本文件与代码不一致，先按代码执行，并同步修订本文件（改规则需用户确认）
 
@@ -494,11 +613,11 @@ npm run build:prod   # 生产构建
 > 由 AI 独立完成的**新增功能/新增模块**，必须按以下顺序执行；任一步骤存疑先中断询问，禁止跳步直接写代码。
 
 ### 步骤1：需求对齐（文档先行）
-- 先检索记忆与现有代码，确认无重复实现；产出 `docs/01-requirements/<module>/<名称>-prd.md`（复制 `_template-prd.md`），写清范围、验收标准、待确认问题
+- 先检索记忆与现有代码，确认无重复实现；产出 `docs/01-requirements/common/<module>/<名称>-prd.md`（复制 `_template-prd.md`），写清范围、验收标准、待确认问题
 - 关键决策点（表结构、权限模型、外部接口范围）中断询问用户，共识后写入 PRD
 
 ### 步骤2：方案设计
-- 产出 `docs/02-development/<module>/<名称>-plan.md` 或 `-dev.md`：分层架构、接口契约、数据模型、异常处理
+- 产出 `docs/02-development/common/<module>/<名称>-plan.md` 或 `-dev.md`：分层架构、接口契约、数据模型、异常处理
 - 涉及 SQL 的，方案中先过 `.trae/skills/sqlserver-compat-check/SKILL.md` 校验清单
 
 ### 步骤3：任务拆分与确认
@@ -512,16 +631,17 @@ npm run build:prod   # 生产构建
 - 按 §3.2~§3.9 编写 Controller/Service/Mapper：命名、`@PreAuthorize`（豁免见 §3.7）、`@Transactional`（豁免见 §3.6）、`startPage()+getDataTable()`、文件头 `@author/@date`、函数中文注释
 - 所有 SQL 先过 sqlserver-compat-check 再输出
 
-### 步骤6：前端实现
-- 按 §4 编写 `ruoyi-ui/src/views/<module>/index.vue` 与 `src/api/<module>/*.js`：Vue 2 Options API、`<pagination>`、`v-hasPermi`、`this.$modal`
-- 菜单 SQL 中的组件路径必须与实际页面文件一一对应，避免点击白屏
+### 步骤6：前端实现（双端并行，按 §4.0 分栈）
+- 主前端：`D:\ebs-web\src\views\<module>\index.vue`、`src/api\<module>\*.ts`、`src/types/api\<module>\*.ts`（Vue3 `<script setup>`+TS，§4.4）
+- 旧前端（并行维护，同一功能需同步实现）：`ruoyi-ui/src/views/<module>/index.vue` 与 `src/api/<module>/*.js`（Vue 2 Options API，§4.2/§4.3）
+- 通用要求：`<pagination>`、`v-hasPermi`；菜单 SQL 中的组件路径必须与**两端各自**实际页面文件一一对应，避免点击白屏
 
 ### 步骤7：编译与自测
 - 后端：`mvn -pl ruoyi-admin -am compile -DskipTests`（本机需 `JAVA_HOME` 指向 JDK17；命令行默认 java 为 1.8 会报「无效的目标发行版 17」，可用 IDEA 自带 JBR：`D:\Idea 2024\JetBrains\IntelliJ IDEA 2024.3.7\jbr`）
-- 前端：`npm run dev`；逐条对照 PRD 验收标准自测，失败项修复后重测
+- 前端：主前端 `D:\ebs-web` 下 `npm run dev`（5173），必要时旧前端 `ruoyi-ui` 下 `npm run dev`（80）；逐条对照 PRD 验收标准自测，失败项修复后重测
 
 ### 步骤8：文档与索引同步
-- 更新 `docs/01-requirements|02-development/<module>/README.md` 索引与 `docs/README.md`；新文档首行保留中文标题并写明「中文名称：xxx」（文档中心按此显示）
+- 更新 `docs/01-requirements|02-development/common/<module>/README.md` 索引与 `docs/README.md`；新文档首行保留中文标题并写明「中文名称：xxx」（文档中心按此显示）
 - 缺陷记入 `docs/04-bugfix/<module>/`
 
 ### 步骤9：交付确认

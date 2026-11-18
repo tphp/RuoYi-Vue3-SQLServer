@@ -2,7 +2,7 @@
 
 > 中文名称：接口日志功能开发文档
 
-> 作者：AI 回溯补录（基于 `ruoyi-apilog` 模块代码）| 日期：2026-11-17 | 关联需求：[接口日志功能需求文档](../../01-requirements/apilog/api-log-prd.md)
+> 作者：AI 回溯补录（基于 `ruoyi-apilog` 模块代码）| 日期：2026-11-17 | 关联需求：[接口日志功能需求文档](../../../01-requirements/common/apilog/api-log-prd.md)
 >
 > ⚠️ 本文档为事后回溯：模块已实现，本文描述以现有代码为准。
 
@@ -67,7 +67,7 @@ ruoyi-apilog/
 `sys_outbound_log`（出站，主键 `outbound_id` IDENTITY）：`interface_name`、`interface_url`、`request_time`、`request_parameter`、`request_status`、`response_content`、`response_time`、`response_code`、`stacktrace` 及同款审计字段。
 
 - 索引：`idx_sys_outbound_log_time(request_time DESC)`、`idx_sys_outbound_log_name(interface_name)`；入站同构（按时间/接口名建索引）。
-- 建表脚本：[sys_interface_log.sql](../../../ruoyi-apilog/src/main/resources/sql/apilog/sys_interface_log.sql)；菜单：[sys_interface_log_menu.sql](../../../ruoyi-apilog/src/main/resources/sql/apilog/sys_interface_log_menu.sql)（挂在系统监控父目录 108 下）。
+- 建表脚本：[sys_interface_log.sql](../../../../ruoyi-apilog/src/main/resources/sql/apilog/sys_interface_log.sql)；菜单：[sys_interface_log_menu.sql](../../../../ruoyi-apilog/src/main/resources/sql/apilog/sys_interface_log_menu.sql)（挂在系统监控父目录 108 下）。
 
 ## 5. 关键实现要点
 
@@ -96,9 +96,9 @@ ruoyi-apilog/
 
 ## 8. 关联文档
 
-- 需求：[接口日志功能需求文档](../../01-requirements/apilog/api-log-prd.md)
+- 需求：[接口日志功能需求文档](../../../01-requirements/common/apilog/api-log-prd.md)
 - 相关方案：[外部系统接口对接方案](../external-api/external-integration-plan.md)
 - **待办**：
-  1. 补前端 `ruoyi-ui/src/views/apilog/inboundLog/index.vue`、`outboundLog/index.vue` 及 `src/api` 对应接口文件（Vue2 + Element UI 规范）
+  1. 主前端 `xxx-web` 页面已具备（`views/apilog/inboundLog|outboundLog/index.vue` + `api/apilog/*.ts`）；旧前端 `ruoyi-ui` 对应页面与 API JS 待补齐（Vue2 + Element UI 规范，存量维护项，按需排期）
   2. `ExternalApiClient` 首批业务接入点确认
   3. 日志定时清理任务（quartz）评估

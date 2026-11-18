@@ -129,7 +129,7 @@ public class DocCenterController
     /**
      * 读取指定文档内容
      *
-     * @param path 文档相对项目根目录的路径，如 {@code docs/02-development/bizperm/xxx.md}
+     * @param path 文档相对项目根目录的路径，如 {@code docs/02-development/common/bizperm/xxx.md}
      * @return 文档原始 Markdown 文本
      */
     @GetMapping("/api/content")

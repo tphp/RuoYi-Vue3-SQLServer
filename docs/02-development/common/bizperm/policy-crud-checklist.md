@@ -27,10 +27,10 @@
 
 | 序号 | 文件路径 | 作用 | 备注 |
 |---|---|---|---|
-| 1 | `d:\ebs-api\ruoyi-bizperm\src\main\resources\sql\bizperm\sys_biz_perm_policy.sql` | 策略主表 + 索引 | 先建主表 |
-| 2 | `d:\ebs-api\ruoyi-bizperm\src\main\resources\sql\bizperm\sys_biz_perm_scope.sql` | 可见范围明细表 + 索引 | 依赖主表 id（逻辑关联） |
-| 3 | `d:\ebs-api\ruoyi-bizperm\src\main\resources\sql\bizperm\sys_menu_bizperm.sql` | 菜单 2100 + 按钮 2101~2104 | 执行前查 `MAX(menu_id)` 防冲突 |
-| 4 | `d:\ebs-api\ruoyi-bizperm\src\main\resources\sql\bizperm\sys_dict_bizperm.sql` | 场景字典 `biz_perm_policy` | 场景编码需在此登记，否则外部查询接口返回 404 |
+| 1 | `ruoyi-bizperm/src/main/resources/sql/bizperm/sys_biz_perm_policy.sql` | 策略主表 + 索引 | 先建主表 |
+| 2 | `ruoyi-bizperm/src/main/resources/sql/bizperm/sys_biz_perm_scope.sql` | 可见范围明细表 + 索引 | 依赖主表 id（逻辑关联） |
+| 3 | `ruoyi-bizperm/src/main/resources/sql/bizperm/sys_menu_bizperm.sql` | 菜单 2100 + 按钮 2101~2104 | 执行前查 `MAX(menu_id)` 防冲突 |
+| 4 | `ruoyi-bizperm/src/main/resources/sql/bizperm/sys_dict_bizperm.sql` | 场景字典 `biz_perm_policy` | 场景编码需在此登记，否则外部查询接口返回 404 |
 
 ### 2.2 关键结构约束
 

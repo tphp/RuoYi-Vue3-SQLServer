@@ -78,4 +78,4 @@
 
 ## 8. 关联文档
 
-- [Oracle数据源接入实施计划（02-development/datasource）](../../02-development/datasource/oracle-datasource-plan.md)
+- [Oracle数据源接入实施计划（02-development/common/datasource）](../../../02-development/common/datasource/oracle-datasource-plan.md)

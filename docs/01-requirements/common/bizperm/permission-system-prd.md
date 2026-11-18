@@ -7,7 +7,7 @@
 | 文档版本 | v1.2 |
 | 编写日期 | 2026-11-03 |
 | 本次更新 | 补充核心目标对齐（树形展示、跨部门可见、按工号查询），新增“我的权限”只读视图与树形接口 |
-| 适用系统 | 当前 EBS / 若依管理平台（`d:\ebs-api`） |
+| 适用系统 | 当前 EBS / 若依管理平台（本后端仓库） |
 | 文档状态 | 待评审 |
 | SQL 方言 | SQL Server（`getdate()` / `CHARINDEX` / `TRY_CAST`，禁止 `limit`、`now()`、`date_format`，分页统一交 PageHelper） |
 
@@ -22,7 +22,7 @@
 | 后端 | Spring Boot 4.0.6、Java 17、MyBatis、Druid、PageHelper、FastJSON2 |
 | 数据库 | SQL Server |
 | 认证 | Spring Security + JWT；对外接口通过 `/api/auth/token` 用 API Key + Secret 换取 Token，`ApiKeyAuthenticationFilter` 已覆盖 `/api/**` |
-| 前端 | 当前仓库实际前端为 `ruoyi-ui`（Vue 2 + Element UI 2.15.14 + vue-cli） |
+| 前端 | 主前端 `xxx-web`（独立仓库、与本仓库平级，Vue 3.5 + TypeScript + Element Plus）；本仓库内 `ruoyi-ui` 为旧前端（Vue 2 + Element UI，存量维护） |
 | 模块化参考 | `ruoyi-apilog` 已是独立公共模块（根 `pom.xml` 注册 + `ruoyi-admin` 依赖 + `resources/mapper` 扫描） |
 
 ### 1.2 可复用的组织与权限能力
@@ -53,7 +53,7 @@
 
 | 编号 | 需求 | 实现落点 |
 |------|------|----------|
-| R1 | 唯一的数据权限配置入口（后台可视化维护），业务管理员可新增/修改/停用，无需开发介入 | 独立模块 `ruoyi-bizperm` + 配置表 + 后台 CRUD 接口 + `ruoyi-ui` 页面 + 菜单/按钮权限 |
+| R1 | 唯一的数据权限配置入口（后台可视化维护），业务管理员可新增/修改/停用，无需开发介入 | 独立模块 `ruoyi-bizperm` + 配置表 + 后台 CRUD 接口 + 主前端 `xxx-web` 页面 + 菜单/按钮权限 |
 | R2 | 统一的“当前人可见人员集合”计算服务，全部模块 AuthFilter 调用同一 Service 方法 | `IBizPermissionService#getVisibleUserCodes(policyCode, userCode)` + 抽象过滤器 `AbstractBizAuthFilter` |
 | R3 | 支持按人员/岗位/部门（含下级递归）配置权限范围 | 授权对象与可见范围均支持 `USER / POST / DEPT` 三类，部门支持“含下级”开关 |
 | R4 | 外部系统按工号远程查询权限范围（JSON 接口） | `/api/bizperm/**` 对外接口，复用 API Key + JWT 认证 |
@@ -97,7 +97,7 @@
 
 ```mermaid
 graph TD
-    A[ruoyi-ui 业务权限配置页] --> B[BizPermPolicyController 后台维护]
+    A[xxx-web 业务权限配置页] --> B[BizPermPolicyController 后台维护]
     B --> C[IBizPermPolicyService 配置CRUD]
     C --> D[(sys_biz_perm_policy / sys_biz_perm_scope)]
 
@@ -428,7 +428,7 @@ bizperm:
 
 ## 6. 后台可视化配置入口（R1）
 
-### 6.1 页面设计（`ruoyi-ui`，Vue2 + Element UI）
+### 6.1 页面设计（主前端 `xxx-web`，Vue3 + TypeScript + Element Plus）
 
 采用“树形视图为主、列表视图为辅”的双视图，两个视图共用同一份数据。
 
@@ -743,7 +743,7 @@ POST /api/auth/token  { "apiKey": "...", "apiSecret": "..." }
 
 ### 11.2 质量验收
 
-- 新增代码全部位于 `ruoyi-bizperm` 与 `ruoyi-ui` 业务目录，未修改 `ruoyi-framework`、`ruoyi-system` 等红区模块；
+- 新增代码全部位于 `ruoyi-bizperm` 与主前端 `xxx-web` 业务目录，未修改 `ruoyi-framework`、`ruoyi-system` 等红区模块；
 - SQL 全部为 SQL Server 兼容语法，无 `limit`、`now()`、`date_format`；
 - 新增 Java 文件包含 `@author` / `@date` 注释，方法含功能与参数说明；
 - 配置类接口均有 `@PreAuthorize` 与 `@Log`；
@@ -1027,5 +1027,5 @@ CREATE INDEX [idx_biz_perm_policy_log] ON [dbo].[sys_biz_perm_policy_log] ([poli
 1. **组织同步**：新增人员/调岗/岗位变更由 `ruoyi-quartz` 的同步任务完成，缓存与 `sys_dept` 递归结果存在短暂不一致；通过 TTL 与手动刷新兜底。
 2. **工号唯一性**：依赖 `sys_user.user_name` 唯一校验；若历史数据存在重复工号，需先治理。
 3. **大数据量部门**：部门递归依赖 `sys_dept.ancestors` 与 `CHARINDEX`，需确认 `ancestors` 字段长度（当前 `nvarchar(50)`）能容纳深层级组织；超深层级需评估扩容。
-4. **前端迁移**：当前仓库前端为 `ruoyi-ui`（Vue2）；若后续迁移到 `crm-web`（Vue3），仅需按同一接口重写页面，后端接口不变。
+4. **前端旧版页面**：主前端 `xxx-web`（Vue3 + TypeScript）页面已交付；旧前端 `ruoyi-ui`（Vue2）如需同功能页面，按同一接口用 Options API 重写即可，后端接口不变。
 5. **模块注册**：`ruoyi-bizperm` 目录已存在但为空，T1 需补全 `pom.xml` 并在根 `pom.xml` 的 `<modules>` 与 `<dependencyManagement>` 中注册，同时在 `ruoyi-admin/pom.xml` 引入依赖，否则 Controller/Mapper 不会被扫描。
