@@ -34,6 +34,7 @@ http://localhost:8080/docs/index.html
 | `01-requirements/common/external-api/` | [外部系统接口对接需求文档](01-requirements/common/external-api/external-integration-prd.md)（回溯补录） |
 | `01-requirements/common/datasource/` | [Oracle副数据源接入需求文档](01-requirements/common/datasource/oracle-datasource-prd.md)（回溯补录） |
 | `01-requirements/common/mq/` | [RabbitMQ 外部接口失败重试需求文档](01-requirements/common/mq/rabbitmq-prd.md) |
+| `01-requirements/common/i18n/` | [系统国际化功能需求文档](01-requirements/common/i18n/i18n-prd.md)（回溯补录） |
 | `02-development/common/bizperm/` | [业务级权限体系开发任务清单](02-development/common/bizperm/permission-system-tasklist.md) |
 | `02-development/common/bizperm/` | [业务级权限策略CRUD落地清单](02-development/common/bizperm/policy-crud-checklist.md) |
 | `02-development/common/apilog/` | [接口日志功能开发文档](02-development/common/apilog/api-log-dev.md)（回溯补录） |
@@ -41,6 +42,8 @@ http://localhost:8080/docs/index.html
 | `02-development/common/external-api/` | [外部系统接口对接方案](02-development/common/external-api/external-integration-plan.md) |
 | `02-development/common/datasource/` | [Oracle数据源接入实施计划](02-development/common/datasource/oracle-datasource-plan.md) |
 | `02-development/common/mq/` | [RabbitMQ 接入方案（外部接口失败重试）](02-development/common/mq/rabbitmq-plan.md) |
+| `02-development/common/i18n/` | [系统国际化开发文档](02-development/common/i18n/i18n-dev.md)（回溯补录） |
+| `02-development/common/i18n/` | [系统国际化使用指南](02-development/common/i18n/i18n-usage.md)（回溯补录） |
 | `02-development/common/structure/` | [全项目结构说明](02-development/common/structure/project-structure.md)（含前后端定位：后端 `xxx-api` 本仓库 + 主前端 `xxx-web` 独立仓库平级，Vue3+TS） |
 | `02-development/ai-dev/` | [AI开发协作指南](02-development/ai-dev/ai-workflow.md) |
 
