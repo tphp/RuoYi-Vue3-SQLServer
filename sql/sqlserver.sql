@@ -1358,6 +1358,7 @@ CREATE TABLE [dbo].[sys_user] (
     [login_ip] nvarchar(128) NULL,
     [login_date] datetime2(7)  NULL,
     [pwd_update_date] datetime2(7)  NULL,
+    [fd_short_no] nvarchar(50) NULL,
     [create_by] nvarchar(64) NULL,
     [create_time] datetime2(7)  NULL,
     [update_by] nvarchar(64) NULL,
@@ -1380,6 +1381,8 @@ EXEC sp_addextendedproperty 'MS_Description', N'帐号状态（0正常 1停用�
 EXEC sp_addextendedproperty 'MS_Description', N'删除标志（0代表存在 2代表删除）', 'SCHEMA', N'dbo', 'TABLE', N'sys_user', 'COLUMN', N'del_flag';
 EXEC sp_addextendedproperty 'MS_Description', N'最后登录IP', 'SCHEMA', N'dbo', 'TABLE', N'sys_user', 'COLUMN', N'login_ip';
 EXEC sp_addextendedproperty 'MS_Description', N'最后登录时间', 'SCHEMA', N'dbo', 'TABLE', N'sys_user', 'COLUMN', N'login_date';
+EXEC sp_addextendedproperty 'MS_Description', N'密码最后更新时间', 'SCHEMA', N'dbo', 'TABLE', N'sys_user', 'COLUMN', N'pwd_update_date';
+EXEC sp_addextendedproperty 'MS_Description', N'上级工号（直接上级的 usercode）', 'SCHEMA', N'dbo', 'TABLE', N'sys_user', 'COLUMN', N'fd_short_no';
 EXEC sp_addextendedproperty 'MS_Description', N'创建者', 'SCHEMA', N'dbo', 'TABLE', N'sys_user', 'COLUMN', N'create_by';
 EXEC sp_addextendedproperty 'MS_Description', N'创建时间', 'SCHEMA', N'dbo', 'TABLE', N'sys_user', 'COLUMN', N'create_time';
 EXEC sp_addextendedproperty 'MS_Description', N'更新者', 'SCHEMA', N'dbo', 'TABLE', N'sys_user', 'COLUMN', N'update_by';
@@ -1391,8 +1394,8 @@ EXEC sp_addextendedproperty 'MS_Description', N'用户信息表', 'SCHEMA', N'db
 -- 初始化-用户信息表数据
 -- ----------------------------
 SET IDENTITY_INSERT [dbo].[sys_user] ON;
-INSERT INTO [dbo].[sys_user] ([user_id], [dept_id], [user_name], [nick_name], [user_type], [email], [phonenumber], [sex], [avatar], [password], [status], [del_flag], [login_ip], [login_date], [pwd_update_date], [create_by], [create_time], [update_by], [update_time], [remark]) values(1,  103, 'admin', 'SMC', '00', 'ry@163.com', '15888888888', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', getdate(), getdate(), 'admin', getdate(), '', null, '管理员');
-INSERT INTO [dbo].[sys_user] ([user_id], [dept_id], [user_name], [nick_name], [user_type], [email], [phonenumber], [sex], [avatar], [password], [status], [del_flag], [login_ip], [login_date], [pwd_update_date], [create_by], [create_time], [update_by], [update_time], [remark]) values(2,  105, 'ry',    'SMC', '00', 'ry@qq.com',  '15666666666', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', getdate(), getdate(), 'admin', getdate(), '', null, '测试员');
+INSERT INTO [dbo].[sys_user] ([user_id], [dept_id], [user_name], [nick_name], [user_type], [email], [phonenumber], [sex], [avatar], [password], [status], [del_flag], [login_ip], [login_date], [pwd_update_date], [fd_short_no], [create_by], [create_time], [update_by], [update_time], [remark]) values(1,  103, 'admin', 'SMC', '00', 'ry@163.com', '15888888888', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', getdate(), getdate(), null, 'admin', getdate(), '', null, '管理员');
+INSERT INTO [dbo].[sys_user] ([user_id], [dept_id], [user_name], [nick_name], [user_type], [email], [phonenumber], [sex], [avatar], [password], [status], [del_flag], [login_ip], [login_date], [pwd_update_date], [fd_short_no], [create_by], [create_time], [update_by], [update_time], [remark]) values(2,  105, 'ry',    'SMC', '00', 'ry@qq.com',  '15666666666', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', getdate(), getdate(), null, 'admin', getdate(), '', null, '测试员');
 SET IDENTITY_INSERT [dbo].[sys_user] OFF;
 
 GO
