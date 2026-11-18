@@ -75,16 +75,16 @@
 - [ ] 日志中的密码/密钥等敏感字段为脱敏值，非明文
 - [ ] 超长报文被截断，不出现字段超长导致的落库失败
 - [ ] 日志列表分页查询、详情、删除、清空按权限生效
-- [ ] **点击入站/出站日志菜单页面正常展示**（依赖前端页面补齐，当前不满足）
+- [ ] **点击入站/出站日志菜单页面正常展示**（主前端 `xxx-web` 页面已具备；旧前端 `ruoyi-ui` 页面待补齐）
 
 ## 7. 疑问与待确认
 
-- [ ] **前端页面缺失**：菜单指向 `apilog/inboundLog/index`、`apilog/outboundLog/index`，但 `ruoyi-ui/src/views/apilog/` 与对应 API JS 均不存在，点击菜单会白屏——是否本期补齐？
+- [ ] **旧前端页面缺失**：菜单指向 `apilog/inboundLog/index`、`apilog/outboundLog/index`，主前端 `xxx-web` 已有对应页面与 API 封装（`views/apilog/`、`api/apilog/*.ts`）；旧前端 `ruoyi-ui/src/views/apilog/` 与对应 API JS 不存在——是否需要为旧前端补齐（存量维护项）？
 - [ ] 出站客户端 `ExternalApiClient` 目前尚无业务调用方，首批接入的外部接口范围是什么？
 - [ ] 日志保留周期与清理策略：当前仅手动 `/clean`，是否需要定时任务自动清理？
 - [ ] 入站日志记录范围：当前对登录后的常规请求全量记录，是否需按接口白名单/黑名单精细控制？
 
 ## 8. 关联文档
 
-- [接口日志功能开发文档（02-development/apilog）](../../02-development/apilog/api-log-dev.md)
-- [外部系统接口对接方案](../../02-development/external-api/external-integration-plan.md)
+- [接口日志功能开发文档（02-development/common/apilog）](../../../02-development/common/apilog/api-log-dev.md)
+- [外部系统接口对接方案](../../../02-development/common/external-api/external-integration-plan.md)

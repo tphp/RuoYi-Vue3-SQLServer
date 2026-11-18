@@ -82,4 +82,4 @@
 
 ## 8. 关联文档
 
-- [单据编号生成配置功能方案（02-development/number-rule）](../../02-development/number-rule/number-generation-config-plan.md)
+- [单据编号生成配置功能方案（02-development/common/number-rule）](../../../02-development/common/number-rule/number-generation-config-plan.md)

@@ -6,7 +6,7 @@
 ## 1. 顶层结构
 
 ```
-d:\ebs-api
+<项目根目录>
 ├── pom.xml                   # Maven 聚合父工程（RuoYi-Vue 3.9.2 / Spring Boot 4 / JDK17）
 ├── ry.bat / ry.sh            # Windows/Linux 启动脚本
 ├── bin/                      # 打包与清理脚本（clean/package/run.bat）
@@ -24,10 +24,12 @@ d:\ebs-api
 ├── ruoyi-generator/          # 🔴 代码生成器
 ├── ruoyi-apilog/             # 🟢 接口日志模块（入站/出站）
 ├── ruoyi-bizperm/            # 🟢 业务级权限体系模块
-└── ruoyi-ui/                 # 🟢 唯一有效前端（Vue 2 + Element UI）
+└── ruoyi-ui/                 # 🟢 旧前端（Vue 2 + Element UI，存量维护）
 ```
 
 > 红绿区边界见 `.trae/rules/project-rules.md` §1 模块表；不存在 `crm-web`、`ruoyi-crm`。
+>
+> **前后端定位（当前最新技术栈）**：后端为本仓库 `xxx-api`；前端为主前端 `xxx-web`（独立仓库、与本仓库平级，Vue 3.5 + TypeScript + Vite + Element Plus + Pinia）。本仓库内的 `ruoyi-ui` 为旧前端（Vue 2），仅存量维护。
 
 ## 2. 后端模块结构（关键路径）
 
@@ -71,7 +73,33 @@ ruoyi-{framework,system,common,quartz,generator}/src/main/java/com/ruoyi/<模块
 └── 框架红区，禁止新增业务代码（存量豁免见 project-rules §3.1）
 ```
 
-## 3. 前端结构（ruoyi-ui，Vue 2 + JavaScript）
+## 3. 前端结构
+
+### 3.1 主前端 xxx-web（Vue 3.5 + TypeScript，独立仓库）
+
+> 独立仓库、与本仓库（`xxx-api`）平级；为当前使用的最新前端技术栈（Vue 3.5 + TypeScript + Vite + Element Plus + Pinia）。
+
+```
+xxx-web/
+├── public/                  # 静态资源
+├── vite.config.ts           # Vite 构建配置（/dev-api 代理到后端 8080）
+└── src/
+    ├── main.ts  App.vue     # 入口
+    ├── permission.ts        # 路由守卫（登录鉴权）
+    ├── settings.ts          # 系统配置
+    ├── api/                 # ⚠️ 框架接口：monitor/ system/ tool/（业务接口新增 api/<module>/<feature>.ts）
+    ├── types/api/           # ⚠️ 接口类型定义（TS），含 index.ts 聚合导出（业务类型新增 types/api/<module>.ts）
+    ├── views/               # 🟢 页面：dashboard/ error/ monitor/ system/ tool/ bizperm/ apilog/…（业务页面新增 views/<module>/<feature>/index.vue）
+    ├── components/          # 🔴 公共组件（Pagination、FileUpload、DictTag、TreePanel、RemoteSelect 等）
+    ├── directive/           # 🔴 v-hasPermi / v-hasRole
+    ├── layout/  router/     # 🔴 布局、动态路由
+    ├── plugins/  store/     # 🔴 $modal 等插件、Pinia（store/modules/*.ts）
+    └── utils/               # 🔴 request.ts、auth.ts、dict.ts、ruoyi.ts
+```
+
+### 3.2 旧前端 ruoyi-ui（Vue 2 + JavaScript，存量维护）
+
+> 本仓库内旧前端，仅存量维护，不再新增业务功能；技术栈为 Vue 2.6 + Element UI + Options API。
 
 ```
 ruoyi-ui/
@@ -81,14 +109,8 @@ ruoyi-ui/
     ├── main.js  App.vue     # 入口
     ├── permission.js        # 路由守卫（登录鉴权）
     ├── settings.js          # 系统配置
-    ├── api/                 # ⚠️ 框架接口：monitor/ system/ tool/（业务接口新增 api/<module>）
-    ├── views/               # 🟢 页面：dashboard/ error/ monitor/ system/ tool/（业务页面新增 views/<module>）
-    ├── components/          # 🔴 公共组件（Pagination、FileUpload、DictTag、TreePanel 等 25 个）
-    ├── directive/           # 🔴 v-hasPermi / v-hasRole
-    ├── layout/  router/     # 🔴 布局、动态路由
-    ├── plugins/  store/     # 🔴 $modal 等插件、Vuex
-    ├── utils/               # 🔴 request.js、auth.js、dict.js、ruoyi.js
-    └── assets/              # 🔴 styles/icons/images
+    ├── api/  views/         # 业务接口与页面（目录约定同主前端，JS + Options API）
+    ├── components/  directive/  layout/  router/  plugins/  store/  utils/  assets/
 ```
 
 ## 4. 文档与配置结构
@@ -96,10 +118,11 @@ ruoyi-ui/
 ```
 docs/
 ├── README.md                # 全局文档索引（含文档中心入口）
-├── 01-requirements/         # 01-需求：_template-prd.md + <模块>/…-prd.md
-│   └── apilog/ bizperm/ datasource/ external-api/ number-rule/
-├── 02-development/          # 02-开发：_template-dev.md + <模块>/…-plan|dev|tasklist|checklist.md
-│   └── apilog/ bizperm/ datasource/ external-api/ number-rule/ structure/
+├── 01-requirements/         # 01-需求：_template-prd.md + common/<模块>/…-prd.md
+│   └── common/              # 通用能力文档（apilog/ bizperm/ datasource/ external-api/ mq/ number-rule/）
+├── 02-development/          # 02-开发：_template-dev.md + common/<模块>/…-plan|dev|tasklist|checklist.md
+│   ├── common/              # 通用能力文档（apilog/ bizperm/ datasource/ external-api/ mq/ number-rule/ structure/）
+│   └── ai-dev/              # AI 开发协作指南
 ├── 03-optimization/         # 03-优化：_template-optimize.md（暂无正式文档）
 └── 04-bugfix/               # 04-bug修复：_template-bugfix.md（暂无正式文档）
 
@@ -123,7 +146,8 @@ docs/
 | `ruoyi-generator/` | 代码生成器 | 🔴 禁止修改 |
 | `ruoyi-apilog/` | 入站过滤器、出站客户端、日志落库与查询 | 🟢 可自由修改 |
 | `ruoyi-bizperm/` | 业务级权限策略、范围、权限树、可见人员 | 🟢 可自由修改 |
-| `ruoyi-ui/` | 唯一前端（Vue 2 + Element UI） | 🟢 仅 `views/<模块>`、`api/<模块>` |
+| `xxx-web/`（独立仓库） | 主前端（Vue 3.5 + TS + Element Plus），当前最新技术栈 | 🟢 仅 `views/<模块>`、`api/<模块>`、`types/api/<模块>` |
+| `ruoyi-ui/` | 旧前端（Vue 2 + Element UI），存量维护 | 🟢 仅 `views/<模块>`、`api/<模块>` |
 | `docs/` | 四类归档文档 + 索引 | 🟢 按 §6 文档规范 |
 | `sql/` | 框架初始化 SQL、菜单/字典基础数据 | 🟡 存量脚本不改名，新增按规范 |
 | `.trae/` | 技术基线规则与 AI 技能 | 🟡 改规则需用户确认 |
@@ -142,12 +166,13 @@ docs/
 | `ruoyi-apilog/.../resources/sql/apilog/sys_interface_log_menu.sql` | 入站/出站日志菜单数据（执行前注意无幂等保护） |
 | `sql/sqlserver.sql` | 框架初始化脚本（含 `sys_menu` 等基础数据） |
 | `.trae/rules/project-rules.md` | 技术基线规则（优先级与红绿区定义） |
-| `ruoyi-ui/src/utils/request.js` | axios 封装（`/dev-api` 代理、Token 注入） |
+| `xxx-web/src/utils/request.ts` | 主前端 axios 封装（`/dev-api` 代理、Token 注入） |
+| `ruoyi-ui/src/utils/request.js` | 旧前端 axios 封装（`/dev-api` 代理、Token 注入，存量维护） |
 
 ## 7. 与规则的对应关系
 
 - 模块红绿区：project-rules §1 模块表
 - 后端包结构：project-rules §3.1（业务模块统一 controller/domain/mapper/service 分层）
-- 前端目录边界：project-rules §4.1（仅 `views/<模块>`、`api/<模块>` 可新增业务代码）
+- 前端目录边界：project-rules §4.1（仅 `views/<模块>`、`api/<模块>` 可新增业务代码；主前端 `xxx-web` 另含 `types/api/<模块>`）
 - 文档归档与命名：project-rules §6
 - 纯 AI 新增模块 9 步流程：project-rules §13

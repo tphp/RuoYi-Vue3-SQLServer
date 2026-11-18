@@ -21,7 +21,7 @@ description: "扫描项目/模块目录结构，自动生成符合 docs 四类�
 
 ### 步骤1：确定范围
 - 全项目：根目录 + 后端 Maven 模块 + `ruoyi-ui` + `docs/` + `.trae/`
-- 单模块：只扫该模块（如 `ruoyi-apilog`、`ruoyi-bizperm`、`docs/02-development/<module>`）
+- 单模块：只扫该模块（如 `ruoyi-apilog`、`ruoyi-bizperm`、`docs/02-development/common/<module>`）
 - 不确定时先问用户要「全项目」还是「指定模块」
 
 ### 步骤2：收集真实结构
@@ -33,7 +33,7 @@ description: "扫描项目/模块目录结构，自动生成符合 docs 四类�
 按下方模板组织，职责说明优先对照 `.trae/rules/project-rules.md` §1 模块表、§3.1 包结构、§4.1 前端目录边界。
 
 ### 步骤4：落位与命名
-- 位置：全项目结构 → `docs/02-development/structure/`；模块结构 → `docs/02-development/<module>/`
+- 位置：全项目结构 → `docs/02-development/common/structure/`；模块结构 → `docs/02-development/common/<module>/`
 - 文件名：**英文小写、短横线**，如 `project-structure.md`、`module-structure.md`
 - 首行必须是中文 H1 标题，其下紧跟元信息行 `> 中文名称：xxx`（文档中心导航按此显示）
 - 同步更新所属目录 `README.md` 索引表与 `docs/README.md` 索引
@@ -85,5 +85,5 @@ d:\ebs-api
 
 - ❌ 修改任何代码文件（本技能只产出文档）
 - ❌ 编造不存在的目录/文件（一切以磁盘实际结构为准）
-- ❌ 在 `docs/` 根目录下平铺新建文档（必须进 `02-development/<module>/`）
+- ❌ 在 `docs/` 根目录下平铺新建文档（必须进 `02-development/common/<module>/`）
 - ❌ 中文/全角字符作文件名；忘记「中文名称：」元信息行
