@@ -28,6 +28,7 @@ import com.ruoyi.system.mapper.SysMenuMapper;
 import com.ruoyi.system.mapper.SysRoleMapper;
 import com.ruoyi.system.mapper.SysRoleMenuMapper;
 import com.ruoyi.system.service.ISysMenuService;
+import com.ruoyi.common.utils.MessageUtils;
 
 /**
  * 菜单 业务层处理
@@ -181,7 +182,9 @@ public class SysMenuServiceImpl implements ISysMenuService
             router.setPath(getRouterPath(menu));
             router.setComponent(getComponent(menu));
             router.setQuery(menu.getQuery());
-            router.setMeta(new MetaVo(menu.getMenuName(), menu.getIcon(), StringUtils.equals("1", menu.getIsCache()), menu.getPath()));
+            MetaVo meta = new MetaVo(menu.getMenuName(), menu.getIcon(), StringUtils.equals("1", menu.getIsCache()), menu.getPath());
+            meta.setTitleEn(getMenuTitleEn(menu));
+            router.setMeta(meta);
             List<SysMenu> cMenus = menu.getChildren();
             if (StringUtils.isNotEmpty(cMenus) && UserConstants.TYPE_DIR.equals(menu.getMenuType()))
             {
@@ -197,14 +200,18 @@ public class SysMenuServiceImpl implements ISysMenuService
                 children.setPath(menu.getPath());
                 children.setComponent(menu.getComponent());
                 children.setName(getRouteName(menu.getRouteName(), menu.getPath()));
-                children.setMeta(new MetaVo(menu.getMenuName(), menu.getIcon(), StringUtils.equals("1", menu.getIsCache()), menu.getPath()));
+                MetaVo childMeta = new MetaVo(menu.getMenuName(), menu.getIcon(), StringUtils.equals("1", menu.getIsCache()), menu.getPath());
+                childMeta.setTitleEn(getMenuTitleEn(menu));
+                children.setMeta(childMeta);
                 children.setQuery(menu.getQuery());
                 childrenList.add(children);
                 router.setChildren(childrenList);
             }
             else if (menu.getParentId().intValue() == MENU_ROOT_ID && isInnerLink(menu))
             {
-                router.setMeta(new MetaVo(menu.getMenuName(), menu.getIcon()));
+                MetaVo dirMeta = new MetaVo(menu.getMenuName(), menu.getIcon());
+                dirMeta.setTitleEn(getMenuTitleEn(menu));
+                router.setMeta(dirMeta);
                 router.setPath("/");
                 List<RouterVo> childrenList = new ArrayList<RouterVo>();
                 RouterVo children = new RouterVo();
@@ -212,13 +219,26 @@ public class SysMenuServiceImpl implements ISysMenuService
                 children.setPath(routerPath);
                 children.setComponent(UserConstants.INNER_LINK);
                 children.setName(getRouteName(menu.getRouteName(), routerPath));
-                children.setMeta(new MetaVo(menu.getMenuName(), menu.getIcon(), menu.getPath()));
+                MetaVo childMeta = new MetaVo(menu.getMenuName(), menu.getIcon(), menu.getPath());
+                childMeta.setTitleEn(getMenuTitleEn(menu));
+                children.setMeta(childMeta);
                 childrenList.add(children);
                 router.setChildren(childrenList);
             }
             routers.add(router);
         }
         return routers;
+    }
+
+    /**
+     * 获取菜单的英文名称，未配置英文名时回退为中文名称
+     *
+     * @param menu 菜单信息
+     * @return 菜单英文名称
+     */
+    private String getMenuTitleEn(SysMenu menu)
+    {
+        return StringUtils.isNotEmpty(menu.getMenuNameEn()) ? menu.getMenuNameEn() : menu.getMenuName();
     }
 
     /**
@@ -346,7 +366,7 @@ public class SysMenuServiceImpl implements ISysMenuService
         }
         catch (Exception e)
         {
-            throw new ServiceException("保存排序异常，请联系管理员");
+            throw new ServiceException(MessageUtils.message("menu.sort.failed"));
         }
     }
 

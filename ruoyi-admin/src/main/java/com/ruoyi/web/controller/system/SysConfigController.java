@@ -21,6 +21,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.system.domain.SysConfig;
 import com.ruoyi.system.service.ISysConfigService;
+import com.ruoyi.common.utils.MessageUtils;
 
 /**
  * 参数配置 信息操作处理
@@ -85,7 +86,7 @@ public class SysConfigController extends BaseController
     {
         if (!configService.checkConfigKeyUnique(config))
         {
-            return error("新增参数'" + config.getConfigName() + "'失败，参数键名已存在");
+            return error(MessageUtils.message("config.add.key.exists", config.getConfigName()));
         }
         config.setCreateBy(getUsername());
         return toAjax(configService.insertConfig(config));
@@ -101,7 +102,7 @@ public class SysConfigController extends BaseController
     {
         if (!configService.checkConfigKeyUnique(config))
         {
-            return error("修改参数'" + config.getConfigName() + "'失败，参数键名已存在");
+            return error(MessageUtils.message("config.edit.key.exists", config.getConfigName()));
         }
         config.setUpdateBy(getUsername());
         return toAjax(configService.updateConfig(config));

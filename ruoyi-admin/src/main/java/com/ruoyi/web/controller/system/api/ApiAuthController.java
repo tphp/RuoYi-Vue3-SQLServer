@@ -14,6 +14,7 @@ import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.framework.web.service.TokenService;
 import com.ruoyi.system.domain.SysApiKey;
 import com.ruoyi.system.service.ISysApiKeyService;
+import com.ruoyi.common.utils.MessageUtils;
 
 /**
  * @author Zhang zhan
@@ -43,13 +44,13 @@ public class ApiAuthController extends BaseController
         
         if (apiKey == null || apiSecret == null)
         {
-            return error("缺少API Key或Secret");
+            return error(MessageUtils.message("apiAuth.key.missing"));
         }
         
         SysApiKey sysApiKey = apiKeyService.validateApiKey(apiKey, apiSecret);
         if (sysApiKey == null)
         {
-            return error("API Key 或 Secret 错误");
+            return error(MessageUtils.message("apiAuth.key.invalid"));
         }
         
         // 创建 SysUser 和 LoginUser 并生成 JWT Token

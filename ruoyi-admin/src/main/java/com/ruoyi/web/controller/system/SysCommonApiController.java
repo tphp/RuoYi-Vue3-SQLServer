@@ -21,6 +21,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.system.domain.SysCommonApi;
 import com.ruoyi.system.service.ISysCommonApiService;
+import com.ruoyi.common.utils.MessageUtils;
 
 @RestController
 @RequestMapping("/system/commonApi")
@@ -56,7 +57,7 @@ public class SysCommonApiController extends BaseController {
     @PostMapping
     public AjaxResult add(@Validated @RequestBody SysCommonApi sysCommonApi) {
         if (!commonApiService.checkApiKeyUnique(sysCommonApi)) {
-            return error("新增接口失败，接口关键字已存在");
+            return error(MessageUtils.message("commonApi.add.key.exists"));
         }
         sysCommonApi.setCreateBy(getLoginUser().getUser().getNickName());
         return toAjax(commonApiService.insertCommonApi(sysCommonApi));
@@ -67,7 +68,7 @@ public class SysCommonApiController extends BaseController {
     @PutMapping
     public AjaxResult edit(@Validated @RequestBody SysCommonApi sysCommonApi) {
         if (!commonApiService.checkApiKeyUnique(sysCommonApi)) {
-            return error("修改接口失败，接口关键字已存在");
+            return error(MessageUtils.message("commonApi.edit.key.exists"));
         }
         sysCommonApi.setUpdateBy(getLoginUser().getUser().getNickName());
         return toAjax(commonApiService.updateCommonApi(sysCommonApi));

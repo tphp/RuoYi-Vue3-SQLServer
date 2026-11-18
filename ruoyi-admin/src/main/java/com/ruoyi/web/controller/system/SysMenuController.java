@@ -21,6 +21,7 @@ import com.ruoyi.common.core.domain.entity.SysMenu;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.service.ISysMenuService;
+import com.ruoyi.common.utils.MessageUtils;
 
 /**
  * 菜单信息
@@ -88,15 +89,15 @@ public class SysMenuController extends BaseController
     {
         if (!menuService.checkMenuNameUnique(menu))
         {
-            return error("新增菜单'" + menu.getMenuName() + "'失败，菜单名称已存在");
+            return error(MessageUtils.message("menu.add.name.exists", menu.getMenuName()));
         }
         else if (UserConstants.YES_FRAME.equals(menu.getIsFrame()) && !StringUtils.ishttp(menu.getPath()))
         {
-            return error("新增菜单'" + menu.getMenuName() + "'失败，地址必须以http(s)://开头");
+            return error(MessageUtils.message("menu.add.link.invalid", menu.getMenuName()));
         }
         else if (!menuService.checkRouteConfigUnique(menu))
         {
-            return error("新增菜单'" + menu.getMenuName() + "'失败，路由名称或地址已存在");
+            return error(MessageUtils.message("menu.add.route.exists", menu.getMenuName()));
         }
         menu.setCreateBy(getUsername());
         return toAjax(menuService.insertMenu(menu));
@@ -112,19 +113,19 @@ public class SysMenuController extends BaseController
     {
         if (!menuService.checkMenuNameUnique(menu))
         {
-            return error("修改菜单'" + menu.getMenuName() + "'失败，菜单名称已存在");
+            return error(MessageUtils.message("menu.edit.name.exists", menu.getMenuName()));
         }
         else if (UserConstants.YES_FRAME.equals(menu.getIsFrame()) && !StringUtils.ishttp(menu.getPath()))
         {
-            return error("修改菜单'" + menu.getMenuName() + "'失败，地址必须以http(s)://开头");
+            return error(MessageUtils.message("menu.edit.link.invalid", menu.getMenuName()));
         }
         else if (menu.getMenuId().equals(menu.getParentId()))
         {
-            return error("修改菜单'" + menu.getMenuName() + "'失败，上级菜单不能选择自己");
+            return error(MessageUtils.message("menu.edit.parent.self", menu.getMenuName()));
         }
         else if (!menuService.checkRouteConfigUnique(menu))
         {
-            return error("修改菜单'" + menu.getMenuName() + "'失败，路由名称或地址已存在");
+            return error(MessageUtils.message("menu.edit.route.exists", menu.getMenuName()));
         }
         menu.setUpdateBy(getUsername());
         return toAjax(menuService.updateMenu(menu));
@@ -154,11 +155,11 @@ public class SysMenuController extends BaseController
     {
         if (menuService.hasChildByMenuId(menuId))
         {
-            return warn("存在子菜单,不允许删除");
+            return warn(MessageUtils.message("menu.has.children"));
         }
         if (menuService.checkMenuExistRole(menuId))
         {
-            return warn("菜单已分配,不允许删除");
+            return warn(MessageUtils.message("menu.assigned"));
         }
         return toAjax(menuService.deleteMenuById(menuId));
     }

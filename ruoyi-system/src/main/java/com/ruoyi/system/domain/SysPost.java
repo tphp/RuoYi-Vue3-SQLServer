@@ -51,8 +51,8 @@ public class SysPost extends BaseEntity
         this.postId = postId;
     }
 
-    @NotBlank(message = "岗位编码不能为空")
-    @Size(min = 0, max = 64, message = "岗位编码长度不能超过64个字符")
+    @NotBlank(message = "{validate.post.postCode.not.blank}")
+    @Size(min = 0, max = 64, message = "{validate.post.postCode.size}")
     public String getPostCode()
     {
         return postCode;
@@ -63,8 +63,8 @@ public class SysPost extends BaseEntity
         this.postCode = postCode;
     }
 
-    @NotBlank(message = "岗位名称不能为空")
-    @Size(min = 0, max = 50, message = "岗位名称长度不能超过50个字符")
+    @NotBlank(message = "{validate.post.postName.not.blank}")
+    @Size(min = 0, max = 50, message = "{validate.post.postName.size}")
     public String getPostName()
     {
         return postName;
@@ -75,7 +75,7 @@ public class SysPost extends BaseEntity
         this.postName = postName;
     }
 
-    @NotNull(message = "显示顺序不能为空")
+    @NotNull(message = "{validate.post.postSort.not.null}")
     public Integer getPostSort()
     {
         return postSort;

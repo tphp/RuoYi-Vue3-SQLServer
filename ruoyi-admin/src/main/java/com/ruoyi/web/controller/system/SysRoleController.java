@@ -28,6 +28,7 @@ import com.ruoyi.system.domain.SysUserRole;
 import com.ruoyi.system.service.ISysDeptService;
 import com.ruoyi.system.service.ISysRoleService;
 import com.ruoyi.system.service.ISysUserService;
+import com.ruoyi.common.utils.MessageUtils;
 
 /**
  * 角色信息
@@ -93,11 +94,11 @@ public class SysRoleController extends BaseController
     {
         if (!roleService.checkRoleNameUnique(role))
         {
-            return error("新增角色'" + role.getRoleName() + "'失败，角色名称已存在");
+            return error(MessageUtils.message("role.add.name.exists", role.getRoleName()));
         }
         else if (!roleService.checkRoleKeyUnique(role))
         {
-            return error("新增角色'" + role.getRoleName() + "'失败，角色权限已存在");
+            return error(MessageUtils.message("role.add.key.exists", role.getRoleName()));
         }
         role.setCreateBy(getUsername());
         return toAjax(roleService.insertRole(role));
@@ -116,11 +117,11 @@ public class SysRoleController extends BaseController
         roleService.checkRoleDataScope(role.getRoleId());
         if (!roleService.checkRoleNameUnique(role))
         {
-            return error("修改角色'" + role.getRoleName() + "'失败，角色名称已存在");
+            return error(MessageUtils.message("role.edit.name.exists", role.getRoleName()));
         }
         else if (!roleService.checkRoleKeyUnique(role))
         {
-            return error("修改角色'" + role.getRoleName() + "'失败，角色权限已存在");
+            return error(MessageUtils.message("role.edit.key.exists", role.getRoleName()));
         }
         role.setUpdateBy(getUsername());
         
@@ -130,7 +131,7 @@ public class SysRoleController extends BaseController
             tokenService.refreshPermissionByRoleId(role.getRoleId(), permissionService);
             return success();
         }
-        return error("修改角色'" + role.getRoleName() + "'失败，请联系管理员");
+        return error(MessageUtils.message("role.edit.contact.admin", role.getRoleName()));
     }
 
     /**

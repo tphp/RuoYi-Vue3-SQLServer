@@ -21,6 +21,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.system.domain.SysPost;
 import com.ruoyi.system.service.ISysPostService;
+import com.ruoyi.common.utils.MessageUtils;
 
 /**
  * 岗位信息操作处理
@@ -76,11 +77,11 @@ public class SysPostController extends BaseController
     {
         if (!postService.checkPostNameUnique(post))
         {
-            return error("新增岗位'" + post.getPostName() + "'失败，岗位名称已存在");
+            return error(MessageUtils.message("post.add.name.exists", post.getPostName()));
         }
         else if (!postService.checkPostCodeUnique(post))
         {
-            return error("新增岗位'" + post.getPostName() + "'失败，岗位编码已存在");
+            return error(MessageUtils.message("post.add.code.exists", post.getPostName()));
         }
         post.setCreateBy(getUsername());
         return toAjax(postService.insertPost(post));
@@ -96,11 +97,11 @@ public class SysPostController extends BaseController
     {
         if (!postService.checkPostNameUnique(post))
         {
-            return error("修改岗位'" + post.getPostName() + "'失败，岗位名称已存在");
+            return error(MessageUtils.message("post.edit.name.exists", post.getPostName()));
         }
         else if (!postService.checkPostCodeUnique(post))
         {
-            return error("修改岗位'" + post.getPostName() + "'失败，岗位编码已存在");
+            return error(MessageUtils.message("post.edit.code.exists", post.getPostName()));
         }
         post.setUpdateBy(getUsername());
         return toAjax(postService.updatePost(post));

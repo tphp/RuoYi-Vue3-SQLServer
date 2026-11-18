@@ -19,7 +19,7 @@ public @interface Xss
 {
     String message()
 
-    default "不允许任何脚本运行";
+    default "{validate.xss.not.allow}";
 
     Class<?>[] groups() default {};
 

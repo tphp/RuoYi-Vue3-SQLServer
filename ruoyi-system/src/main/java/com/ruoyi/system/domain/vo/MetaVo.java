@@ -15,6 +15,11 @@ public class MetaVo
     private String title;
 
     /**
+     * 该路由展示的名字（英文），英文界面下优先使用
+     */
+    private String titleEn;
+
+    /**
      * 设置该路由的图标，对应路径src/assets/icons/svg
      */
     private String icon;
@@ -82,6 +87,16 @@ public class MetaVo
     public void setTitle(String title)
     {
         this.title = title;
+    }
+
+    public String getTitleEn()
+    {
+        return titleEn;
+    }
+
+    public void setTitleEn(String titleEn)
+    {
+        this.titleEn = titleEn;
     }
 
     public String getIcon()

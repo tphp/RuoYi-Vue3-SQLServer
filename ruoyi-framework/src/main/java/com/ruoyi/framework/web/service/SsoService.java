@@ -60,13 +60,13 @@ public class SsoService
         {
             AsyncManager.me().execute(AsyncFactory.recordLogininfor(loginName, Constants.LOGIN_FAIL,
                     MessageUtils.message("user.not.exists")));
-            throw new ServiceException("用户不存在: " + loginName);
+            throw new ServiceException(MessageUtils.message("sso.user.not.exists", loginName));
         }
         if (UserStatus.DELETED.getCode().equals(user.getDelFlag()))
         {
             AsyncManager.me().execute(AsyncFactory.recordLogininfor(loginName, Constants.LOGIN_FAIL,
                     "用户已被删除"));
-            throw new ServiceException("用户已被删除");
+            throw new ServiceException(MessageUtils.message("sso.user.deleted"));
         }
         if (UserStatus.DISABLE.getCode().equals(user.getStatus()))
         {

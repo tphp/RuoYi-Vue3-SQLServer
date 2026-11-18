@@ -17,6 +17,7 @@ import com.ruoyi.system.domain.SysApiKey;
 import com.ruoyi.system.service.ISysApiKeyService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import com.ruoyi.common.utils.MessageUtils;
 
 /**
  * @author Zhang zhan
@@ -48,7 +49,7 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter
         {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setContentType("application/json;charset=UTF-8");
-            response.getWriter().write(JSON.toJSONString(AjaxResult.error("缺少有效的认证令牌")));
+            response.getWriter().write(JSON.toJSONString(AjaxResult.error(MessageUtils.message("apiAuth.token.missing"))));
             return;
         }
         
@@ -67,7 +68,7 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter
             {
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 response.setContentType("application/json;charset=UTF-8");
-                response.getWriter().write(JSON.toJSONString(AjaxResult.error("令牌中缺少API Key信息")));
+                response.getWriter().write(JSON.toJSONString(AjaxResult.error(MessageUtils.message("apiAuth.token.key.missing"))));
                 return;
             }
             
@@ -77,7 +78,7 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter
             {
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 response.setContentType("application/json;charset=UTF-8");
-                response.getWriter().write(JSON.toJSONString(AjaxResult.error("API Key不存在")));
+                response.getWriter().write(JSON.toJSONString(AjaxResult.error(MessageUtils.message("apiAuth.key.not.exists"))));
                 return;
             }
             
@@ -85,7 +86,7 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter
             {
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 response.setContentType("application/json;charset=UTF-8");
-                response.getWriter().write(JSON.toJSONString(AjaxResult.error("API Key已被停用")));
+                response.getWriter().write(JSON.toJSONString(AjaxResult.error(MessageUtils.message("apiAuth.key.disabled"))));
                 return;
             }
             
@@ -93,7 +94,7 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter
             {
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 response.setContentType("application/json;charset=UTF-8");
-                response.getWriter().write(JSON.toJSONString(AjaxResult.error("API Key已过期")));
+                response.getWriter().write(JSON.toJSONString(AjaxResult.error(MessageUtils.message("apiAuth.key.expired"))));
                 return;
             }
             
@@ -107,7 +108,7 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter
         {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setContentType("application/json;charset=UTF-8");
-            response.getWriter().write(JSON.toJSONString(AjaxResult.error("令牌解析失败")));
+            response.getWriter().write(JSON.toJSONString(AjaxResult.error(MessageUtils.message("apiAuth.token.parse.failed"))));
         }
     }
 }

@@ -12,6 +12,7 @@ import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.service.ISysUserService;
+import com.ruoyi.common.utils.MessageUtils;
 
 /**
  * 首页
@@ -46,17 +47,17 @@ public class SysIndexController
         String password = body.get("password");
         if (StringUtils.isEmpty(password))
         {
-            return AjaxResult.error("密码不能为空");
+            return AjaxResult.error(MessageUtils.message("common.password.empty"));
         }
         String username = SecurityUtils.getUsername();
         SysUser user = userService.selectUserByUserName(username);
         if (user == null)
         {
-            return AjaxResult.error("服务器超时，请重新登录");
+            return AjaxResult.error(MessageUtils.message("common.session.expired"));
         }
         if (!SecurityUtils.matchesPassword(password, user.getPassword()))
         {
-            return AjaxResult.error("密码错误，请重新输入");
+            return AjaxResult.error(MessageUtils.message("common.password.error"));
         }
 
         return AjaxResult.success("解锁成功");
