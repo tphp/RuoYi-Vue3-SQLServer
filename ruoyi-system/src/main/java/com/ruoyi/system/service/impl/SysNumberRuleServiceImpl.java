@@ -21,6 +21,7 @@ import com.ruoyi.system.mapper.SysNumberRuleItemMapper;
 import com.ruoyi.system.mapper.SysNumberRuleMapper;
 import com.ruoyi.system.mapper.SysNumberSerialMapper;
 import com.ruoyi.system.service.ISysNumberRuleService;
+import com.ruoyi.common.utils.MessageUtils;
 
 /**
  * 编号规则Service实现类
@@ -163,17 +164,17 @@ public class SysNumberRuleServiceImpl implements ISysNumberRuleService
         SysNumberRule rule = numberRuleMapper.selectNumberRuleByCode(ruleCode);
         if (rule == null)
         {
-            throw new RuntimeException("编号规则不存在：" + ruleCode);
+            throw new RuntimeException(MessageUtils.message("numberRule.not.exists", ruleCode));
         }
         if (!"0".equals(rule.getStatus()))
         {
-            throw new RuntimeException("编号规则已停用：" + ruleCode);
+            throw new RuntimeException(MessageUtils.message("numberRule.disabled", ruleCode));
         }
 
         List<SysNumberRuleItem> items = numberRuleItemMapper.selectRuleItemsByRuleId(rule.getRuleId());
         if (items == null || items.isEmpty())
         {
-            throw new RuntimeException("编号规则未配置元素：" + ruleCode);
+            throw new RuntimeException(MessageUtils.message("numberRule.elements.not.configured", ruleCode));
         }
 
         StringBuilder sb = new StringBuilder();

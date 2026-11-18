@@ -25,6 +25,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.system.domain.SysNumberRule;
 import com.ruoyi.system.service.ISysNumberRuleService;
+import com.ruoyi.common.utils.MessageUtils;
 
 /**
  * 编号规则Controller
@@ -84,7 +85,7 @@ public class SysNumberRuleController extends BaseController
     {
         if (!numberRuleService.checkRuleCodeUnique(sysNumberRule))
         {
-            return error("新增编号规则'" + sysNumberRule.getRuleName() + "'失败，规则编码已存在");
+            return error(MessageUtils.message("numberRule.add.code.exists", sysNumberRule.getRuleName()));
         }
         return toAjax(numberRuleService.insertNumberRule(sysNumberRule));
     }
@@ -99,7 +100,7 @@ public class SysNumberRuleController extends BaseController
     {
         if (!numberRuleService.checkRuleCodeUnique(sysNumberRule))
         {
-            return error("修改编号规则'" + sysNumberRule.getRuleName() + "'失败，规则编码已存在");
+            return error(MessageUtils.message("numberRule.edit.code.exists", sysNumberRule.getRuleName()));
         }
         return toAjax(numberRuleService.updateNumberRule(sysNumberRule));
     }

@@ -131,8 +131,8 @@ public class SysUser extends BaseEntity
         this.deptId = deptId;
     }
 
-    @Xss(message = "用户昵称不能包含脚本字符")
-    @Size(min = 0, max = 30, message = "用户昵称长度不能超过30个字符")
+    @Xss(message = "{validate.user.nickName.xss}")
+    @Size(min = 0, max = 30, message = "{validate.user.nickName.size}")
     public String getNickName()
     {
         return nickName;
@@ -143,9 +143,9 @@ public class SysUser extends BaseEntity
         this.nickName = nickName;
     }
 
-    @Xss(message = "用户账号不能包含脚本字符")
-    @NotBlank(message = "用户账号不能为空")
-    @Size(min = 0, max = 30, message = "用户账号长度不能超过30个字符")
+    @Xss(message = "{validate.user.userName.xss}")
+    @NotBlank(message = "{validate.user.userName.not.blank}")
+    @Size(min = 0, max = 30, message = "{validate.user.userName.size}")
     public String getUserName()
     {
         return userName;
@@ -156,8 +156,8 @@ public class SysUser extends BaseEntity
         this.userName = userName;
     }
 
-    @Email(message = "邮箱格式不正确")
-    @Size(min = 0, max = 50, message = "邮箱长度不能超过50个字符")
+    @Email(message = "{validate.user.email.invalid}")
+    @Size(min = 0, max = 50, message = "{validate.user.email.size}")
     public String getEmail()
     {
         return email;
@@ -168,7 +168,7 @@ public class SysUser extends BaseEntity
         this.email = email;
     }
 
-    @Size(min = 0, max = 11, message = "手机号码长度不能超过11个字符")
+    @Size(min = 0, max = 11, message = "{validate.user.phonenumber.size}")
     public String getPhonenumber()
     {
         return phonenumber;

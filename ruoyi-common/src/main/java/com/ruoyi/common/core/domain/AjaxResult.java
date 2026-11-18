@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Objects;
 import com.ruoyi.common.constant.HttpStatus;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.common.utils.MessageUtils;
 
 /**
  * 操作消息提醒
@@ -132,7 +133,7 @@ public class AjaxResult extends HashMap<String, Object>
      */
     public static AjaxResult error()
     {
-        return AjaxResult.error("操作失败");
+        return AjaxResult.error(MessageUtils.message("common.operation.failed"));
     }
 
     /**

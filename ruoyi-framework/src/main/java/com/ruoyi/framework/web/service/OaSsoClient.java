@@ -20,6 +20,7 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import com.ruoyi.common.utils.MessageUtils;
 
 /**
  * OA 单点登录客户端
@@ -72,11 +73,11 @@ public class OaSsoClient
     {
         if (token == null || token.isEmpty())
         {
-            throw new ServiceException("SSO 登录凭证不能为空");
+            throw new ServiceException(MessageUtils.message("sso.credential.missing"));
         }
         if (ssoProperties.getOaUrl() == null || ssoProperties.getOaUrl().isEmpty())
         {
-            throw new ServiceException("未配置 SSO OA 接口地址 (sso.oa-url)");
+            throw new ServiceException(MessageUtils.message("sso.oa.url.not.configured"));
         }
 
         String body = "token=" + urlEncode(token);
@@ -97,42 +98,38 @@ public class OaSsoClient
         catch (HttpConnectTimeoutException e)
         {
             log.error("[SSO] 连接 OA 超时 url={}, timeoutMs={}", ssoProperties.getOaUrl(), ssoProperties.getConnectTimeout(), e);
-            throw new ServiceException("连接 OA 服务器超时（" + ssoProperties.getConnectTimeout()
-                    + "ms），请检查网络或调大 sso.connect-timeout / sso.read-timeout");
+            throw new ServiceException(MessageUtils.message("sso.oa.connect.timeout", ssoProperties.getConnectTimeout()));
         }
         catch (HttpTimeoutException e)
         {
             log.error("[SSO] 调用 OA 读取超时 url={}, readTimeoutMs={}", ssoProperties.getOaUrl(), ssoProperties.getReadTimeout(), e);
-            throw new ServiceException("读取 OA 响应超时（" + ssoProperties.getReadTimeout()
-                    + "ms），请检查网络或调大 sso.read-timeout");
+            throw new ServiceException(MessageUtils.message("sso.oa.read.timeout", ssoProperties.getReadTimeout()));
         }
         catch (UnknownHostException e)
         {
             log.error("[SSO] 未知主机 url={}", ssoProperties.getOaUrl(), e);
-            throw new ServiceException("无法解析 OA 主机地址：" + e.getMessage() + "，请检查 sso.oa-url");
+            throw new ServiceException(MessageUtils.message("sso.oa.unknown.host", e.getMessage()));
         }
         catch (ConnectException e)
         {
             log.error("[SSO] 连接被拒绝 url={}", ssoProperties.getOaUrl(), e);
-            throw new ServiceException("连接 OA 被拒绝（" + e.getMessage() + "），请确认 OA 服务已启动且端口可达");
+            throw new ServiceException(MessageUtils.message("sso.oa.connect.refused", e.getMessage()));
         }
         catch (IOException e)
         {
             log.error("[SSO] 调用 OA I/O 异常 url={}", ssoProperties.getOaUrl(), e);
-            throw new ServiceException("调用 OA 验证接口 I/O 异常 [" + e.getClass().getSimpleName()
-                    + "]：" + safeMsg(e.getMessage()));
+            throw new ServiceException(MessageUtils.message("sso.oa.io.exception", e.getClass().getSimpleName(), safeMsg(e.getMessage())));
         }
         catch (InterruptedException e)
         {
             Thread.currentThread().interrupt();
             log.error("[SSO] 调用 OA 被中断", e);
-            throw new ServiceException("调用 OA 验证接口被中断");
+            throw new ServiceException(MessageUtils.message("sso.oa.interrupted"));
         }
         catch (Exception e)
         {
             log.error("[SSO] 调用 OA 未知异常 url={}", ssoProperties.getOaUrl(), e);
-            throw new ServiceException("调用 OA 验证接口失败 [" + e.getClass().getSimpleName()
-                    + "]：" + safeMsg(e.getMessage()));
+            throw new ServiceException(MessageUtils.message("sso.oa.call.failed", e.getClass().getSimpleName(), safeMsg(e.getMessage())));
         }
 
         int status = response.statusCode();
@@ -140,7 +137,7 @@ public class OaSsoClient
         log.debug("[SSO] OA 响应 status={}, body={}", status, respBody);
         if (status < 200 || status >= 300)
         {
-            throw new ServiceException("OA 返回异常状态码：" + status);
+            throw new ServiceException(MessageUtils.message("sso.oa.invalid.status", status));
         }
 
         JSONObject json;
@@ -152,11 +149,11 @@ public class OaSsoClient
         {
             // OA 可能返回纯文本错误，尝试从中提取
             log.warn("[SSO] OA 响应非 JSON 格式: {}", respBody);
-            throw new ServiceException("OA 响应格式错误：" + truncate(respBody, 200));
+            throw new ServiceException(MessageUtils.message("sso.oa.invalid.format", truncate(respBody, 200)));
         }
         if (json == null)
         {
-            throw new ServiceException("OA 响应为空");
+            throw new ServiceException(MessageUtils.message("sso.oa.empty.response"));
         }
 
         // 优先取 errorMsg
@@ -169,7 +166,7 @@ public class OaSsoClient
         String loginName = json.getString("loginName");
         if (loginName == null || loginName.isEmpty() || "null".equalsIgnoreCase(loginName))
         {
-            throw new ServiceException("OA 未返回有效的 loginName");
+            throw new ServiceException(MessageUtils.message("sso.oa.no.loginname"));
         }
         return loginName.trim();
     }

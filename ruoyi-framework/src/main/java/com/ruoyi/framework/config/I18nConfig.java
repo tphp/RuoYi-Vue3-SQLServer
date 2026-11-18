@@ -3,41 +3,21 @@ package com.ruoyi.framework.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.LocaleResolver;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
-import org.springframework.web.servlet.i18n.SessionLocaleResolver;
-import com.ruoyi.common.constant.Constants;
 
 /**
  * 资源文件配置加载
- * 
+ *
+ * <p>本系统为无状态 JWT 架构，语言由前端通过 X-Lang 请求头指定，
+ * 不使用 Session 存储，也不使用 LocaleChangeInterceptor（该拦截器依赖 Session）。
+ *
  * @author ruoyi
  */
 @Configuration
-public class I18nConfig implements WebMvcConfigurer
+public class I18nConfig
 {
     @Bean
     public LocaleResolver localeResolver()
     {
-        SessionLocaleResolver slr = new SessionLocaleResolver();
-        // 默认语言
-        slr.setDefaultLocale(Constants.DEFAULT_LOCALE);
-        return slr;
-    }
-
-    @Bean
-    public LocaleChangeInterceptor localeChangeInterceptor()
-    {
-        LocaleChangeInterceptor lci = new LocaleChangeInterceptor();
-        // 参数名
-        lci.setParamName("lang");
-        return lci;
-    }
-
-    @Override
-    public void addInterceptors(InterceptorRegistry registry)
-    {
-        registry.addInterceptor(localeChangeInterceptor());
+        return new HeaderLocaleResolver();
     }
 }

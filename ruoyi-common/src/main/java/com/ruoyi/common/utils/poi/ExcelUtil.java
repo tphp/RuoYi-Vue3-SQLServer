@@ -85,6 +85,7 @@ import com.ruoyi.common.utils.file.FileTypeUtils;
 import com.ruoyi.common.utils.file.FileUtils;
 import com.ruoyi.common.utils.file.ImageUtils;
 import com.ruoyi.common.utils.reflect.ReflectUtils;
+import com.ruoyi.common.utils.MessageUtils;
 
 /**
  * Excel相关处理
@@ -363,7 +364,7 @@ public class ExcelUtil<T>
         Sheet sheet = StringUtils.isNotEmpty(sheetName) ? wb.getSheet(sheetName) : wb.getSheetAt(0);
         if (sheet == null)
         {
-            throw new IOException("文件sheet不存在");
+            throw new IOException(MessageUtils.message("excel.sheet.not.exists"));
         }
         boolean isXSSFWorkbook = !(wb instanceof HSSFWorkbook);
         Map<String, List<PictureData>> pictures = null;
@@ -385,7 +386,7 @@ public class ExcelUtil<T>
             Row heard = sheet.getRow(titleNum);
             if (heard == null)
             {
-                throw new UtilException("文件标题行为空，请检查Excel文件格式");
+                throw new UtilException(MessageUtils.message("excel.header.empty"));
             }
             for (int i = 0; i < heard.getLastCellNum(); i++)
             {
@@ -625,7 +626,7 @@ public class ExcelUtil<T>
     {
         if (sheets == null || sheets.isEmpty())
         {
-            return AjaxResult.error("导出数据不能为空");
+            return AjaxResult.error(MessageUtils.message("common.export.data.empty"));
         }
         SXSSFWorkbook wb = buildWorkbook(sheets);
         OutputStream out = null;
@@ -640,7 +641,7 @@ public class ExcelUtil<T>
         catch (Exception e)
         {
             log.error("多Sheet导出Excel异常{}", e.getMessage());
-            throw new UtilException("导出Excel失败，请联系网站管理员！");
+            throw new UtilException(MessageUtils.message("excel.export.failed"));
         }
         finally
         {
@@ -787,7 +788,7 @@ public class ExcelUtil<T>
         catch (Exception e)
         {
             log.error("导出Excel异常{}", e.getMessage());
-            throw new UtilException("导出Excel失败，请联系网站管理员！");
+            throw new UtilException(MessageUtils.message("excel.export.failed"));
         }
         finally
         {

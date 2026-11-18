@@ -10,6 +10,7 @@ import com.ruoyi.system.domain.SysPost;
 import com.ruoyi.system.mapper.SysPostMapper;
 import com.ruoyi.system.mapper.SysUserPostMapper;
 import com.ruoyi.system.service.ISysPostService;
+import com.ruoyi.common.utils.MessageUtils;
 
 /**
  * 岗位信息 服务层处理
@@ -146,7 +147,7 @@ public class SysPostServiceImpl implements ISysPostService
             SysPost post = selectPostById(postId);
             if (countUserPostById(postId) > 0)
             {
-                throw new ServiceException(String.format("%1$s已分配,不能删除", post.getPostName()));
+                throw new ServiceException(MessageUtils.message("post.assigned.cannot.delete", post.getPostName()));
             }
         }
         return postMapper.deletePostByIds(postIds);

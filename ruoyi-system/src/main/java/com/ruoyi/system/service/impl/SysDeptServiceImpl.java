@@ -20,6 +20,7 @@ import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.system.mapper.SysDeptMapper;
 import com.ruoyi.system.mapper.SysRoleMapper;
 import com.ruoyi.system.service.ISysDeptService;
+import com.ruoyi.common.utils.MessageUtils;
 
 /**
  * 部门管理 服务实现
@@ -223,7 +224,7 @@ public class SysDeptServiceImpl implements ISysDeptService
             List<SysDept> depts = SpringUtils.getAopProxy(this).selectDeptList(dept);
             if (StringUtils.isEmpty(depts))
             {
-                throw new ServiceException("没有权限访问部门数据！");
+                throw new ServiceException(MessageUtils.message("dept.no.data.permission"));
             }
         }
     }
@@ -241,7 +242,7 @@ public class SysDeptServiceImpl implements ISysDeptService
         // 如果父节点不为正常状态,则不允许新增子节点
         if (!UserConstants.DEPT_NORMAL.equals(info.getStatus()))
         {
-            throw new ServiceException("部门停用，不允许新增");
+            throw new ServiceException(MessageUtils.message("dept.disabled.not.allow.add"));
         }
         dept.setAncestors(info.getAncestors() + "," + dept.getParentId());
         return deptMapper.insertDept(dept);
@@ -329,7 +330,7 @@ public class SysDeptServiceImpl implements ISysDeptService
         }
         catch (Exception e)
         {
-            throw new ServiceException("保存排序异常，请联系管理员");
+            throw new ServiceException(MessageUtils.message("dept.sort.failed"));
         }
     }
 

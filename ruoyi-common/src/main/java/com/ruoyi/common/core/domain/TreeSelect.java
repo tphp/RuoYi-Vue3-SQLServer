@@ -24,6 +24,9 @@ public class TreeSelect implements Serializable
     /** 节点名称 */
     private String label;
 
+    /** 节点名称（英文），英文界面下优先使用 */
+    private String labelEn;
+
     /** 节点禁用 */
     private boolean disabled = false;
 
@@ -48,6 +51,7 @@ public class TreeSelect implements Serializable
     {
         this.id = menu.getMenuId();
         this.label = menu.getMenuName();
+        this.labelEn = StringUtils.isNotEmpty(menu.getMenuNameEn()) ? menu.getMenuNameEn() : menu.getMenuName();
         this.children = menu.getChildren().stream().map(TreeSelect::new).collect(Collectors.toList());
     }
 
@@ -69,6 +73,16 @@ public class TreeSelect implements Serializable
     public void setLabel(String label)
     {
         this.label = label;
+    }
+
+    public String getLabelEn()
+    {
+        return labelEn;
+    }
+
+    public void setLabelEn(String labelEn)
+    {
+        this.labelEn = labelEn;
     }
 
     public boolean isDisabled()

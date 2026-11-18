@@ -12,6 +12,7 @@ import com.ruoyi.common.constant.HttpStatus;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.exception.ServiceException;
+import com.ruoyi.common.utils.MessageUtils;
 
 /**
  * 安全服务工具类
@@ -32,7 +33,7 @@ public class SecurityUtils
         }
         catch (Exception e)
         {
-            throw new ServiceException("获取用户ID异常", HttpStatus.UNAUTHORIZED);
+            throw new ServiceException(MessageUtils.message("security.user.id.exception"), HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -47,7 +48,7 @@ public class SecurityUtils
         }
         catch (Exception e)
         {
-            throw new ServiceException("获取部门ID异常", HttpStatus.UNAUTHORIZED);
+            throw new ServiceException(MessageUtils.message("security.dept.id.exception"), HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -62,7 +63,7 @@ public class SecurityUtils
         }
         catch (Exception e)
         {
-            throw new ServiceException("获取用户账户异常", HttpStatus.UNAUTHORIZED);
+            throw new ServiceException(MessageUtils.message("security.username.exception"), HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -77,7 +78,7 @@ public class SecurityUtils
         }
         catch (Exception e)
         {
-            throw new ServiceException("获取用户信息异常", HttpStatus.UNAUTHORIZED);
+            throw new ServiceException(MessageUtils.message("security.user.info.exception"), HttpStatus.UNAUTHORIZED);
         }
     }
 

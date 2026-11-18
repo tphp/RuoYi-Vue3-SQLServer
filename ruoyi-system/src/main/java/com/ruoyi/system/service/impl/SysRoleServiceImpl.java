@@ -23,6 +23,7 @@ import com.ruoyi.system.mapper.SysRoleMapper;
 import com.ruoyi.system.mapper.SysRoleMenuMapper;
 import com.ruoyi.system.mapper.SysUserRoleMapper;
 import com.ruoyi.system.service.ISysRoleService;
+import com.ruoyi.common.utils.MessageUtils;
 
 /**
  * 角色 业务层处理
@@ -184,7 +185,7 @@ public class SysRoleServiceImpl implements ISysRoleService
     {
         if (StringUtils.isNotNull(role.getRoleId()) && role.isAdmin())
         {
-            throw new ServiceException("不允许操作超级管理员角色");
+            throw new ServiceException(MessageUtils.message("role.super.admin.not.allow"));
         }
     }
 
@@ -205,7 +206,7 @@ public class SysRoleServiceImpl implements ISysRoleService
                 List<SysRole> roles = SpringUtils.getAopProxy(this).selectRoleList(role);
                 if (StringUtils.isEmpty(roles))
                 {
-                    throw new ServiceException("没有权限访问角色数据！");
+                    throw new ServiceException(MessageUtils.message("role.no.data.permission"));
                 }
             }
         }
@@ -367,7 +368,7 @@ public class SysRoleServiceImpl implements ISysRoleService
             SysRole role = selectRoleById(roleId);
             if (countUserRoleByRoleId(roleId) > 0)
             {
-                throw new ServiceException(String.format("%1$s已分配,不能删除", role.getRoleName()));
+                throw new ServiceException(MessageUtils.message("role.assigned.cannot.delete", role.getRoleName()));
             }
         }
         // 删除角色与菜单关联

@@ -51,9 +51,9 @@ public class SysNotice extends BaseEntity
         this.noticeTitle = noticeTitle;
     }
 
-    @Xss(message = "公告标题不能包含脚本字符")
-    @NotBlank(message = "公告标题不能为空")
-    @Size(min = 0, max = 50, message = "公告标题不能超过50个字符")
+    @Xss(message = "{validate.notice.noticeTitle.xss}")
+    @NotBlank(message = "{validate.notice.noticeTitle.not.blank}")
+    @Size(min = 0, max = 50, message = "{validate.notice.noticeTitle.size}")
     public String getNoticeTitle()
     {
         return noticeTitle;

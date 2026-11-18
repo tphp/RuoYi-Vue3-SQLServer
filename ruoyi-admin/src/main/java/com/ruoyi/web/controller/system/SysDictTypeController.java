@@ -21,6 +21,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.system.service.ISysDictTypeService;
+import com.ruoyi.common.utils.MessageUtils;
 
 /**
  * 数据字典信息
@@ -73,7 +74,7 @@ public class SysDictTypeController extends BaseController
     {
         if (!dictTypeService.checkDictTypeUnique(dict))
         {
-            return error("新增字典'" + dict.getDictName() + "'失败，字典类型已存在");
+            return error(MessageUtils.message("dict.add.type.exists", dict.getDictName()));
         }
         dict.setCreateBy(getUsername());
         return toAjax(dictTypeService.insertDictType(dict));
@@ -89,7 +90,7 @@ public class SysDictTypeController extends BaseController
     {
         if (!dictTypeService.checkDictTypeUnique(dict))
         {
-            return error("修改字典'" + dict.getDictName() + "'失败，字典类型已存在");
+            return error(MessageUtils.message("dict.edit.type.exists", dict.getDictName()));
         }
         dict.setUpdateBy(getUsername());
         return toAjax(dictTypeService.updateDictType(dict));

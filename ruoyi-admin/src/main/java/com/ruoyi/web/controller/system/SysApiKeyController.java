@@ -21,6 +21,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.system.domain.SysApiKey;
 import com.ruoyi.system.service.ISysApiKeyService;
+import com.ruoyi.common.utils.MessageUtils;
 
 /**
  * @author Zhang zhan
@@ -78,7 +79,7 @@ public class SysApiKeyController extends BaseController
     {
         if (!apiKeyService.checkApiKeyUnique(sysApiKey))
         {
-            return error("新增API密钥失败，API Key已存在");
+            return error(MessageUtils.message("apiKey.add.exists"));
         }
         sysApiKey.setCreateBy(getUsername());
         return toAjax(apiKeyService.insertApiKey(sysApiKey));
@@ -94,7 +95,7 @@ public class SysApiKeyController extends BaseController
     {
         if (!apiKeyService.checkApiKeyUnique(sysApiKey))
         {
-            return error("修改API密钥失败，API Key已存在");
+            return error(MessageUtils.message("apiKey.edit.exists"));
         }
         sysApiKey.setUpdateBy(getUsername());
         return toAjax(apiKeyService.updateApiKey(sysApiKey));

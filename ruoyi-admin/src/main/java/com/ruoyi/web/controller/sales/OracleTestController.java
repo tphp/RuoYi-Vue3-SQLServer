@@ -14,6 +14,7 @@ import com.ruoyi.common.annotation.DataSource;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.enums.DataSourceType;
+import com.ruoyi.common.utils.MessageUtils;
 
 /**
  * Oracle 数据源连通性测试
@@ -55,7 +56,7 @@ public class OracleTestController extends BaseController
             info = new HashMap<>();
             info.put("connected", false);
             info.put("error", e.getMessage());
-            return AjaxResult.error("Oracle 连接失败：" + e.getMessage(), info);
+            return AjaxResult.error(MessageUtils.message("oracle.connect.failed", e.getMessage()), info);
         }
         info.put("connected", true);
         return success(info);
@@ -75,7 +76,7 @@ public class OracleTestController extends BaseController
         // 表名白名单校验：只能字母/数字/下划线，且必须字母开头
         if (!table.matches("^[a-zA-Z][a-zA-Z0-9_]*$"))
         {
-            return AjaxResult.error("表名非法，只允许字母开头、字母/数字/下划线组合：" + table);
+            return AjaxResult.error(MessageUtils.message("oracle.table.invalid", table));
         }
         // Oracle 用 ROWNUM 限制行数（不能用 LIMIT）
         String sql = "SELECT * FROM (SELECT * FROM " + table + ") WHERE ROWNUM <= 10";
@@ -89,7 +90,7 @@ public class OracleTestController extends BaseController
             Map<String, Object> err = new HashMap<>();
             err.put("table", table);
             err.put("error", e.getMessage());
-            return AjaxResult.error("查询表 " + table + " 失败：" + e.getMessage(), err);
+            return AjaxResult.error(MessageUtils.message("oracle.query.failed", table, e.getMessage()), err);
         }
         Map<String, Object> data = new HashMap<>();
         data.put("table", table);

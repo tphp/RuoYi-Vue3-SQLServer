@@ -25,6 +25,7 @@ import com.ruoyi.common.utils.file.FileUtils;
 import com.ruoyi.common.utils.file.MimeTypeUtils;
 import com.ruoyi.framework.web.service.TokenService;
 import com.ruoyi.system.service.ISysUserService;
+import com.ruoyi.common.utils.MessageUtils;
 
 /**
  * 个人信息 业务处理
@@ -70,11 +71,11 @@ public class SysProfileController extends BaseController
         currentUser.setSex(user.getSex());
         if (StringUtils.isNotEmpty(user.getPhonenumber()) && !userService.checkPhoneUnique(currentUser))
         {
-            return error("修改用户'" + loginUser.getUsername() + "'失败，手机号码已存在");
+            return error(MessageUtils.message("profile.modify.phone.exists", loginUser.getUsername()));
         }
         if (StringUtils.isNotEmpty(user.getEmail()) && !userService.checkEmailUnique(currentUser))
         {
-            return error("修改用户'" + loginUser.getUsername() + "'失败，邮箱账号已存在");
+            return error(MessageUtils.message("profile.modify.email.exists", loginUser.getUsername()));
         }
         if (userService.updateUserProfile(currentUser) > 0)
         {
@@ -82,7 +83,7 @@ public class SysProfileController extends BaseController
             tokenService.setLoginUser(loginUser);
             return success();
         }
-        return error("修改个人信息异常，请联系管理员");
+        return error(MessageUtils.message("profile.modify.failed.contact.admin"));
     }
 
     /**
@@ -100,11 +101,11 @@ public class SysProfileController extends BaseController
         String password = user.getPassword();
         if (!SecurityUtils.matchesPassword(oldPassword, password))
         {
-            return error("修改密码失败，旧密码错误");
+            return error(MessageUtils.message("profile.update.pwd.old.error"));
         }
         if (SecurityUtils.matchesPassword(newPassword, password))
         {
-            return error("新密码不能与旧密码相同");
+            return error(MessageUtils.message("profile.update.pwd.same"));
         }
         newPassword = SecurityUtils.encryptPassword(newPassword);
         if (userService.resetUserPwd(userId, newPassword) > 0)
@@ -115,7 +116,7 @@ public class SysProfileController extends BaseController
             tokenService.setLoginUser(loginUser);
             return success();
         }
-        return error("修改密码异常，请联系管理员");
+        return error(MessageUtils.message("profile.update.pwd.failed.contact.admin"));
     }
 
     /**
@@ -144,6 +145,6 @@ public class SysProfileController extends BaseController
                 return ajax;
             }
         }
-        return error("上传图片异常，请联系管理员");
+        return error(MessageUtils.message("profile.upload.avatar.failed"));
     }
 }

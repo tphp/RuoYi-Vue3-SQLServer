@@ -24,6 +24,7 @@ import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.ServletUtils;
 import com.ruoyi.system.domain.SysCommonApi;
 import com.ruoyi.system.service.ISysCommonApiService;
+import com.ruoyi.common.utils.MessageUtils;
 
 /**
  * 通用接口调用客户端
@@ -120,7 +121,7 @@ public class CommonApiClient {
             return JSON.parseObject(raw);
         } catch (Exception e) {
             log.warn("[CommonApi] 接口[{}]返回非JSON, 原始响应前300字符: {}", apiKey, truncate(raw));
-            throw new ServiceException("接口[" + apiKey + "]返回非JSON格式: " + truncate(raw));
+            throw new ServiceException(MessageUtils.message("commonApi.invalid.json", apiKey, truncate(raw)));
         }
     }
 
@@ -159,7 +160,7 @@ public class CommonApiClient {
         try {
             return JSON.parseObject(raw);
         } catch (Exception e) {
-            throw new ServiceException("接口[" + apiKey + "]返回非JSON格式: " + truncate(raw));
+            throw new ServiceException(MessageUtils.message("commonApi.invalid.json", apiKey, truncate(raw)));
         }
     }
 
@@ -235,10 +236,10 @@ public class CommonApiClient {
     private SysCommonApi requireConfig(String apiKey) {
         SysCommonApi cfg = commonApiService.selectCommonApiByKey(apiKey);
         if (cfg == null) {
-            throw new ServiceException("通用接口配置不存在：关键字 " + apiKey);
+            throw new ServiceException(MessageUtils.message("commonApi.not.configured", apiKey));
         }
         if (cfg.getApiUrl() == null || cfg.getApiUrl().isEmpty()) {
-            throw new ServiceException("通用接口[" + apiKey + "]未配置接口地址");
+            throw new ServiceException(MessageUtils.message("commonApi.url.not.configured", apiKey));
         }
         return cfg;
     }
@@ -286,14 +287,14 @@ public class CommonApiClient {
             if (resp.statusCode() != 200) {
                 log.error("[CommonApi] 接口[{}] HTTP {} url={} body={}", apiKey, resp.statusCode(), url,
                         resp.body() == null ? "" : resp.body().length() > 500 ? resp.body().substring(0, 500) : resp.body());
-                throw new ServiceException("调用接口[" + apiKey + "]失败：HTTP " + resp.statusCode());
+                throw new ServiceException(MessageUtils.message("commonApi.call.failed", apiKey, resp.statusCode()));
             }
             return resp.body() == null ? "" : resp.body();
         } catch (ServiceException se) {
             throw se;
         } catch (Exception e) {
             log.error("[CommonApi] 接口[{}]调用异常 url={} err={}", apiKey, url, e.getMessage(), e);
-            throw new ServiceException("调用接口[" + apiKey + "]异常：" + e.getMessage());
+            throw new ServiceException(MessageUtils.message("commonApi.call.exception", apiKey, e.getMessage()));
         }
     }
 
