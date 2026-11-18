@@ -30,6 +30,9 @@ public class SysDictData extends BaseEntity
     @Excel(name = "字典标签")
     private String dictLabel;
 
+    /** 字典标签（英文） */
+    private String dictLabelEn;
+
     /** 字典键值 */
     @Excel(name = "字典键值")
     private String dictValue;
@@ -82,6 +85,16 @@ public class SysDictData extends BaseEntity
     public void setDictLabel(String dictLabel)
     {
         this.dictLabel = dictLabel;
+    }
+
+    public String getDictLabelEn()
+    {
+        return dictLabelEn;
+    }
+
+    public void setDictLabelEn(String dictLabelEn)
+    {
+        this.dictLabelEn = dictLabelEn;
     }
 
     @NotBlank(message = "{validate.dictData.dictValue.not.blank}")
@@ -160,6 +173,7 @@ public class SysDictData extends BaseEntity
             .append("dictCode", getDictCode())
             .append("dictSort", getDictSort())
             .append("dictLabel", getDictLabel())
+            .append("dictLabelEn", getDictLabelEn())
             .append("dictValue", getDictValue())
             .append("dictType", getDictType())
             .append("cssClass", getCssClass())
