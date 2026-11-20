@@ -153,4 +153,4 @@ key 分组概览：错误消息、文件上传、权限（`no.create/update/dele
 - 需求文档：[系统国际化功能需求文档](../../../01-requirements/common/i18n/i18n-prd.md)
 - 使用文档：[系统国际化使用指南](i18n-usage.md)（加 key / 调用 / 前端配合 / FAQ）
 - 菜单英文补数据脚本：[sql/README.md](../../../../sql/README.md)（存量库升级脚本索引）
-- AI 开发协作指南：[AI 开发协作指南](../../ai-dev/ai-workflow.md)（模块分层、静态桥接模式与本项目一致）
+- AI 开发协作指南：[AI 开发协作指南](../../../../.trae/rules/ai-workflow.md)（模块分层、静态桥接模式与本项目一致）

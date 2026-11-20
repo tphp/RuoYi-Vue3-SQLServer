@@ -45,6 +45,6 @@ http://localhost:8080/docs/index.html
 | `02-development/common/i18n/` | [系统国际化开发文档](02-development/common/i18n/i18n-dev.md)（回溯补录） |
 | `02-development/common/i18n/` | [系统国际化使用指南](02-development/common/i18n/i18n-usage.md)（回溯补录） |
 | `02-development/common/structure/` | [全项目结构说明](02-development/common/structure/project-structure.md)（含前后端定位：后端 `xxx-api` 本仓库 + 主前端 `xxx-web` 独立仓库平级，Vue3+TS） |
-| `02-development/ai-dev/` | [AI开发协作指南](02-development/ai-dev/ai-workflow.md) |
+| `.trae/rules/` | [AI开发协作指南](../.trae/rules/ai-workflow.md)（已从 `02-development/ai-dev/` 迁入规则目录） |
 
 > 原 `.trae/docs/`、`.trae/documents/` 下的文档已完成迁移归档。

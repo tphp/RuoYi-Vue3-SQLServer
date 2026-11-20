@@ -121,14 +121,14 @@ docs/
 ├── 01-requirements/         # 01-需求：_template-prd.md + common/<模块>/…-prd.md
 │   └── common/              # 通用能力文档（apilog/ bizperm/ datasource/ external-api/ mq/ number-rule/）
 ├── 02-development/          # 02-开发：_template-dev.md + common/<模块>/…-plan|dev|tasklist|checklist.md
-│   ├── common/              # 通用能力文档（apilog/ bizperm/ datasource/ external-api/ mq/ number-rule/ structure/）
-│   └── ai-dev/              # AI 开发协作指南
+│   └── common/              # 通用能力文档（apilog/ bizperm/ datasource/ external-api/ mq/ number-rule/ structure/）
 ├── 03-optimization/         # 03-优化：_template-optimize.md（暂无正式文档）
 └── 04-bugfix/               # 04-bug修复：_template-bugfix.md（暂无正式文档）
 
 .trae/
 ├── rules.md                 # 全局文档规则
 ├── rules/project-rules.md   # 技术基线规则（§0~§13，含纯 AI 开发 9 步流程）
+├── rules/ai-workflow.md     # AI 开发协作指南（执行手册，原 docs/02-development/ai-dev/）
 └── skills/
     ├── sqlserver-compat-check/  # SQL Server 兼容性检查（强制触发）
     └── dev-structure-doc/       # 开发结构目录文档生成
