@@ -43,6 +43,7 @@ public class TreeSelect implements Serializable
     {
         this.id = dept.getDeptId();
         this.label = dept.getDeptName();
+        this.labelEn = StringUtils.isNotEmpty(dept.getDeptNameEn()) ? dept.getDeptNameEn() : dept.getDeptName();
         this.disabled = StringUtils.equals(UserConstants.DEPT_DISABLE, dept.getStatus());
         this.children = dept.getChildren().stream().map(TreeSelect::new).collect(Collectors.toList());
     }

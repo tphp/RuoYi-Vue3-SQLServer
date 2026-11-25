@@ -7,6 +7,7 @@ create table sys_dept (
   parent_id         bigint(20)      default 0                  comment '父部门id',
   ancestors         varchar(50)     default ''                 comment '祖级列表',
   dept_name         varchar(30)     default ''                 comment '部门名称',
+  dept_name_en      varchar(100)    default null               comment '部门名称（英文）',
   order_num         int(4)          default 0                  comment '显示顺序',
   leader            varchar(20)     default null               comment '负责人',
   phone             varchar(11)     default null               comment '联系电话',
@@ -23,16 +24,16 @@ create table sys_dept (
 -- ----------------------------
 -- 初始化-部门表数据
 -- ----------------------------
-insert into sys_dept values(100,  0,   '0',          '若依科技',   0, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', sysdate(), '', null);
-insert into sys_dept values(101,  100, '0,100',      '深圳总公司', 1, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', sysdate(), '', null);
-insert into sys_dept values(102,  100, '0,100',      '长沙分公司', 2, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', sysdate(), '', null);
-insert into sys_dept values(103,  101, '0,100,101',  '研发部门',   1, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', sysdate(), '', null);
-insert into sys_dept values(104,  101, '0,100,101',  '市场部门',   2, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', sysdate(), '', null);
-insert into sys_dept values(105,  101, '0,100,101',  '测试部门',   3, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', sysdate(), '', null);
-insert into sys_dept values(106,  101, '0,100,101',  '财务部门',   4, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', sysdate(), '', null);
-insert into sys_dept values(107,  101, '0,100,101',  '运维部门',   5, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', sysdate(), '', null);
-insert into sys_dept values(108,  102, '0,100,102',  '市场部门',   1, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', sysdate(), '', null);
-insert into sys_dept values(109,  102, '0,100,102',  '财务部门',   2, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', sysdate(), '', null);
+insert into sys_dept values(100,   0,    '0',           '若依科技', 'RuoYi Technology',    0,  '若依',  '15888888888',  'ry@qq.com',  '0',  '0',  'admin',  sysdate(),  '',  null);
+insert into sys_dept values(101,   100,  '0,100',       '深圳总公司', 'Shenzhen Head Office',  1,  '若依',  '15888888888',  'ry@qq.com',  '0',  '0',  'admin',  sysdate(),  '',  null);
+insert into sys_dept values(102,   100,  '0,100',       '长沙分公司', 'Changsha Branch',  2,  '若依',  '15888888888',  'ry@qq.com',  '0',  '0',  'admin',  sysdate(),  '',  null);
+insert into sys_dept values(103,   101,  '0,100,101',   '研发部门', 'R&D Department',    1,  '若依',  '15888888888',  'ry@qq.com',  '0',  '0',  'admin',  sysdate(),  '',  null);
+insert into sys_dept values(104,   101,  '0,100,101',   '市场部门', 'Marketing Department',    2,  '若依',  '15888888888',  'ry@qq.com',  '0',  '0',  'admin',  sysdate(),  '',  null);
+insert into sys_dept values(105,   101,  '0,100,101',   '测试部门', 'Testing Department',    3,  '若依',  '15888888888',  'ry@qq.com',  '0',  '0',  'admin',  sysdate(),  '',  null);
+insert into sys_dept values(106,   101,  '0,100,101',   '财务部门', 'Finance Department',    4,  '若依',  '15888888888',  'ry@qq.com',  '0',  '0',  'admin',  sysdate(),  '',  null);
+insert into sys_dept values(107,   101,  '0,100,101',   '运维部门', 'Operations Department',    5,  '若依',  '15888888888',  'ry@qq.com',  '0',  '0',  'admin',  sysdate(),  '',  null);
+insert into sys_dept values(108,   102,  '0,100,102',   '市场部门', 'Marketing Department',    1,  '若依',  '15888888888',  'ry@qq.com',  '0',  '0',  'admin',  sysdate(),  '',  null);
+insert into sys_dept values(109,   102,  '0,100,102',   '财务部门', 'Finance Department',    2,  '若依',  '15888888888',  'ry@qq.com',  '0',  '0',  'admin',  sysdate(),  '',  null);
 
 
 -- ----------------------------
@@ -44,6 +45,7 @@ create table sys_user (
   dept_id           bigint(20)      default null               comment '部门ID',
   user_name         varchar(30)     not null                   comment '用户账号',
   nick_name         varchar(30)     not null                   comment '用户昵称',
+  nick_name_en      varchar(100)    default null               comment '用户昵称（英文）',
   user_type         varchar(2)      default '00'               comment '用户类型（00系统用户）',
   email             varchar(50)     default ''                 comment '用户邮箱',
   phonenumber       varchar(11)     default ''                 comment '手机号码',
@@ -67,8 +69,8 @@ create table sys_user (
 -- ----------------------------
 -- 初始化-用户信息表数据
 -- ----------------------------
-insert into sys_user values(1,  103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', sysdate(), sysdate(), null, 'admin', sysdate(), '', null, '管理员');
-insert into sys_user values(2,  105, 'ry',    '若依', '00', 'ry@qq.com',  '15666666666', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', sysdate(), sysdate(), null, 'admin', sysdate(), '', null, '测试员');
+insert into sys_user values(1,   103,  'admin',  '若依', 'RuoYi',  '00',  'ry@163.com',  '15888888888',  '1',  '',  '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2',  '0',  '0',  '127.0.0.1',  sysdate(),  sysdate(),  null,  'admin',  sysdate(),  '',  null,  '管理员');
+insert into sys_user values(2,   105,  'ry',     '若依', 'RuoYi',  '00',  'ry@qq.com',   '15666666666',  '1',  '',  '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2',  '0',  '0',  '127.0.0.1',  sysdate(),  sysdate(),  null,  'admin',  sysdate(),  '',  null,  '测试员');
 
 
 -- ----------------------------

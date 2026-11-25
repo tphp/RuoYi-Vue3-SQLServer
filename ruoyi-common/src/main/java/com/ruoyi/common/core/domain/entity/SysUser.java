@@ -40,6 +40,9 @@ public class SysUser extends BaseEntity
     @Excel(name = "用户名称")
     private String nickName;
 
+    /** 用户昵称（英文） */
+    private String nickNameEn;
+
     /** 用户邮箱 */
     @Excel(name = "用户邮箱")
     private String email;
@@ -144,6 +147,16 @@ public class SysUser extends BaseEntity
     public void setNickName(String nickName)
     {
         this.nickName = nickName;
+    }
+
+    public String getNickNameEn()
+    {
+        return nickNameEn;
+    }
+
+    public void setNickNameEn(String nickNameEn)
+    {
+        this.nickNameEn = nickNameEn;
     }
 
     @Xss(message = "{validate.user.userName.xss}")
@@ -330,6 +343,7 @@ public class SysUser extends BaseEntity
                 .append("deptId", getDeptId())
                 .append("userName", getUserName())
                 .append("nickName", getNickName())
+                .append("nickNameEn", getNickNameEn())
                 .append("email", getEmail())
                 .append("phonenumber", getPhonenumber())
                 .append("sex", getSex())
