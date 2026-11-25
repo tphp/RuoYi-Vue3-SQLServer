@@ -13,7 +13,6 @@
 ├── common/                   # 通用能力文档（各分支项目共用）
 │   └── <模块名>/             # 每个业务模块 / 技术领域一个子目录
 │       └── <英文短横线名>.md  # 首行保留中文标题，并写明「中文名称：xxx」
-└── ai-dev/                   # AI 开发协作指南
 ```
 
 ### 命名规范
@@ -44,4 +43,5 @@
 | 系统国际化 | `common/i18n/` | [系统国际化开发文档](common/i18n/i18n-dev.md)（回溯补录） |
 | 系统国际化 | `common/i18n/` | [系统国际化使用指南](common/i18n/i18n-usage.md)（回溯补录） |
 | 全项目结构 | `common/structure/` | [全项目结构说明](common/structure/project-structure.md) |
-| AI 开发协作 | `ai-dev/` | [AI开发协作指南](ai-dev/ai-workflow.md) |
+
+> AI 开发协作指南已迁至规则目录：[`.trae/rules/ai-workflow.md`](../../.trae/rules/ai-workflow.md)。

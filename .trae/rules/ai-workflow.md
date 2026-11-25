@@ -1,13 +1,13 @@
-
 # AI 开发协作指南（开发者版）
 
 > 中文名称：AI开发协作指南
 > 生成时间：2026-11-17 | 适用：人类开发者与后续 AI 会话的统一入口
-> 权威依据：[.trae/rules/project-rules.md](../../../.trae/rules/project-rules.md)（技术基线，本文为导读与操作手册，冲突时以规则原文为准）
+> 位置：`.trae/rules/ai-workflow.md`（与 [project-rules.md](project-rules.md) 同目录）
+> 权威依据：[project-rules.md](project-rules.md)（技术基线，本文为导读与操作手册，冲突时以规则原文为准）
 
 ## 0. 一分钟上手（后续 AI 会话必读）
 
-1. **先读规则**：`.trae/rules/project-rules.md`（技术基线，§0 定义优先级：人工指令 > 全局 rules > 技术基线 > docs 约定 > 业务 Prompt）
+1. **先读规则**：[project-rules.md](project-rules.md)（技术基线，§0 定义优先级：人工指令 > 全局 rules > 技术基线 > docs 约定 > 业务 Prompt）
 2. **再查记忆**：项目记忆 `project_memory.md` 中的 Hard Constraints / Engineering Conventions / Lessons Learned
 3. **新增功能一律走 §13 九步强制流程**（见 §3），存疑即中断询问，禁止跳步直接写代码
 4. **涉及 SQL 必触发技能**：`sqlserver-compat-check`（见 §4）
@@ -37,13 +37,14 @@
 
 - 每类下按模块建子目录（英文小写短横线：`bizperm`、`apilog`、`number-rule`、`datasource`…）
 - **禁止**在 `docs/` 根下平铺任务目录
+- 本文件（AI 开发协作指南）属规则类文档，放在 `.trae/rules/`，不进 `docs/02-development/`
 
 ### 2.2 文件与内容规范
 
 - **文件名**：英文小写、短横线；01 以 `-prd` 结尾，02 按性质 `-dev`/`-plan`/`-tasklist`/`-checklist`；禁中文文件名、空格、全角括号
 - **首行**：中文 H1 标题；其下紧跟元信息行 `> 中文名称：xxx`（文档中心导航按此显示，未标注则回退显示文件名）
 - **索引**：新建/重命名文档必须同步更新所属分类 `README.md` 与 `docs/README.md`
-- 交叉引用用相对链接；改名时全仓 grep 清理旧链接
+- 交叉引用用相对链接；改名/移动时全仓 grep 清理旧链接
 
 ### 2.3 文档中心（在线查阅）
 
@@ -111,7 +112,7 @@ npm run build:prod
 
 ## 7. 关联入口
 
-- 技术基线：[project-rules.md](../../../.trae/rules/project-rules.md)
-- 全项目结构：[project-structure.md](../common/structure/project-structure.md)
-- 文档总索引：[docs/README.md](../../README.md)
-- 接口日志示例（回溯补录范式）：[api-log-prd.md](../../01-requirements/common/apilog/api-log-prd.md)、[api-log-dev.md](../common/apilog/api-log-dev.md)
+- 技术基线：[project-rules.md](project-rules.md)
+- 全项目结构：[project-structure.md](../../docs/02-development/common/structure/project-structure.md)
+- 文档总索引：[docs/README.md](../../docs/README.md)
+- 接口日志示例（回溯补录范式）：[api-log-prd.md](../../docs/01-requirements/common/apilog/api-log-prd.md)、[api-log-dev.md](../../docs/02-development/common/apilog/api-log-dev.md)

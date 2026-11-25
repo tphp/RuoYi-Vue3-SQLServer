@@ -20,17 +20,17 @@ description: "扫描项目/模块目录结构，自动生成符合 docs 四类�
 ## 执行步骤（严格按顺序）
 
 ### 步骤1：确定范围
-- 全项目：根目录 + 后端 Maven 模块 + `ruoyi-ui` + `docs/` + `.trae/`
+- 全项目：根目录 + 后端 Maven 模块 + `ruoyi-ui` + `D:\ebs-web`（主前端，独立仓库）+ `docs/` + `.trae/`
 - 单模块：只扫该模块（如 `ruoyi-apilog`、`ruoyi-bizperm`、`docs/02-development/common/<module>`）
 - 不确定时先问用户要「全项目」还是「指定模块」
 
 ### 步骤2：收集真实结构
-- 用 Glob / `Get-ChildItem -Recurse` 收集目录与文件，**必须排除**：`target/`、`node_modules/`、`.git/`、`.idea/`、`dist/`、`.vscode/`、`*.class`、日志与临时文件
+- 用 Glob 收集目录与文件（不要用 shell 的 ls/find 代替），**必须排除**：`target/`、`node_modules/`、`.git/`、`.idea/`、`dist/`、`.vscode/`、`*.class`、日志与临时文件
 - 树深控制：默认 3~4 层；文件较多的目录只列关键文件（入口类、XML、SQL、README），其余用 `…（其余 N 个文件）` 概括
 - 结构树用代码块呈现，目录后以 `#` 注释一句话职责
 
 ### 步骤3：生成文档内容
-按下方模板组织，职责说明优先对照 `.trae/rules/project-rules.md` §1 模块表、§3.1 包结构、§4.1 前端目录边界。
+按下方模板组织，职责说明优先对照 `.trae/rules/project-rules.md` §1 模块表、§3.1 包结构、§4.0 双前端分工、§4.1 前端目录边界。
 
 ### 步骤4：落位与命名
 - 位置：全项目结构 → `docs/02-development/common/structure/`；模块结构 → `docs/02-development/common/<module>/`
@@ -39,7 +39,7 @@ description: "扫描项目/模块目录结构，自动生成符合 docs 四类�
 - 同步更新所属目录 `README.md` 索引表与 `docs/README.md` 索引
 
 ### 步骤5：校验（全部通过才交付）
-- [ ] 目录树与真实磁盘一致（抽查 3~5 个路径，无臆造目录）
+- [ ] 目录树与真实磁盘一致（用 Read 抽查 3~5 个路径确认存在，无臆造目录）
 - [ ] 已排除 `target`、`node_modules` 等构建/IDE 产物
 - [ ] 文件名英文短横线；首行中文 H1 + 「中文名称：」元信息
 - [ ] 两级 README 索引已更新，链接可点通
@@ -56,13 +56,23 @@ description: "扫描项目/模块目录结构，自动生成符合 docs 四类�
 ## 1. 顶层结构
 
 ```
-d:\ebs-api
-├── ruoyi-admin/            # Web 入口、监控/工具控制器
-├── ruoyi-apilog/           # 接口日志模块（🟢 可改）
-├── ruoyi-ui/               # 唯一前端工程（Vue2 + Element UI）
+d:\ebs-api（后端 + 旧前端）
+├── ruoyi-admin/            # Web 入口、系统/监控/工具控制器（🟡 新增业务控制器需确认）
+├── ruoyi-framework/        # 框架配置、安全、多数据源（🔴 禁改）
+├── ruoyi-system/           # 系统管理（🔴 禁改，存量二开按豁免维护）
+├── ruoyi-common/           # 公共工具、注解、核心基类（🔴 禁改）
+├── ruoyi-quartz/           # 定时任务（🔴 禁改）
+├── ruoyi-generator/        # 代码生成器（🔴 禁改）
+├── ruoyi-apilog/           # 接口日志（🟢 可改）
+├── ruoyi-bizperm/          # 业务权限（🟢 可改）
+├── ruoyi-ui/               # 旧前端（Vue2 + Element UI，与 ebs-web 并行维护）
 ├── docs/                   # 四类文档（01-04）
 ├── sql/                    # 框架初始化 SQL
 └── .trae/                  # 规则 rules/ 与技能 skills/
+
+D:\ebs-web（独立仓库，主前端：Vue3 + TS + Vite + Element Plus）
+├── src/api/ | src/types/api/ | src/views/   # 🟢 业务代码区
+└── 其余目录（components/layout/router/store/utils/vite 等）  # 🔴 框架目录，禁改
 ```
 
 ## 2. 目录职责表
@@ -70,6 +80,8 @@ d:\ebs-api
 | 目录 | 职责 | 改动边界 |
 |------|------|----------|
 | `ruoyi-apilog/` | 入站过滤器、出站客户端、日志落库 | 🟢 可自由修改 |
+| `ruoyi-bizperm/` | 策略、范围、权限树、可见人员 | 🟢 可自由修改 |
+| `D:\ebs-web/src/views/` | 主前端业务页面（Vue3 `<script setup>` + TS） | 🟢 可按模块新增 |
 
 ## 3. 关键文件说明
 
@@ -79,6 +91,7 @@ d:\ebs-api
 ## 4. 与规则的对应关系
 - 包结构：project-rules §3.1
 - 前端边界：project-rules §4.1
+- 双前端分工（`D:\ebs-web` 主前端 / `ruoyi-ui` 旧前端）：project-rules §4.0、§4.5
 ````
 
 ## 禁止事项
